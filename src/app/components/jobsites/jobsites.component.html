@@ -1,0 +1,26 @@
+<app-list-page
+  [title]="'Jobsites'"
+  [subtitle]=" canManageJobsites ? 'Manage all job site locations' : ''"
+  [rows]="(jobsites$ | async) ?? []"
+  [columns]="columns"
+  [actions]="actions"
+  [searchable]="true"
+  [clientSideSearch]="false"
+  [queryChange]="handleSearchChange"
+  [searchPlaceholder]="'Search jobsites...'"
+  [pageSize]="currentPageSize"
+  [serverSidePagination]="true"
+  [totalItems]="(total$ | async) ?? 0"
+  [currentPage]="currentPageNumber"
+  [pageChange]="handlePageChange"
+  [pageSizeOptions]="[5, 10, 20, 50]"
+  [pageSizeChange]="handlePageSizeChange"
+>
+  <ng-container pageActions>
+    @if (canManageJobsites) {
+      <button mat-flat-button color="primary" type="button" (click)="onAddJobsite()">
+        Add Jobsite
+      </button>
+    }
+  </ng-container>
+</app-list-page>

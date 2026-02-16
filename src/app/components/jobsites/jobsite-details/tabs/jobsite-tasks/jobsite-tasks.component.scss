@@ -1,0 +1,209 @@
+@import '../../jobsite-details-tabs.scss';
+
+// Review Notes from Owner
+.activity-item__review-notes {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.08));
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-left: 3px solid #f59e0b;
+  border-radius: 6px;
+
+  > mat-icon {
+    color: #f59e0b;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .review-notes-content {
+    flex: 1;
+    min-width: 0;
+
+    .review-notes-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #b45309;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+      margin-bottom: 0.25rem;
+    }
+
+    .review-notes-text {
+      margin: 0;
+      font-size: 0.875rem;
+      color: var(--sn-text);
+      font-style: italic;
+      line-height: 1.5;
+    }
+  }
+}
+
+// Filter Banner
+.filter-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+  color: var(--sn-text);
+
+  mat-icon {
+    color: #3b82f6;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  span {
+    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  button {
+    gap: 0.25rem;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+// Tasks Header
+.tasks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 1rem;
+
+  h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--sn-text);
+  }
+
+  .tasks-subtitle {
+    color: var(--sn-text-muted);
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  button {
+    flex-shrink: 0;
+    gap: 0.5rem;
+  }
+}
+
+// Tasks List
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+// Pending Review variant for activity-item
+.activity-item {
+  &--pending {
+    border-left-color: #8b5cf6;
+    background: linear-gradient(to right, rgba(139, 92, 246, 0.05), transparent);
+  }
+
+  &--pending &__icon,
+  &--pending .activity-item__icon {
+    background: rgba(139, 92, 246, 0.1);
+    mat-icon { color: #8b5cf6; }
+  }
+
+  // Work Summary - shows worker's description preview
+  &__work-summary {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    margin: 0.75rem 0;
+    background: rgba(139, 92, 246, 0.08);
+    border-left: 3px solid #8b5cf6;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.875rem;
+    color: var(--sn-text-muted);
+    font-style: italic;
+
+    mat-icon {
+      flex-shrink: 0;
+      font-size: 1.125rem;
+      width: 1.125rem;
+      height: 1.125rem;
+      color: #8b5cf6;
+      margin-top: 2px;
+    }
+
+    span {
+      line-height: 1.5;
+    }
+  }
+
+  &__meta {
+    margin-top: 0.75rem;
+  }
+}
+
+// Pending Review variant for activity-badge
+.activity-badge {
+  &--pending {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+  }
+}
+
+// Worker Badge
+.worker-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  background: var(--sn-page-bg);
+  border: 1px solid var(--sn-surface-border);
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  color: var(--sn-text-muted);
+
+  mat-icon {
+    font-size: 0.875rem;
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+}
+
+// Review Button - prominent styling for pending review tasks
+.review-button {
+  gap: 0.5rem;
+  animation: pulse-review 2s ease-in-out infinite;
+
+  mat-icon {
+    font-size: 1.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+}
+
+@keyframes pulse-review {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(139, 92, 246, 0);
+  }
+}

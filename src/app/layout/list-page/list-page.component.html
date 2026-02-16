@@ -1,0 +1,23 @@
+<app-page-layout [title]="title()" [subtitle]="subtitle()">
+  <ng-container pageActions>
+    <ng-content select="[pageActions]" />
+  </ng-container>
+
+  <app-data-table
+    [rows]="rows()"
+    [columns]="columns()"
+    [actions]="actions()"
+    [searchable]="searchable()"
+    [clientSideSearch]="clientSideSearch()"
+    [queryChange]="queryChange()"
+    [searchPlaceholder]="searchPlaceholder()"
+    [pageSize]="pageSize()"
+    [serverSidePagination]="serverSidePagination()"
+    [totalItems]="totalItems()"
+    [currentPage]="currentPage()"
+    [pageChange]="pageChange()"
+    [pageSizeOptions]="pageSizeOptions()"
+    [pageSizeChange]="pageSizeChange()"
+    (rowClick)="rowClick.emit($event)"
+  />
+</app-page-layout>

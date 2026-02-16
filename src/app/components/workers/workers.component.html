@@ -1,0 +1,16 @@
+<app-list-page
+  title="Workers"
+  subtitle="Manage your workforce across all jobsites."
+  [rows]="(members$ | async) ?? []"
+  [columns]="columns"
+  [actions]="actions"
+  [searchable]="true"
+  [clientSideSearch]="false"
+  [queryChange]="onQueryChange"
+  searchPlaceholder="Search workers"
+  [pageSize]="10"
+>
+  <ng-container pageActions>
+    <button mat-flat-button color="primary" type="button">Invite worker</button>
+  </ng-container>
+</app-list-page>

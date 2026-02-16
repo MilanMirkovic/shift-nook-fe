@@ -1,0 +1,59 @@
+<div class="client-dialog">
+  <div class="dialog-header">
+    <mat-icon class="header-icon">person_add</mat-icon>
+    <div class="header-text">
+      <h2 mat-dialog-title>Add New Client</h2>
+      <p class="subtitle">Create a new client profile</p>
+    </div>
+  </div>
+
+  <mat-dialog-content>
+    <form [formGroup]="clientForm" class="client-form">
+      <div class="form-field">
+        <label class="field-label">Client Name</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>business</mat-icon>
+          <input matInput formControlName="name" placeholder="e.g. Acme Corporation">
+          @if (getErrorMessage('name')) {
+            <mat-error>{{ getErrorMessage('name') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label">Email Address</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>email</mat-icon>
+          <input matInput type="email" formControlName="email" placeholder="e.g. contact@acme.com">
+          @if (getErrorMessage('email')) {
+            <mat-error>{{ getErrorMessage('email') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label">Phone Number</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>phone</mat-icon>
+          <input matInput type="tel" formControlName="phone" placeholder="e.g. +1 (555) 123-4567">
+          @if (getErrorMessage('phone')) {
+            <mat-error>{{ getErrorMessage('phone') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button (click)="onCancel()" [disabled]="submitting">
+      Cancel
+    </button>
+    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="submitting || clientForm.invalid">
+      @if (submitting) {
+        <mat-spinner diameter="16"></mat-spinner>
+      } @else {
+        Create Client
+      }
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -1,0 +1,58 @@
+<div class="tab-content">
+  <div class="details-grid">
+    <div class="detail-card">
+      <div class="detail-card__icon">
+        <mat-icon>business</mat-icon>
+      </div>
+      <div class="detail-card__content">
+        <label>Jobsite Name</label>
+        <p>{{ jobsite.name }}</p>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <div class="detail-card__icon">
+        <mat-icon>place</mat-icon>
+      </div>
+      <div class="detail-card__content">
+        <label>Address</label>
+        <p>{{ jobsite.address }}</p>
+      </div>
+    </div>
+
+    <div class="detail-card" *ngIf="jobsite.latitude && jobsite.longitude">
+      <div class="detail-card__icon">
+        <mat-icon>my_location</mat-icon>
+      </div>
+      <div class="detail-card__content">
+        <label>Coordinates</label>
+        <p>{{ jobsite.latitude }}, {{ jobsite.longitude }}</p>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <div class="detail-card__icon">
+        <mat-icon>calendar_today</mat-icon>
+      </div>
+      <div class="detail-card__content">
+        <label>Created</label>
+        <p>{{ jobsite.createdAt | date:'MMMM d, yyyy' }}</p>
+      </div>
+    </div>
+
+    <div class="detail-card" *ngIf="client">
+      <div class="detail-card__icon">
+        <mat-icon>person</mat-icon>
+      </div>
+      <div class="detail-card__content">
+        <label>Client</label>
+        <p>
+          <a [routerLink]="['/clients', client.id]" class="client-link">
+            {{ client.name }}
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,22 @@
+<app-list-page
+  title="Team"
+  subtitle="Manage staff profiles, roles, and availability."
+  [rows]="(members$ | async) ?? []"
+  [columns]="columns"
+  [actions]="actions"
+  searchPlaceholder="Search team members"
+  [pageSize]="20"
+  [serverSidePagination]="true"
+  [totalItems]="(total$ | async) ?? 0"
+  [currentPage]="0"
+  [pageChange]="onPageChange"
+  [pageSizeChange]="onPageSizeChange"
+  [queryChange]="onQueryChange"
+  [clientSideSearch]="false"
+  (rowClick)="onRowClick($event)"
+>
+  <ng-container pageActions>
+    <button mat-flat-button color="primary" type="button">Add member</button>
+  </ng-container>
+</app-list-page>
+

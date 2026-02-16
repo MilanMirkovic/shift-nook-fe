@@ -1,0 +1,165 @@
+<app-page-layout
+  title="Dashboard"
+  subtitle="Overview of today's activity and key metrics"
+>
+  <!-- Summary Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon clients">
+        <mat-icon>business</mat-icon>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ clientsTotal$ | async }}</div>
+        <div class="stat-label">Clients</div>
+      </div>
+      <a routerLink="/clients" class="stat-link">
+        <mat-icon>arrow_forward</mat-icon>
+      </a>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon jobsites">
+        <mat-icon>location_on</mat-icon>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ jobsitesTotal$ | async }}</div>
+        <div class="stat-label">Jobsites</div>
+      </div>
+      <a routerLink="/jobsites" class="stat-link">
+        <mat-icon>arrow_forward</mat-icon>
+      </a>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon team">
+        <mat-icon>groups</mat-icon>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ membersTotal$ | async }}</div>
+        <div class="stat-label">Team Members</div>
+      </div>
+      <a routerLink="/team" class="stat-link">
+        <mat-icon>arrow_forward</mat-icon>
+      </a>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon active">
+        <mat-icon>timer</mat-icon>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ activeTimesheetsCount }}</div>
+        <div class="stat-label">Active Sessions</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="dashboard-grid">
+    <!-- Today's Activity -->
+    <div class="sn-card dashboard-card">
+      <div class="card-header">
+        <mat-icon>calendar_today</mat-icon>
+        <h3>Today's Activity</h3>
+        <span class="date-badge">{{ todayFormatted }}</span>
+      </div>
+      <div class="card-body">
+        <div class="loading-state" *ngIf="loading">
+          <mat-spinner diameter="32"></mat-spinner>
+        </div>
+        <div class="empty-state" *ngIf="!loading && todayTimesheets.length === 0">
+          <mat-icon>event_busy</mat-icon>
+          <p>No activity recorded today</p>
+        </div>
+        <div class="activity-summary" *ngIf="!loading && todayTimesheets.length > 0">
+          <div class="summary-item">
+            <span class="summary-value">{{ todayTimesheets.length }}</span>
+            <span class="summary-label">Check-ins</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-value">{{ completedToday }}</span>
+            <span class="summary-label">Completed</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-value">{{ totalHoursToday }}</span>
+            <span class="summary-label">Total Hours</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Workers -->
+    <div class="sn-card dashboard-card">
+      <div class="card-header">
+        <mat-icon>person_pin_circle</mat-icon>
+        <h3>Currently Working</h3>
+        <span class="count-badge" *ngIf="activeTimesheets.length > 0">{{ activeTimesheets.length }}</span>
+      </div>
+      <div class="card-body">
+        <div class="loading-state" *ngIf="loading">
+          <mat-spinner diameter="32"></mat-spinner>
+        </div>
+        <div class="empty-state" *ngIf="!loading && activeTimesheets.length === 0">
+          <mat-icon>person_off</mat-icon>
+          <p>No workers currently clocked in</p>
+        </div>
+        <div class="active-workers-list" *ngIf="!loading && activeTimesheets.length > 0">
+          <div class="worker-item" *ngFor="let timesheet of activeTimesheets; trackBy: trackById">
+            <div class="worker-avatar">
+              <mat-icon>person</mat-icon>
+            </div>
+            <div class="worker-info">
+              <span class="worker-name">{{ timesheet.workerName || 'Unknown Worker' }}</span>
+              <span class="worker-jobsite">{{ timesheet.jobsiteName || 'Unknown Jobsite' }}</span>
+              <span class="worker-task">{{ timesheet.jobsiteTaskName || 'General Work' }}</span>
+              <span class="worker-time">Since {{ formatTime(timesheet.checkInTime) }}</span>
+            </div>
+            <div class="worker-duration">
+              {{ calculateDuration(timesheet.checkInTime) }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Timesheets -->
+    <div class="sn-card dashboard-card full-width">
+      <div class="card-header">
+        <mat-icon>history</mat-icon>
+        <h3>Recent Timesheets</h3>
+        <a routerLink="/work-time" class="view-all-link">View All</a>
+      </div>
+      <div class="card-body">
+        <div class="loading-state" *ngIf="loading">
+          <mat-spinner diameter="32"></mat-spinner>
+        </div>
+        <div class="empty-state" *ngIf="!loading && recentTimesheets.length === 0">
+          <mat-icon>assignment</mat-icon>
+          <p>No recent timesheets</p>
+        </div>
+        <div class="timesheets-table" *ngIf="!loading && recentTimesheets.length > 0">
+          <div class="table-header">
+            <span>Worker</span>
+            <span>Jobsite</span>
+            <span>Task</span>
+            <span>Check In</span>
+            <span>Check Out</span>
+            <span>Duration</span>
+            <span>Status</span>
+          </div>
+          <div class="table-row" *ngFor="let timesheet of recentTimesheets; trackBy: trackById">
+            <span class="cell-primary">{{ timesheet.workerName || 'Unknown' }}</span>
+            <span>{{ timesheet.jobsiteName || 'Unknown' }}</span>
+            <span>{{ timesheet.jobsiteTaskName || '-' }}</span>
+            <span>{{ formatDateTime(timesheet.checkInTime) }}</span>
+            <span>{{ formatDateTime(timesheet.checkOutTime) }}</span>
+            <span>{{ formatDuration(timesheet.durationMinutes) }}</span>
+            <span [class]="'status-badge ' + (timesheet.status?.toLowerCase() || 'open')">
+              {{ timesheet.status || 'OPEN' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-page-layout>

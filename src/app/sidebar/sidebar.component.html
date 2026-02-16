@@ -1,0 +1,103 @@
+<div class="sidebar-root">
+  <!-- Header -->
+  <div class="sidenav-header">
+    <div class="brand">
+      <div class="brand-mark">SN</div>
+
+      <div class="brand-text" [class.is-hidden]="!isHandset && isCollapsed">
+        <div class="brand-name">{{ appName }}</div>
+        <div class="brand-subtitle">Scheduling, simplified</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body: nav scrolls, footer pinned -->
+  <div class="sidenav-content">
+    <mat-nav-list class="nav-list">
+      <!-- Current Company Display (if multiple companies) -->
+      @if (hasMultipleCompanies && currentCompany) {
+        <div class="company-section">
+          <mat-divider></mat-divider>
+          <div class="company-info" [class.is-collapsed]="!isHandset && isCollapsed">
+            <div class="company-avatar">{{ getCompanyInitials(currentCompany.companyName) }}</div>
+            <div class="company-details" [class.is-hidden]="!isHandset && isCollapsed">
+              <div class="company-name">{{ currentCompany.companyName }}</div>
+              <div class="company-role">{{ currentCompany.role }}</div>
+            </div>
+          </div>
+          <a mat-list-item (click)="onSwitchCompany()" class="switch-company-btn">
+            <mat-icon matListItemIcon>swap_horiz</mat-icon>
+            <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Switch Company</span>
+          </a>
+          <mat-divider></mat-divider>
+        </div>
+      }
+
+      @if (canSeeDashboard) {
+        <a mat-list-item routerLink="/dashboard" routerLinkActive="active" (click)="onLinkClicked()">
+          <mat-icon matListItemIcon>dashboard</mat-icon>
+          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Dashboard</span>
+        </a>
+      }
+
+      @if (canSeeWorkers) {
+        <a mat-list-item routerLink="/workers" routerLinkActive="active" (click)="onLinkClicked()">
+          <mat-icon matListItemIcon>badge</mat-icon>
+          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Workers</span>
+        </a>
+      }
+      @if (canSeeClients) {
+        <a mat-list-item routerLink="/clients" routerLinkActive="active" (click)="onLinkClicked()">
+          <mat-icon matListItemIcon>business</mat-icon>
+          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Clients</span>
+        </a>
+      }
+      <a mat-list-item routerLink="/jobsites" routerLinkActive="active" (click)="onLinkClicked()">
+        <mat-icon matListItemIcon>location_on</mat-icon>
+        <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Jobsites</span>
+      </a>
+      @if (canSeeClients) {
+        <a mat-list-item routerLink="/work-time" routerLinkActive="active" (click)="onLinkClicked()">
+          <mat-icon matListItemIcon>schedule</mat-icon>
+          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Work Time</span>
+        </a>
+      }
+      <a mat-list-item routerLink="/settings" routerLinkActive="active" (click)="onLinkClicked()">
+        <mat-icon matListItemIcon>settings</mat-icon>
+        <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Settings</span>
+      </a>
+    </mat-nav-list>
+
+    <!-- Footer -->
+    <div class="sidenav-footer" [class.is-hidden]="!isHandset && isCollapsed">
+      <div class="support-section">
+        <div class="support-title">Need help?</div>
+        <div class="support-subtitle">Contact support or check the documentation.</div>
+      </div>
+
+      @if (!isAuthenticated) {
+        <button
+          mat-flat-button
+          routerLink="/login"
+          color="primary"
+          type="button"
+          class="signin-button"
+        >
+          Sign in
+        </button>
+      }
+
+      @if (isAuthenticated) {
+        <button
+          mat-stroked-button
+          (click)="onSignOut()"
+          type="button"
+          class="signout-button"
+        >
+          <mat-icon>logout</mat-icon>
+          Sign out
+        </button>
+      }
+    </div>
+  </div>
+</div>

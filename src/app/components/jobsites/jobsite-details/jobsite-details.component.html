@@ -1,0 +1,118 @@
+<ng-container *ngIf="jobsite$ | async as jobsite; else loading">
+  <!-- Premium Header Section -->
+  <div class="jobsite-header">
+    <div class="jobsite-header__breadcrumb">
+      <a routerLink="/jobsites" class="breadcrumb-link">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Jobsites
+      </a>
+    </div>
+
+    <div class="jobsite-header__title-section">
+      <div class="jobsite-header__avatar">
+        <mat-icon>location_on</mat-icon>
+      </div>
+      <div class="jobsite-header__info">
+        <h1 class="jobsite-header__name">{{ jobsite.name }} - {{jobsite.clientName}}</h1>
+        <p class="jobsite-header__meta">
+          <mat-icon class="meta-icon">place</mat-icon>
+          {{ jobsite.address }}
+          <span class="divider" *ngIf="jobsite.latitude && jobsite.longitude">•</span>
+          <mat-icon class="meta-icon" *ngIf="jobsite.latitude && jobsite.longitude">my_location</mat-icon>
+          <span *ngIf="jobsite.latitude && jobsite.longitude">{{ jobsite.latitude }}, {{ jobsite.longitude }}</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="jobsite-header__actions">
+      <button mat-stroked-button class="white-button" (click)="onEditJobsite()">
+        <mat-icon>edit</mat-icon>
+        Edit Jobsite
+      </button>
+      <button mat-flat-button color="primary" (click)="onViewOnMap()">
+        <mat-icon>map</mat-icon>
+        View on Map
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs Section -->
+  <div class="jobsite-content">
+    <mat-tab-group animationDuration="300ms" class="premium-tabs">
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">schedule</mat-icon>
+          Timesheets
+        </ng-template>
+        <ng-template matTabContent>
+          <app-jobsite-timesheets
+            [jobsite]="jobsite"
+            (createTimesheet)="onCreateTimesheet()">
+          </app-jobsite-timesheets>
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">task</mat-icon>
+          Tasks
+        </ng-template>
+        <ng-template matTabContent>
+          <app-jobsite-tasks
+            [jobsite]="jobsite"
+            [tasks$]="tasks$"
+            [tasksLoading$]="tasksLoading$"
+            [canManageJobsites$]="canManageJobsites$"
+            [filteredTaskId]="filteredTaskId"
+            (addTask)="onAddTask()"
+            (editTask)="onEditTask($event)"
+            (deleteTask)="onDeleteTask($event)"
+            (reviewTask)="onReviewTask($event)"
+            (clearFilter)="onClearTaskFilter()">
+          </app-jobsite-tasks>
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">info</mat-icon>
+          Details
+        </ng-template>
+        <ng-template matTabContent>
+          <app-jobsite-info
+            [jobsite]="jobsite"
+            [client]="client">
+          </app-jobsite-info>
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">history</mat-icon>
+          Activity
+        </ng-template>
+        <ng-template matTabContent>
+          <app-jobsite-activity
+            [jobsiteName]="jobsite.name"
+            [activities]="activities"
+            [activitiesLoading]="activitiesLoading"
+            [activitiesError]="activitiesError"
+            [hasMoreActivities]="hasMoreActivities"
+            [totalActivities]="totalActivities"
+            [loadingMore]="loadingMore"
+            (loadMore)="loadMoreActivities()"
+            (applyFilters)="onApplyFilters($event)"
+            (clearFilters)="onClearFilters()">
+          </app-jobsite-activity>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</ng-container>
+
+<ng-template #loading>
+  <div class="loading-state">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Loading jobsite details…</p>
+  </div>
+</ng-template>

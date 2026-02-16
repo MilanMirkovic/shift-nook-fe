@@ -1,0 +1,51 @@
+<div class="task-dialog">
+  <div class="dialog-header">
+    <mat-icon class="header-icon">task</mat-icon>
+    <div class="header-text">
+      <h2 mat-dialog-title>{{ isEditMode ? 'Edit Task' : 'Add New Task' }}</h2>
+      <p class="subtitle">{{ isEditMode ? 'Update task for' : 'Create a task for' }} {{ data.jobsiteName || 'this jobsite' }}</p>
+    </div>
+  </div>
+
+  <mat-dialog-content>
+    <form [formGroup]="taskForm" class="task-form">
+      <div class="form-field">
+        <label class="field-label">Task Name</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>task</mat-icon>
+          <input matInput formControlName="name" placeholder="e.g. Install electrical wiring">
+          @if (getErrorMessage('name')) {
+            <mat-error>{{ getErrorMessage('name') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label">Description (Optional)</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>description</mat-icon>
+          <textarea matInput
+                    formControlName="description"
+                    placeholder="Add details about this task..."
+                    rows="4"></textarea>
+          @if (getErrorMessage('description')) {
+            <mat-error>{{ getErrorMessage('description') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button (click)="onCancel()" [disabled]="submitting">
+      Cancel
+    </button>
+    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="submitting || taskForm.invalid">
+      @if (submitting) {
+        <mat-spinner diameter="16"></mat-spinner>
+      } @else {
+        {{ isEditMode ? 'Save Changes' : 'Create Task' }}
+      }
+    </button>
+  </mat-dialog-actions>
+</div>

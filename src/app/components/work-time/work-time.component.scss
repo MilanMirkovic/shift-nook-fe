@@ -1,0 +1,48 @@
+:host {
+  display: block;
+  height: 100%;
+  padding: 24px;
+  background-color: var(--mat-app-background-color, #fafafa);
+}
+
+.work-time-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.work-time-header {
+  margin-bottom: 32px;
+
+  h1 {
+    font-size: 32px;
+    font-weight: 500;
+    margin: 0 0 8px 0;
+    color: var(--mat-app-text-color, rgba(0, 0, 0, 0.87));
+  }
+
+  p {
+    font-size: 16px;
+    margin: 0;
+    color: var(--mat-app-text-color, rgba(0, 0, 0, 0.6));
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  :host {
+    padding: 16px;
+  }
+
+  .work-time-header {
+    margin-bottom: 24px;
+
+    h1 {
+      font-size: 24px;
+    }
+
+    p {
+      font-size: 14px;
+    }
+  }
+}
+

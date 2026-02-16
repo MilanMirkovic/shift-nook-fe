@@ -1,0 +1,117 @@
+<div class="table">
+  <div class="sn-card table__card">
+    @if (searchable()) {
+      <div class="table__cardHeader">
+        <div class="table__searchWrap">
+          <mat-icon class="table__searchIcon" aria-hidden="true">search</mat-icon>
+          <input
+            class="table__searchInput"
+            type="text"
+            [placeholder]="searchPlaceholder()"
+            [ngModel]="query()"
+            (ngModelChange)="setQuery($event)"
+          />
+          @if (query()) {
+            <button
+              mat-icon-button
+              type="button"
+              class="table__searchClear"
+              aria-label="Clear search"
+              (click)="clearQuery()"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </div>
+
+        <div class="table__cardHeaderRight">
+          <div class="table__count">{{ filteredRows().length }} results</div>
+        </div>
+      </div>
+    }
+
+    <div class="table__viewport">
+      <table mat-table [dataSource]="pagedRows()" class="mat-elevation-z0">
+        @for (col of columns(); track col.id) {
+          <ng-container [matColumnDef]="col.id">
+            <th mat-header-cell *matHeaderCellDef [ngStyle]="colStyle(col)">
+              {{ col.header }}
+            </th>
+            <td mat-cell *matCellDef="let row" [ngStyle]="colStyle(col)">
+              {{ formatValue(row, col) }}
+            </td>
+          </ng-container>
+        }
+
+        @if (actions().length > 0) {
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="table__actionsHeader">Actions</th>
+            <td mat-cell *matCellDef="let row" class="table__actionsCell">
+              @for (action of actions(); track action.label) {
+                @if (isActionVisible(action, row)) {
+                  <button
+                    mat-icon-button
+                    [color]="action.color"
+                    [attr.aria-label]="action.label"
+                    (click)="action.handler(row)"
+                    type="button"
+                  >
+                    <mat-icon>{{ action.icon }}</mat-icon>
+                  </button>
+                }
+              }
+            </td>
+          </ng-container>
+        }
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumnIds()" ></tr>
+        <tr mat-row  *matRowDef="let row; columns: displayedColumnIds()"  (click)="onRowClick(row)"
+            class="clickable-row"></tr>
+
+        @if (pagedRows().length === 0) {
+          <tr class="table__empty">
+            <td [attr.colspan]="displayedColumnIds().length">
+              <div class="table__emptyInner">No results</div>
+            </td>
+          </tr>
+        }
+      </table>
+    </div>
+
+    @if (pageSize() > 0 && (totalPages() > 1 || pageSizeOptions().length > 0)) {
+      <div class="table__pager">
+        @if (totalPages() > 1) {
+          <button mat-stroked-button type="button" (click)="prevPage()" [disabled]="!canGoPrev()">
+            Previous
+          </button>
+
+          <div class="table__pagerText">Page {{ currentPageDisplay() }} of {{ totalPages() }}</div>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="nextPage()"
+            [disabled]="!canGoNext()"
+          >
+            Next
+          </button>
+        }
+
+        @if (pageSizeOptions().length > 0) {
+          <div class="table__pageSizeSelect">
+            <label class="table__pageSizeLabel">Per page:</label>
+            <select
+              class="table__pageSizeDropdown"
+              [value]="pageSize()"
+              (change)="onPageSizeChange(+$any($event.target).value)"
+            >
+              @for (option of pageSizeOptions(); track option) {
+                <option [value]="option">{{ option }}</option>
+              }
+            </select>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

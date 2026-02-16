@@ -1,0 +1,141 @@
+/* ===============================
+   Layout shell
+   =============================== */
+
+.app-shell {
+  height: 100vh;
+  position: relative;
+}
+
+/* ===============================
+   Floating navigation handle
+   =============================== */
+
+.nav-edge-handle {
+  position: fixed;
+  top: 50vh;
+  left: 0;
+  transform: translateY(-50%);
+  z-index: 9999;
+
+  width: 32px;
+  height: 56px;
+  padding: 0;
+  border-radius: 0 12px 12px 0;
+
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(11, 42, 74, 0.12);
+  border-left: none;
+  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.nav-edge-handle mat-icon {
+  color: #0b2a4a;
+  font-size: 20px;
+  transition: transform 0.25s ease;
+}
+
+.nav-edge-handle:hover {
+  background: #ffffff;
+  width: 36px;
+  box-shadow: 3px 0 20px rgba(0, 0, 0, 0.12);
+}
+
+.nav-edge-handle:hover mat-icon {
+  transform: translateX(2px);
+}
+
+.nav-edge-handle:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+/* Closed state emphasis */
+.nav-edge-handle[aria-expanded="false"] {
+  background: linear-gradient(135deg, #0b2a4a 0%, #1a3a5a 100%);
+  width: 36px;
+  height: 64px;
+}
+
+.nav-edge-handle[aria-expanded="false"] mat-icon {
+  color: #ffffff;
+}
+
+.nav-edge-handle[aria-expanded="false"]:hover {
+  width: 40px;
+  background: linear-gradient(135deg, #1a3a5a 0%, #2a4a6a 100%);
+}
+
+/* ===============================
+   Toolbar
+   =============================== */
+
+.app-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* ===============================
+   Side navigation (shell)
+   =============================== */
+
+.app-sidenav {
+  width: 280px;
+  max-width: 85vw;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  background: linear-gradient(
+      180deg,
+      #d9efff 0%,
+      #c7e4ff 55%,
+      #bcdcff 100%
+  );
+
+  color: #0b2a4a;
+  border-right: 1px solid rgba(11, 42, 74, 0.12);
+
+  overflow-x: hidden;
+}
+
+/* Collapsed desktop mode */
+.app-sidenav.is-collapsed {
+  width: 76px;
+}
+
+/* Important: Angular Material wraps mat-sidenav content in an inner container.
+   Make THAT container a flex column so the footer can pin properly. */
+:host ::ng-deep .app-sidenav .mat-drawer-inner-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* ===============================
+   Main content
+   =============================== */
+
+.app-content {
+  min-height: 100vh;
+}
+
+/* ===============================
+   Brand / header
+   =============================== */
+
+/* (moved into src/app/sidebar/sidebar.component.scss) */

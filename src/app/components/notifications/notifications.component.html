@@ -1,0 +1,93 @@
+<div class="notifications-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon class="title-icon">notifications</mat-icon>
+        Notifications
+      </h1>
+      <p class="page-subtitle" *ngIf="unreadCount > 0">
+        You have {{ unreadCount }} unread notification{{ unreadCount > 1 ? 's' : '' }}
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button
+        mat-stroked-button
+        *ngIf="unreadCount > 0"
+        (click)="onMarkAllAsRead()"
+        class="mark-all-btn"
+      >
+        <mat-icon>done_all</mat-icon>
+        Mark all as read
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Toggle -->
+  <div class="filter-section">
+    <mat-button-toggle-group
+      [value]="filterMode"
+      (change)="onFilterChange($event.value)"
+      class="filter-toggle"
+    >
+      <mat-button-toggle value="all">All</mat-button-toggle>
+      <mat-button-toggle value="unread">Unread only</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+  <!-- Notifications List -->
+  <div class="notifications-container">
+    <!-- Loading State -->
+    <div *ngIf="loading && notifications.length === 0" class="loading-state">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading notifications...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && notifications.length === 0" class="empty-state">
+      <mat-icon class="empty-icon">notifications_none</mat-icon>
+      <h3>No notifications</h3>
+      <p *ngIf="filterMode === 'all'">You're all caught up! No notifications to display.</p>
+      <p *ngIf="filterMode === 'unread'">No unread notifications. Switch to "All" to see previous notifications.</p>
+    </div>
+
+    <!-- Notification Items -->
+    <mat-card
+      *ngFor="let notification of notifications"
+      class="notification-card"
+      [class.unread]="!notification.read"
+      (click)="onNotificationClick(notification)"
+    >
+      <div class="notification-item">
+        <div class="notification-icon" [ngClass]="getIconClass(notification.type)">
+          <mat-icon>{{ getNotificationIcon(notification.type) }}</mat-icon>
+        </div>
+
+        <div class="notification-content">
+          <div class="notification-header">
+            <span class="notification-title">{{ notification.title }}</span>
+            <span class="notification-time">{{ getTimeAgo(notification.createdAt) }}</span>
+          </div>
+          <p class="notification-message">{{ notification.message }}</p>
+        </div>
+
+        <div *ngIf="!notification.read" class="unread-indicator"></div>
+      </div>
+    </mat-card>
+
+    <!-- Load More Button -->
+    <div *ngIf="hasMore && !loading" class="load-more-section">
+      <button mat-stroked-button color="primary" (click)="onLoadMore()">
+        <mat-icon>expand_more</mat-icon>
+        Load more notifications
+      </button>
+    </div>
+
+    <!-- Loading More Spinner -->
+    <div *ngIf="loading && notifications.length > 0" class="loading-more">
+      <mat-spinner diameter="32"></mat-spinner>
+    </div>
+  </div>
+</div>
+

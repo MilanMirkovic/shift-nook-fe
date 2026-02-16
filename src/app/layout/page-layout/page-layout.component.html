@@ -1,0 +1,21 @@
+<section class="page" [class.is-padded]="padded">
+  <div class="page__container" [attr.data-max-width]="maxWidth">
+    <header class="page__header">
+      <div class="page__titleblock">
+        <h1 class="page__title">{{ title }}</h1>
+        @if (subtitle) {
+          <p class="page__subtitle">{{ subtitle }}</p>
+        }
+      </div>
+
+      <div class="page__actions">
+        <ng-content select="[pageActions]" />
+      </div>
+    </header>
+
+    <div class="page__content">
+      <ng-content />
+    </div>
+  </div>
+</section>
+

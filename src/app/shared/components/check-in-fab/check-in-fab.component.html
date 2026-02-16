@@ -1,0 +1,11 @@
+<button
+  *ngIf="isWorker && (isCheckedIn$ | async) !== null"
+  mat-fab
+  [color]="(isCheckedIn$ | async) ? 'accent' : 'primary'"
+  class="check-in-fab"
+  (click)="openCheckInDialog()"
+  [matTooltip]="(isCheckedIn$ | async) ? 'Check Out' : 'Check In'"
+  matTooltipPosition="left"
+>
+  <mat-icon>{{ (isCheckedIn$ | async) ? 'logout' : 'login' }}</mat-icon>
+</button>

@@ -1,0 +1,74 @@
+<div class="company-selection-container">
+  <div class="company-selection-content">
+    <!-- Header Section -->
+    <div class="header">
+      <div class="brand-logo">
+        <span class="logo-mark">SN</span>
+      </div>
+      <h1 class="title">Choose Your Company</h1>
+      <p class="subtitle">Select which company you'd like to manage</p>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p class="loading-text">Loading your companies...</p>
+    </div>
+
+    <!-- Companies Grid -->
+    <div *ngIf="!loading && companies.length > 0" class="companies-grid">
+      <div
+        *ngFor="let company of companies"
+        class="company-card"
+        (click)="selectCompany(company)"
+        role="button"
+        tabindex="0"
+        (keydown.enter)="selectCompany(company)"
+        (keydown.space)="selectCompany(company)"
+      >
+        <div class="card-header">
+          <div class="company-avatar">
+            {{ getCompanyInitials(company.companyName) }}
+          </div>
+          <div class="company-badge">
+            <mat-icon>{{ company.role === 'OWNER' ? 'stars' : 'badge' }}</mat-icon>
+            <span>{{ company.role }}</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <h3 class="company-name">{{ company.companyName }}</h3>
+          <p class="member-since">Member since {{ formatMemberSince(company.memberSince) }}</p>
+        </div>
+
+        <div class="card-footer">
+          <div class="select-button">
+            <span>Select Company</span>
+            <mat-icon>arrow_forward</mat-icon>
+          </div>
+        </div>
+
+        <!-- Decorative element -->
+        <div class="card-decoration"></div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && companies.length === 0" class="empty-state">
+      <mat-icon class="empty-icon">business</mat-icon>
+      <h3>No Companies Found</h3>
+      <p>You don't have access to any companies yet.</p>
+      <button mat-flat-button color="primary" (click)="router.navigate(['/dashboard'])">
+        Go to Dashboard
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p class="footer-text">
+        Need help? <a href="#">Contact Support</a>
+      </p>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,157 @@
+<div class="check-in-dialog">
+  <h2 mat-dialog-title>{{ isCheckedIn ? 'Check Out' : 'Check In' }}</h2>
+
+  <mat-dialog-content>
+    <!-- Location Loading State -->
+    <div *ngIf="gettingLocation" class="location-state">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p class="location-message">Getting your location...</p>
+    </div>
+
+    <!-- Location Error State -->
+    <div *ngIf="!gettingLocation && !currentLocation" class="location-state location-error">
+      <mat-icon>location_off</mat-icon>
+      <p class="location-message error">Unable to get your location.</p>
+      <p class="location-hint">Please enable location services and try again.</p>
+    </div>
+
+    <!-- Check In Form -->
+    <div *ngIf="!isCheckedIn && currentLocation && !gettingLocation" class="form-content">
+      <!-- Map Container -->
+      <div class="map-container">
+        <div #mapContainer class="map"></div>
+        <div *ngIf="mapLoading" class="map-loader">          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading map...</p>
+        </div>
+      </div>
+
+      <form [formGroup]="checkInForm">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Select Jobsite</mat-label>
+          <mat-select formControlName="jobsiteId" required>
+            <mat-option *ngFor="let jobsite of jobsites$ | async" [value]="jobsite.id">
+              {{ jobsite.name }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>business</mat-icon>
+          <mat-hint>Choose the jobsite location</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Select Task</mat-label>
+          <mat-select formControlName="jobsiteTaskId" required>
+            <mat-option *ngFor="let task of jobsiteTasks$ | async" [value]="task.id">
+              {{ task.name }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>work</mat-icon>
+          <mat-hint>Select your primary task</mat-hint>
+        </mat-form-field>
+
+        <div class="location-info">
+          <mat-icon>location_on</mat-icon>
+          <span>Location acquired with {{currentLocation.accuracy}}m accuracy</span>
+        </div>
+      </form>
+    </div>
+
+    <!-- Check Out Info -->
+    <div *ngIf="isCheckedIn && currentLocation && !gettingLocation && activeTimesheet" class="checkout-content">
+      <!-- Map Container -->
+      <div class="map-container">
+        <div #mapContainer class="map"></div>
+        <div *ngIf="mapLoading" class="map-loader">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading map...</p>
+        </div>
+      </div>
+
+      <div class="status-card">
+        <div class="status-header">
+          <mat-icon class="status-icon">schedule</mat-icon>
+          <div class="status-info">
+            <h3>Currently Checked In</h3>
+            <p class="status-time">{{ activeTimesheet.checkInTime | date:'EEEE, MMMM d, y' }}</p>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="detail-row">
+          <mat-icon>access_time</mat-icon>
+          <div class="detail-content">
+            <span class="detail-label">Check-in Time</span>
+            <span class="detail-value">{{ activeTimesheet.checkInTime | date:'shortTime' }}</span>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <mat-icon>business</mat-icon>
+          <div class="detail-content">
+            <span class="detail-label">Jobsite</span>
+            <span class="detail-value">{{ activeTimesheet.jobsiteName }}</span>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <mat-icon>location_on</mat-icon>
+          <div class="detail-content">
+            <span class="detail-label">Check-out Location</span>
+            <span class="detail-value">Ready ({{currentLocation.accuracy}}m accuracy)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Checkout Form -->
+      <form [formGroup]="checkOutForm" class="checkout-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Work Description</mat-label>
+          <textarea
+            matInput
+            formControlName="workDescription"
+            placeholder="Describe the work you completed during this shift..."
+            rows="4"
+          ></textarea>
+          <mat-icon matPrefix>description</mat-icon>
+          <mat-hint>Summarize what you accomplished today</mat-hint>
+        </mat-form-field>
+
+        <mat-checkbox formControlName="markTaskAsComplete" color="primary" class="task-complete-checkbox">
+          Mark task as complete
+        </mat-checkbox>
+      </form>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="(loading$ | async) || (updatingTimesheet$ | async)">
+      Cancel
+    </button>
+
+    <button
+      *ngIf="!isCheckedIn"
+      mat-raised-button
+      color="primary"
+      (click)="onCheckIn()"
+      [disabled]="checkInForm.invalid || !currentLocation || (loading$ | async)"
+      class="action-button"
+    >
+      <mat-icon *ngIf="!(loading$ | async)">login</mat-icon>
+      <mat-spinner *ngIf="loading$ | async" diameter="20"></mat-spinner>
+      <span>Check In</span>
+    </button>
+
+    <button
+      *ngIf="isCheckedIn"
+      mat-raised-button
+      color="accent"
+      (click)="onCheckOut()"
+      [disabled]="!currentLocation || (updatingTimesheet$ | async)"
+      class="action-button"
+    >
+      <mat-icon *ngIf="!(updatingTimesheet$ | async)">logout</mat-icon>
+      <mat-spinner *ngIf="updatingTimesheet$ | async" diameter="20"></mat-spinner>
+      <span>Check Out</span>
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -1,0 +1,84 @@
+.work-session-timer {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 16px 20px;
+  z-index: 1000;
+  animation: slideInUp 0.3s ease-out;
+
+  .timer-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: white;
+
+    .timer-icon {
+      mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        animation: pulse 2s ease-in-out infinite;
+      }
+    }
+
+    .timer-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .timer-label {
+        font-size: 11px;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .timer-company {
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.2;
+      }
+
+      .timer-elapsed {
+        font-size: 20px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    .timer-stop {
+      mat-icon {
+        color: rgba(255, 255, 255, 0.9);
+        transition: color 0.2s;
+      }
+
+      &:hover mat-icon {
+        color: #ff6b6b;
+      }
+    }
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}

@@ -1,0 +1,509 @@
+@if (loading) {
+  <div class="loading-state">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Loading worker details...</p>
+  </div>
+} @else if (worker) {
+  <!-- Premium Worker Header -->
+  <header class="worker-header">
+    <!-- Breadcrumb -->
+    <div class="worker-header__breadcrumb">
+      <a [routerLink]="['/workers']" class="breadcrumb-link">
+        <mat-icon>arrow_back</mat-icon>
+        <span>Back to Workers</span>
+      </a>
+    </div>
+
+    <!-- Title Section -->
+    <div class="worker-header__title-section">
+      <div class="worker-header__avatar">
+        {{ getWorkerInitials() }}
+      </div>
+      <div class="worker-header__info">
+        <h1 class="worker-header__name">{{ getWorkerFullName() }}</h1>
+        <p class="worker-header__meta">
+          <mat-icon class="meta-icon">badge</mat-icon>
+          <span [class]="getRoleBadgeColor()">{{ formatRole(worker.role) }}</span>
+          <span class="divider">•</span>
+          <mat-icon class="meta-icon">email</mat-icon>
+          <span>{{ worker.email }}</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="worker-header__actions">
+      <button mat-stroked-button type="button" (click)="onEdit()">
+        <mat-icon>edit</mat-icon>
+        Edit Worker
+      </button>
+      <button mat-flat-button color="primary" type="button">
+        <mat-icon>schedule</mat-icon>
+        View Schedule
+      </button>
+    </div>
+  </header>
+
+  <!-- Content Tabs -->
+  <div class="worker-content">
+    <mat-tab-group class="premium-tabs" animationDuration="300ms">
+      <!-- Overview Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">info</mat-icon>
+          Overview
+        </ng-template>
+        <div class="tab-content">
+          <h2>Worker Information</h2>
+          <div class="details-grid">
+            <div class="detail-card">
+              <div class="detail-card__icon">
+                <mat-icon>person</mat-icon>
+              </div>
+              <div class="detail-card__content">
+                <label>Full Name</label>
+                <p>{{ getWorkerFullName() }}</p>
+              </div>
+            </div>
+
+            <div class="detail-card">
+              <div class="detail-card__icon">
+                <mat-icon>email</mat-icon>
+              </div>
+              <div class="detail-card__content">
+                <label>Email Address</label>
+                <p>{{ worker.email }}</p>
+              </div>
+            </div>
+
+            <div class="detail-card">
+              <div class="detail-card__icon">
+                <mat-icon>badge</mat-icon>
+              </div>
+              <div class="detail-card__content">
+                <label>Role</label>
+                <p [class]="getRoleBadgeColor()">{{ formatRole(worker.role) }}</p>
+              </div>
+            </div>
+
+            <div class="detail-card">
+              <div class="detail-card__icon">
+                <mat-icon>fingerprint</mat-icon>
+              </div>
+              <div class="detail-card__content">
+                <label>User ID</label>
+                <p class="monospace">{{ worker.userId }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Statistics Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">analytics</mat-icon>
+          Statistics
+        </ng-template>
+        <div class="tab-content">
+          <h2>Work Statistics</h2>
+
+          @if (timesheetsLoading) {
+            <div class="loading-state">
+              <mat-spinner diameter="48"></mat-spinner>
+              <p>Loading statistics...</p>
+            </div>
+          } @else {
+            <!-- Time Period Stats -->
+            <div class="stats-section">
+              <h3>Hours Worked</h3>
+              <div class="stats-grid">
+                <div class="stat-card stat-card--primary">
+                  <div class="stat-card__icon">
+                    <mat-icon>today</mat-icon>
+                  </div>
+                  <div class="stat-card__content">
+                    <label>This Week</label>
+                    <p class="stat-value">{{ getHoursThisWeek() }}h</p>
+                  </div>
+                </div>
+
+                <div class="stat-card stat-card--success">
+                  <div class="stat-card__icon">
+                    <mat-icon>calendar_month</mat-icon>
+                  </div>
+                  <div class="stat-card__content">
+                    <label>This Month</label>
+                    <p class="stat-value">{{ getHoursThisMonth() }}h</p>
+                  </div>
+                </div>
+
+                <div class="stat-card stat-card--info">
+                  <div class="stat-card__icon">
+                    <mat-icon>schedule</mat-icon>
+                  </div>
+                  <div class="stat-card__content">
+                    <label>Total Hours</label>
+                    <p class="stat-value">{{ getTotalHours() }}h</p>
+                  </div>
+                </div>
+
+                <div class="stat-card stat-card--warning">
+                  <div class="stat-card__icon">
+                    <mat-icon>assignment</mat-icon>
+                  </div>
+                  <div class="stat-card__content">
+                    <label>Total Shifts</label>
+                    <p class="stat-value">{{ totalTimesheets }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hours by Jobsite -->
+            <div class="stats-section">
+              <h3>Hours by Jobsite</h3>
+              @if (getJobsiteStats().length === 0) {
+                <div class="empty-state-small">
+                  <mat-icon>location_off</mat-icon>
+                  <p>No jobsite data available</p>
+                </div>
+              } @else {
+                <div class="jobsite-stats-list">
+                  @for (jobsiteStat of getJobsiteStats(); track jobsiteStat.jobsiteName) {
+                    <div class="jobsite-stat-item">
+                      <div class="jobsite-stat-item__header">
+                        <div class="jobsite-info">
+                          <mat-icon>location_on</mat-icon>
+                          <span class="jobsite-name">{{ jobsiteStat.jobsiteName }}</span>
+                        </div>
+                        <span class="jobsite-hours">{{ jobsiteStat.hours }}h</span>
+                      </div>
+                      <div class="jobsite-stat-item__bar">
+                        <div class="progress-bar" [style.width.%]="jobsiteStat.percentage"></div>
+                      </div>
+                      <div class="jobsite-stat-item__meta">
+                        <span>{{ jobsiteStat.shiftCount }} shifts</span>
+                        <span>{{ jobsiteStat.percentage }}% of total</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Recent Activity Summary -->
+            <div class="stats-section">
+              <h3>Activity Summary</h3>
+              <div class="stats-grid stats-grid--3col">
+                <div class="stat-card stat-card--outline">
+                  <div class="stat-card__icon">
+                    <mat-icon>check_circle</mat-icon>
+                  </div>
+                  <div class="stat-card__content">
+                    <label>Completed Shifts</label>
+                    <p class="stat-value">{{ getCompletedShiftsCount() }}</p>
+                  </div>
+                </div>
+
+                <div class="stat-card stat-card--outline">
+                  <div class="stat-card__icon">
+                    <mat-icon>pending</mat-icon>
+                  </div>
+                  <div class="stat-card__content">
+                    <label>Active Shifts</label>
+                    <p class="stat-value">{{ getActiveShiftsCount() }}</p>
+                  </div>
+                </div>
+
+                <div class="stat-card stat-card--outline">
+                  <div class="stat-card__icon">
+                    <mat-icon>av_timer</mat-icon>
+                  </div>
+                  <div class="stat-card__content">
+                    <label>Avg Shift Length</label>
+                    <p class="stat-value">{{ getAverageShiftLength() }}h</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- Timesheets Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">schedule</mat-icon>
+          Timesheets
+        </ng-template>
+        <div class="tab-content">
+          <div class="activity-header">
+            <div>
+              <h2>Timesheets</h2>
+              <p class="activity-subtitle">View timesheet records for this worker</p>
+            </div>
+            <button mat-stroked-button (click)="toggleTimesheetFilters()">
+              <mat-icon>{{ showTimesheetFilters ? 'filter_list_off' : 'filter_list' }}</mat-icon>
+              {{ showTimesheetFilters ? 'Hide Filters' : 'Show Filters' }}
+            </button>
+          </div>
+
+          <!-- Date Range Filters -->
+          @if (showTimesheetFilters) {
+            <div class="activity-filters">
+              <mat-form-field appearance="outline">
+                <mat-label>Start Date</mat-label>
+                <input matInput [matDatepicker]="timesheetStartPicker" [(ngModel)]="timesheetStartDate">
+                <mat-datepicker-toggle matSuffix [for]="timesheetStartPicker"></mat-datepicker-toggle>
+                <mat-datepicker #timesheetStartPicker></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>End Date</mat-label>
+                <input matInput [matDatepicker]="timesheetEndPicker" [(ngModel)]="timesheetEndDate">
+                <mat-datepicker-toggle matSuffix [for]="timesheetEndPicker"></mat-datepicker-toggle>
+                <mat-datepicker #timesheetEndPicker></mat-datepicker>
+              </mat-form-field>
+
+              <div class="filter-actions">
+                <button mat-flat-button color="primary" (click)="applyTimesheetFilters()">
+                  <mat-icon>search</mat-icon>
+                  Apply Filters
+                </button>
+                <button mat-stroked-button (click)="clearTimesheetFilters()">
+                  <mat-icon>clear</mat-icon>
+                  Clear
+                </button>
+              </div>
+            </div>
+          }
+
+          @if (timesheetsLoading) {
+            <div class="loading-state">
+              <mat-spinner diameter="48"></mat-spinner>
+              <p>Loading timesheets...</p>
+            </div>
+          } @else if (timesheetsError) {
+            <div class="empty-state">
+              <mat-icon class="empty-state__icon">error</mat-icon>
+              <h3 class="empty-state__title">Error Loading Timesheets</h3>
+              <p class="empty-state__description">{{ timesheetsError }}</p>
+            </div>
+          } @else if (timesheets.length === 0) {
+            <div class="empty-state">
+              <mat-icon class="empty-state__icon">schedule</mat-icon>
+              <h3 class="empty-state__title">No Timesheets Yet</h3>
+              <p class="empty-state__description">
+                Timesheet records for this worker will appear here.
+              </p>
+            </div>
+          } @else {
+            <div class="timesheets-list">
+              @for (timesheet of timesheets; track timesheet.id) {
+                <div class="timesheet-card">
+                  <div class="timesheet-card__header">
+                    <div class="timesheet-card__title">
+                      <mat-icon>schedule</mat-icon>
+                      <span>{{ timesheet.checkInTime | date:'MMM d, yyyy' }}</span>
+                    </div>
+                    <span class="timesheet-status" [ngClass]="getTimesheetStatusClass(timesheet)">
+                      {{ getTimesheetStatusLabel(timesheet) }}
+                    </span>
+                  </div>
+
+                  <div class="timesheet-card__content">
+                    <div class="timesheet-detail">
+                      <mat-icon class="detail-icon">login</mat-icon>
+                      <div class="detail-info">
+                        <label>Check-in</label>
+                        <p>{{ timesheet.checkInTime | date:'h:mm a' }}</p>
+                      </div>
+                    </div>
+
+                    <div class="timesheet-detail">
+                      <mat-icon class="detail-icon">logout</mat-icon>
+                      <div class="detail-info">
+                        <label>Check-out</label>
+                        <p>{{ timesheet.checkOutTime ? (timesheet.checkOutTime | date:'h:mm a') : 'Still active' }}</p>
+                      </div>
+                    </div>
+
+                    <div class="timesheet-detail">
+                      <mat-icon class="detail-icon">timer</mat-icon>
+                      <div class="detail-info">
+                        <label>Duration</label>
+                        <p>{{ formatDuration(timesheet) }}</p>
+                      </div>
+                    </div>
+
+                    @if (timesheet.jobsiteName) {
+                      <div class="timesheet-detail">
+                        <mat-icon class="detail-icon">location_on</mat-icon>
+                        <div class="detail-info">
+                          <label>Jobsite</label>
+                          <p>{{ timesheet.jobsiteName }}</p>
+                        </div>
+                      </div>
+                    }
+
+                    <div class="timesheet-detail">
+                      <mat-icon class="detail-icon">work</mat-icon>
+                      <div class="detail-info">
+                        <label>Task</label>
+                        <p>{{ timesheet.jobsiteTaskName }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- Load More Button -->
+              @if (hasMoreTimesheets) {
+                <div class="load-more-container">
+                  <button mat-stroked-button (click)="loadMoreTimesheets()" [disabled]="loadingMoreTimesheets">
+                    @if (loadingMoreTimesheets) {
+                      <mat-spinner diameter="20"></mat-spinner>
+                    } @else {
+                      <mat-icon>expand_more</mat-icon>
+                    }
+                    {{ loadingMoreTimesheets ? 'Loading...' : 'Load More Timesheets' }}
+                  </button>
+                  <p class="load-more-info">Showing {{ timesheets.length }} of {{ totalTimesheets }} timesheets</p>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- Activity Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">history</mat-icon>
+          Activity
+        </ng-template>
+        <div class="tab-content">
+          <div class="activity-header">
+            <div>
+              <h2>Activity Timeline</h2>
+              <p class="activity-subtitle">Track all interactions and changes for this worker</p>
+            </div>
+            <button mat-stroked-button (click)="toggleFilters()">
+              <mat-icon>{{ showFilters ? 'filter_list_off' : 'filter_list' }}</mat-icon>
+              {{ showFilters ? 'Hide Filters' : 'Show Filters' }}
+            </button>
+          </div>
+
+          <!-- Date Range Filters -->
+          @if (showFilters) {
+            <div class="activity-filters">
+              <mat-form-field appearance="outline">
+                <mat-label>Start Date</mat-label>
+                <input matInput [matDatepicker]="startPicker" [(ngModel)]="startDate">
+                <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                <mat-datepicker #startPicker></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>End Date</mat-label>
+                <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate">
+                <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+                <mat-datepicker #endPicker></mat-datepicker>
+              </mat-form-field>
+
+              <div class="filter-actions">
+                <button mat-flat-button color="primary" (click)="applyFilters()">
+                  <mat-icon>search</mat-icon>
+                  Apply Filters
+                </button>
+                <button mat-stroked-button (click)="clearFilters()">
+                  <mat-icon>clear</mat-icon>
+                  Clear
+                </button>
+              </div>
+            </div>
+          }
+
+          @if (activitiesLoading) {
+            <div class="loading-state">
+              <mat-spinner diameter="48"></mat-spinner>
+              <p>Loading activity timeline...</p>
+            </div>
+          } @else if (activitiesError) {
+            <div class="empty-state">
+              <mat-icon class="empty-state__icon">error</mat-icon>
+              <h3 class="empty-state__title">Error Loading Activities</h3>
+              <p class="empty-state__description">{{ activitiesError }}</p>
+            </div>
+          } @else if (activities.length === 0) {
+            <div class="empty-state">
+              <mat-icon class="empty-state__icon">history</mat-icon>
+              <h3 class="empty-state__title">No Activity Yet</h3>
+              <p class="empty-state__description">
+                Recent activity and history for this worker will appear here.
+              </p>
+            </div>
+          } @else {
+            <div class="activity-timeline">
+              @for (activity of activities; track activity.id) {
+                <div class="activity-item" [ngClass]="getCategoryClass(activity.category)">
+                  <div class="activity-item__icon">
+                    <mat-icon>{{ getActivityIcon(activity.type) }}</mat-icon>
+                  </div>
+                  <div class="activity-item__content">
+                    <div class="activity-item__header">
+                      <h4 class="activity-item__title">{{ activity.title }}</h4>
+                      <span class="activity-item__time">
+                        {{ activity.timestamp | date:'MMM d, yyyy • h:mm a' }}
+                      </span>
+                    </div>
+                    <p class="activity-item__description">{{ activity.description }}</p>
+                    <div class="activity-item__meta">
+                      <span class="activity-badge" [ngClass]="getBadgeClass(activity.category)">
+                        {{ activity.category }}
+                      </span>
+                      @if (activity.metadata['amount']) {
+                        <span class="activity-amount"
+                              [ngClass]="activity.metadata['amount'] > 0 ? 'activity-amount--positive' : 'activity-amount--negative'">
+                          {{ activity.metadata['amount'] | currency }}
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- Load More Button -->
+              @if (hasMoreActivities) {
+                <div class="load-more-container">
+                  <button mat-stroked-button (click)="loadMoreActivities()" [disabled]="loadingMore">
+                    @if (loadingMore) {
+                      <mat-spinner diameter="20"></mat-spinner>
+                    } @else {
+                      <mat-icon>expand_more</mat-icon>
+                    }
+                    {{ loadingMore ? 'Loading...' : 'Load More Activities' }}
+                  </button>
+                  <p class="load-more-info">Showing {{ activities.length }} of {{ totalActivities }} activities</p>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+} @else {
+  <div class="empty-state">
+    <mat-icon class="empty-state__icon">person_off</mat-icon>
+    <h3 class="empty-state__title">Worker Not Found</h3>
+    <p class="empty-state__description">
+      The worker you're looking for could not be found.
+    </p>
+    <button mat-flat-button color="primary" type="button" (click)="onBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Workers
+    </button>
+  </div>
+}

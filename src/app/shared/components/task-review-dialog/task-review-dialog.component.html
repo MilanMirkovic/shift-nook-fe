@@ -1,0 +1,223 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon class="title-icon">rate_review</mat-icon>
+  <span>Review Task</span>
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-state">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Loading task details...</p>
+  </div>
+
+  <!-- Content -->
+  <ng-container *ngIf="!loading()">
+    <!-- Task Info Card -->
+    <div class="task-info-card">
+      <div class="task-header">
+        <div class="task-title-section">
+          <h3 class="task-name">{{ data.task.name }}</h3>
+          <span class="task-status" [ngClass]="getStatusClass(data.task.status)">
+            {{ getStatusLabel(data.task.status) }}
+          </span>
+        </div>
+        <p class="task-location">
+          <mat-icon>location_on</mat-icon>
+          {{ data.jobsiteName }}
+        </p>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Task Description -->
+      <div class="task-section" *ngIf="data.task.description">
+        <h4 class="section-title">
+          <mat-icon>description</mat-icon>
+          Task Description
+        </h4>
+        <p class="section-content">{{ data.task.description }}</p>
+      </div>
+
+      <!-- Work Description from Worker -->
+      <div class="task-section work-description" *ngIf="data.task.workDescription">
+        <h4 class="section-title">
+          <mat-icon>edit_note</mat-icon>
+          Worker's Summary
+        </h4>
+        <div class="worker-summary-card">
+          <p class="section-content">{{ data.task.workDescription }}</p>
+          <div class="worker-info" *ngIf="data.task.assignedWorkerName">
+            <mat-icon>person</mat-icon>
+            <span>{{ data.task.assignedWorkerName }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Time Summary -->
+      <div class="task-section time-summary">
+        <h4 class="section-title">
+          <mat-icon>schedule</mat-icon>
+          Time Summary
+        </h4>
+        <div class="time-stats">
+          <div class="stat-item">
+            <span class="stat-value">{{ formatDuration(totalDuration()) }}</span>
+            <span class="stat-label">Total Time</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{ timesheets().length }}</span>
+            <span class="stat-label">Work Sessions</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Task Status Option -->
+      <div class="task-section status-option" *ngIf="!showRejectForm()">
+        <h4 class="section-title">
+          <mat-icon>task_alt</mat-icon>
+          Approval Options
+        </h4>
+        <mat-checkbox
+          [checked]="markAsCompleted()"
+          (change)="onMarkAsCompletedChange($event.checked)"
+          color="primary"
+          class="status-checkbox"
+        >
+          <span class="checkbox-label">Mark task as Completed</span>
+          <span class="checkbox-hint">If unchecked, task will be set back to Open for more work</span>
+        </mat-checkbox>
+      </div>
+    </div>
+
+    <!-- Timesheet History -->
+    <div class="timesheet-section" *ngIf="timesheets().length > 0">
+      <h4 class="section-title">
+        <mat-icon>history</mat-icon>
+        Timesheet History
+      </h4>
+
+      <mat-accordion class="timesheet-accordion">
+        <mat-expansion-panel *ngFor="let timesheet of timesheets(); let i = index">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <div class="timesheet-header-content">
+                <span class="session-number">Session {{ timesheets().length - i }}</span>
+                <span class="session-date">{{ formatDate(timesheet.checkInTime) }}</span>
+              </div>
+            </mat-panel-title>
+            <mat-panel-description>
+              <span class="session-duration">{{ formatDuration(timesheet.durationMinutes || 0) }}</span>
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="timesheet-details">
+            <div class="detail-row">
+              <mat-icon>person</mat-icon>
+              <span class="detail-label">Worker:</span>
+              <span class="detail-value">{{ timesheet.workerName }}</span>
+            </div>
+            <div class="detail-row">
+              <mat-icon>login</mat-icon>
+              <span class="detail-label">Check In:</span>
+              <span class="detail-value">{{ formatDateTime(timesheet.checkInTime) }}</span>
+            </div>
+            <div class="detail-row" *ngIf="timesheet.checkOutTime">
+              <mat-icon>logout</mat-icon>
+              <span class="detail-label">Check Out:</span>
+              <span class="detail-value">{{ formatDateTime(timesheet.checkOutTime) }}</span>
+            </div>
+            <div class="detail-row work-note" *ngIf="timesheet.workDescription">
+              <mat-icon>notes</mat-icon>
+              <span class="detail-label">Work Notes:</span>
+              <span class="detail-value">{{ timesheet.workDescription }}</span>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+
+    <!-- No Timesheets Message -->
+    <div class="no-timesheets" *ngIf="timesheets().length === 0 && !loading()">
+      <mat-icon>info</mat-icon>
+      <p>No timesheet records found for this task.</p>
+    </div>
+
+    <!-- Reject Form -->
+    <div class="reject-form" *ngIf="showRejectForm()">
+      <h4 class="section-title">
+        <mat-icon>feedback</mat-icon>
+        Request More Work
+      </h4>
+      <p class="reject-hint">Please provide feedback for the worker explaining what additional work is needed.</p>
+
+      <form [formGroup]="rejectForm">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Feedback for Worker</mat-label>
+          <textarea
+            matInput
+            formControlName="rejectionReason"
+            placeholder="Describe what additional work is required..."
+            rows="4"
+          ></textarea>
+          <mat-hint>Minimum 10 characters</mat-hint>
+          <mat-error *ngIf="rejectForm.get('rejectionReason')?.hasError('required')">
+            Feedback is required
+          </mat-error>
+          <mat-error *ngIf="rejectForm.get('rejectionReason')?.hasError('minlength')">
+            Please provide more detailed feedback (min 10 characters)
+          </mat-error>
+        </mat-form-field>
+      </form>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="error()">
+      <mat-icon>error</mat-icon>
+      <span>{{ error() }}</span>
+    </div>
+  </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <ng-container *ngIf="!showRejectForm()">
+    <button mat-button (click)="onCancel()" [disabled]="submitting()">
+      Cancel
+    </button>
+    <button
+      mat-stroked-button
+      color="warn"
+      (click)="onShowRejectForm()"
+      [disabled]="submitting() || loading()"
+    >
+      <mat-icon>replay</mat-icon>
+      Request More Work
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="onApprove()"
+      [disabled]="submitting() || loading()"
+      class="approve-button"
+    >
+      <mat-spinner *ngIf="submitting()" diameter="20" class="button-spinner"></mat-spinner>
+      <mat-icon *ngIf="!submitting()">check_circle</mat-icon>
+      <span>{{ submitting() ? 'Approving...' : 'Approve Task' }}</span>
+    </button>
+  </ng-container>
+
+  <ng-container *ngIf="showRejectForm()">
+    <button mat-button (click)="onCancelReject()" [disabled]="submitting()">
+      Back
+    </button>
+    <button
+      mat-flat-button
+      color="warn"
+      (click)="onReject()"
+      [disabled]="submitting() || rejectForm.invalid"
+    >
+      <mat-spinner *ngIf="submitting()" diameter="20" class="button-spinner"></mat-spinner>
+      <mat-icon *ngIf="!submitting()">send</mat-icon>
+      <span>{{ submitting() ? 'Sending...' : 'Send Feedback' }}</span>
+    </button>
+  </ng-container>
+</mat-dialog-actions>

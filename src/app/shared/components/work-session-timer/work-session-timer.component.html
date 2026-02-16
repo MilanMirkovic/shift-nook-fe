@@ -1,0 +1,13 @@
+<div *ngIf="isWorking$ | async" class="work-session-timer">
+  <div class="timer-content">
+    <div class="timer-icon">
+      <mat-icon>schedule</mat-icon>
+    </div>
+    <div class="timer-info">
+      <div class="timer-label">Working on</div>
+      <div class="timer-company">{{ companyName$ | async }}</div>
+      <div class="timer-elapsed">{{ elapsedTimeFormatted$ | async }}</div>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,108 @@
+<div class="tab-content">
+  <!-- Filter Banner -->
+  <div class="filter-banner" *ngIf="filteredTaskId">
+    <mat-icon>filter_list</mat-icon>
+    <span>Showing filtered task from notification</span>
+    <button mat-button color="primary" (click)="onClearFilter()">
+      <mat-icon>close</mat-icon>
+      Show All Tasks
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="tasksLoading$ | async" class="loading-state">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Loading tasks...</p>
+  </div>
+
+  <!-- Task List -->
+  <ng-container *ngIf="!(tasksLoading$ | async)">
+    <div *ngIf="(filteredTasks$ | async) as tasks">
+      <!-- Header with Add Button -->
+      <div class="tasks-header" *ngIf="tasks.length > 0">
+        <div>
+          <h2>Tasks</h2>
+          <p class="tasks-subtitle">Manage tasks for {{ jobsite.name }}</p>
+        </div>
+        <button mat-flat-button color="primary" (click)="onAddTask()" *ngIf="canManageJobsites$ | async">
+          <mat-icon>add</mat-icon>
+          Add Task
+        </button>
+      </div>
+
+      <!-- Tasks List -->
+      <div class="tasks-list" *ngIf="tasks.length > 0">
+        <div *ngFor="let task of tasks" class="activity-item" [ngClass]="getTaskCategoryClass(task.status)">
+          <div class="activity-item__icon">
+            <mat-icon>{{ getTaskIcon(task.status) }}</mat-icon>
+          </div>
+          <div class="activity-item__content">
+            <div class="activity-item__header">
+              <h4 class="activity-item__title">{{ task.name }}</h4>
+              <span class="activity-item__time">
+                {{ task.createdAt | date:'MMM d, yyyy • h:mm a' }}
+              </span>
+            </div>
+            <p class="activity-item__description" *ngIf="task.description">{{ task.description }}</p>
+
+            <!-- Review notes from owner - shown when task is OPEN and has feedback -->
+            <div class="activity-item__review-notes" *ngIf="task.status === 'OPEN' && task.reviewNotes">
+              <mat-icon>feedback</mat-icon>
+              <div class="review-notes-content">
+                <span class="review-notes-label">Feedback from reviewer:</span>
+                <p class="review-notes-text">"{{ task.reviewNotes }}"</p>
+              </div>
+            </div>
+
+            <!-- Worker's work description preview -->
+            <p class="activity-item__work-summary" *ngIf="task.workDescription && isPendingReview(task)">
+              <mat-icon>edit_note</mat-icon>
+              <span>"{{ task.workDescription | slice:0:100 }}{{ task.workDescription.length > 100 ? '...' : '' }}"</span>
+            </p>
+
+            <div class="activity-item__meta">
+              <span class="activity-badge" [ngClass]="getTaskBadgeClass(task.status)">
+                {{ getStatusLabel(task.status) }}
+              </span>
+              <span class="worker-badge" *ngIf="task.assignedWorkerName">
+                <mat-icon>person</mat-icon>
+                {{ task.assignedWorkerName }}
+              </span>
+            </div>
+          </div>
+          <div class="activity-item__actions" *ngIf="canManageJobsites$ | async">
+            <!-- Review Button - shown prominently for pending review tasks -->
+            <button
+              *ngIf="isPendingReview(task)"
+              mat-flat-button
+              color="primary"
+              class="review-button"
+              (click)="onReviewTask(task)"
+              matTooltip="Review Task"
+            >
+              <mat-icon>rate_review</mat-icon>
+              Review
+            </button>
+            <button mat-icon-button color="primary" (click)="onEditTask(task)" matTooltip="Edit Task">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="onDeleteTask(task)" matTooltip="Delete Task">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="tasks.length === 0">
+        <mat-icon class="empty-state__icon">task</mat-icon>
+        <h3 class="empty-state__title">No tasks yet</h3>
+        <p class="empty-state__description">Create and manage tasks for {{ jobsite.name }}</p>
+        <button mat-flat-button color="primary" (click)="onAddTask()" *ngIf="canManageJobsites$ | async">
+          <mat-icon>add</mat-icon>
+          Add Task
+        </button>
+      </div>
+    </div>
+  </ng-container>
+</div>

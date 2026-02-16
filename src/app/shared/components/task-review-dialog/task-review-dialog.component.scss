@@ -1,0 +1,521 @@
+// Task Review Dialog Styles
+
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 20px 24px 16px;
+  font-size: 22px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.87);
+
+  .title-icon {
+    color: #667eea;
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.dialog-content {
+  padding: 0 24px 16px;
+  min-width: 480px;
+  max-width: 600px;
+  max-height: 70vh;
+  overflow-y: auto;
+
+  @media (max-width: 600px) {
+    min-width: unset;
+    max-width: unset;
+  }
+}
+
+// Loading State
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+
+  p {
+    margin: 16px 0 0;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 14px;
+  }
+}
+
+// Task Info Card
+.task-info-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+
+  .task-header {
+    margin-bottom: 16px;
+
+    .task-title-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .task-name {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    .task-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      &.status-pending {
+        background: #fff3e0;
+        color: #e65100;
+      }
+
+      &.status-progress {
+        background: #e3f2fd;
+        color: #1565c0;
+      }
+
+      &.status-completed {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+
+      &.status-cancelled {
+        background: #ffebee;
+        color: #c62828;
+      }
+
+      &.status-open {
+        background: #f5f5f5;
+        color: #616161;
+      }
+    }
+
+    .task-location {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0;
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 14px;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: #667eea;
+      }
+    }
+  }
+
+  mat-divider {
+    margin: 16px 0;
+  }
+}
+
+// Task Sections
+.task-section {
+  margin-bottom: 20px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.87);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: #667eea;
+    }
+  }
+
+  .section-content {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(0, 0, 0, 0.7);
+  }
+}
+
+// Work Description Section
+.work-description {
+  .worker-summary-card {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    border-left: 4px solid #667eea;
+    border-radius: 0 8px 8px 0;
+    padding: 16px;
+
+    .section-content {
+      font-style: italic;
+      color: rgba(0, 0, 0, 0.8);
+    }
+
+    .worker-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(102, 126, 234, 0.2);
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.6);
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: #667eea;
+      }
+    }
+  }
+}
+
+// Time Summary
+.time-summary {
+  .time-stats {
+    display: flex;
+    gap: 24px;
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 24px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      flex: 1;
+
+      .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #667eea;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.6);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 4px;
+      }
+    }
+  }
+}
+
+// Status Option Section
+.status-option {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+
+  .status-checkbox {
+    display: flex;
+    flex-direction: column;
+
+    .checkbox-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    .checkbox-hint {
+      display: block;
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.54);
+      margin-top: 4px;
+      margin-left: 0;
+    }
+  }
+
+  ::ng-deep .mat-mdc-checkbox {
+    .mdc-form-field {
+      align-items: flex-start;
+    }
+
+    .mdc-checkbox {
+      margin-top: 2px;
+    }
+
+    .mdc-label {
+      display: flex;
+      flex-direction: column;
+      padding-left: 8px;
+    }
+  }
+}
+
+// Timesheet Section
+.timesheet-section {
+  margin-bottom: 20px;
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.87);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: #667eea;
+    }
+  }
+}
+
+.timesheet-accordion {
+  .mat-expansion-panel {
+    margin-bottom: 8px;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .timesheet-header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .session-number {
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    .session-date {
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  .session-duration {
+    font-weight: 600;
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 13px;
+  }
+
+  .timesheet-details {
+    padding: 8px 0;
+
+    .detail-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: rgba(0, 0, 0, 0.4);
+        margin-top: 2px;
+      }
+
+      .detail-label {
+        font-size: 13px;
+        color: rgba(0, 0, 0, 0.6);
+        min-width: 80px;
+      }
+
+      .detail-value {
+        font-size: 13px;
+        color: rgba(0, 0, 0, 0.87);
+        flex: 1;
+      }
+
+      &.work-note {
+        flex-direction: column;
+
+        .detail-value {
+          margin-top: 4px;
+          padding: 12px;
+          background: #f8f9fa;
+          border-radius: 6px;
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+}
+
+// No Timesheets
+.no-timesheets {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 20px;
+
+  mat-icon {
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+// Reject Form
+.reject-form {
+  background: #fff8e1;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+  border: 1px solid #ffe082;
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #f57c00;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .reject-hint {
+    margin: 0 0 16px;
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .full-width {
+    width: 100%;
+  }
+}
+
+// Error Message
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #ffebee;
+  border-radius: 8px;
+  margin-top: 16px;
+
+  mat-icon {
+    color: #c62828;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  span {
+    color: #c62828;
+    font-size: 14px;
+  }
+}
+
+// Dialog Actions
+mat-dialog-actions {
+  padding: 16px 24px;
+  margin: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  gap: 8px;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .approve-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+    &:not(:disabled):hover {
+      background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+    }
+  }
+
+  .button-spinner {
+    margin-right: 4px;
+
+    ::ng-deep circle {
+      stroke: white !important;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 480px) {
+  .time-summary .time-stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .dialog-content {
+    min-width: unset;
+  }
+
+  mat-dialog-actions {
+    flex-wrap: wrap;
+
+    button {
+      flex: 1;
+      min-width: 120px;
+    }
+  }
+}
