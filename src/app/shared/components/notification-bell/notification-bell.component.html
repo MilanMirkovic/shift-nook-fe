@@ -33,14 +33,14 @@
   <mat-divider></mat-divider>
 
   <div class="notification-list" (click)="$event.stopPropagation()">
-    <!-- Loading spinner -->
+    <!-- Loading dots -->
     <div *ngIf="loading && notifications.length === 0" class="loading-container">
-      <mat-spinner diameter="32"></mat-spinner>
+      <div class="sn-dots"><span></span><span></span><span></span></div>
     </div>
 
     <!-- Empty state -->
     <div *ngIf="!loading && notifications.length === 0" class="empty-state">
-      <mat-icon class="empty-icon">notifications_none</mat-icon>
+      <div class="empty-icon"><mat-icon>notifications_none</mat-icon></div>
       <p>No notifications yet</p>
     </div>
 

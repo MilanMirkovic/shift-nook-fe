@@ -1,16 +1,10 @@
-/* ===============================
-   Layout shell
-   =============================== */
-
+/* ─── Layout shell ────────────────────────────────────────────────────────── */
 .app-shell {
   height: 100vh;
   position: relative;
 }
 
-/* ===============================
-   Floating navigation handle
-   =============================== */
-
+/* ─── Floating navigation handle ─────────────────────────────────────────── */
 .nav-edge-handle {
   position: fixed;
   top: 50vh;
@@ -18,107 +12,98 @@
   transform: translateY(-50%);
   z-index: 9999;
 
-  width: 32px;
-  height: 56px;
+  width: 28px;
+  height: 52px;
   padding: 0;
-  border-radius: 0 12px 12px 0;
+  border-radius: 0 10px 10px 0;
 
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(11, 42, 74, 0.12);
+  background: #ffffff;
+  border: 1px solid #e8eaf0;
   border-left: none;
-  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(10px);
+  box-shadow: 2px 0 12px rgba(15, 23, 42, 0.08);
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   cursor: pointer;
 }
 
 .nav-edge-handle mat-icon {
-  color: #0b2a4a;
-  font-size: 20px;
-  transition: transform 0.25s ease;
+  color: #64748b;
+  font-size: 18px;
+  transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .nav-edge-handle:hover {
-  background: #ffffff;
-  width: 36px;
-  box-shadow: 3px 0 20px rgba(0, 0, 0, 0.12);
+  background: #f8f9fc;
+  width: 32px;
+  box-shadow: 3px 0 16px rgba(15, 23, 42, 0.1);
 }
 
 .nav-edge-handle:hover mat-icon {
   transform: translateX(2px);
+  color: #2563eb;
 }
 
 .nav-edge-handle:active {
   transform: translateY(-50%) scale(0.96);
 }
 
-/* Closed state emphasis */
+/* Closed state */
 .nav-edge-handle[aria-expanded="false"] {
-  background: linear-gradient(135deg, #0b2a4a 0%, #1a3a5a 100%);
-  width: 36px;
-  height: 64px;
+  background: #ffffff;
+  border-color: #e8eaf0;
+  width: 32px;
+  height: 56px;
 }
 
 .nav-edge-handle[aria-expanded="false"] mat-icon {
-  color: #ffffff;
+  color: #2563eb;
 }
 
 .nav-edge-handle[aria-expanded="false"]:hover {
-  width: 40px;
-  background: linear-gradient(135deg, #1a3a5a 0%, #2a4a6a 100%);
+  width: 36px;
+  background: #f8f9fc;
 }
 
-/* ===============================
-   Toolbar
-   =============================== */
-
+/* ─── Toolbar ─────────────────────────────────────────────────────────────── */
 .app-toolbar {
   position: sticky;
   top: 0;
   z-index: 10;
+  background: #ffffff !important;
+  border-bottom: 1px solid #e8eaf0;
+  box-shadow: none !important;
+  height: 64px;
+  color: #0f172a !important;
 }
 
 .spacer {
   flex: 1 1 auto;
 }
 
-/* ===============================
-   Side navigation (shell)
-   =============================== */
-
+/* ─── Side navigation (shell) ─────────────────────────────────────────────── */
 .app-sidenav {
-  width: 280px;
+  width: 260px;
   max-width: 85vw;
   height: 100vh;
 
   display: flex;
   flex-direction: column;
 
-  background: linear-gradient(
-      180deg,
-      #d9efff 0%,
-      #c7e4ff 55%,
-      #bcdcff 100%
-  );
-
-  color: #0b2a4a;
-  border-right: 1px solid rgba(11, 42, 74, 0.12);
+  background: #ffffff;
+  color: #0f172a;
+  border-right: 1px solid #e8eaf0;
 
   overflow-x: hidden;
 }
 
-/* Collapsed desktop mode */
 .app-sidenav.is-collapsed {
-  width: 76px;
+  width: 72px;
 }
 
-/* Important: Angular Material wraps mat-sidenav content in an inner container.
-   Make THAT container a flex column so the footer can pin properly. */
 :host ::ng-deep .app-sidenav .mat-drawer-inner-container {
   height: 100%;
   display: flex;
@@ -126,33 +111,14 @@
   overflow-x: hidden;
 }
 
-/* ===============================
-   Main content
-   =============================== */
-
+/* ─── Main content ────────────────────────────────────────────────────────── */
 .app-content {
   min-height: 100vh;
+  background: #f8f9fc;
 }
 
-/* ===============================
-   Brand / header
-   =============================== */
-
-/* (moved into src/app/sidebar/sidebar.component.scss) */
-
-// Use the new deep blue gradient for app backgrounds and key UI elements
+/* ─── Gradient utility ────────────────────────────────────────────────────── */
 .app-header, .main-header, .sn-primary-bg {
   background: var(--sn-primary-gradient);
   color: #fff;
-}
-
-button.mat-primary, .sn-primary-btn {
-  background: var(--sn-primary-gradient);
-  color: #fff;
-  border: none;
-  transition: background 0.2s;
-}
-
-button.mat-primary:hover, .sn-primary-btn:hover {
-  background: var(--sn-primary-hover);
 }

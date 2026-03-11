@@ -10,20 +10,22 @@
   }
 }
 
-// Premium header matching jobsite dialog
+// ─── Header ───────────────────────────────────────────────────────────────────
 .dialog-header {
-  background: linear-gradient(135deg, var(--sn-primary-start) 0%, var(--sn-primary-end) 100%);
-  padding: 20px 24px;
+  background: #ffffff;
+  padding: 24px 28px 20px;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  gap: 14px;
+  border-bottom: 1px solid #e8eaf0;
 
   .header-icon {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
-    color: white;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: #2563eb;
     flex-shrink: 0;
+    margin-top: 2px;
   }
 
   .header-text {
@@ -32,28 +34,29 @@
     h2[mat-dialog-title] {
       margin: 0;
       padding: 0;
-      color: white;
-      font-size: 1.125rem;
-      font-weight: 600;
+      color: #0f172a;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.25px;
       line-height: 1.2;
     }
 
     .subtitle {
-      margin: 2px 0 0;
-      color: rgba(255, 255, 255, 0.85);
-      font-size: 0.75rem;
-      line-height: 1.2;
+      margin: 4px 0 0;
+      color: #94a3b8;
+      font-size: 0.875rem;
     }
   }
 }
 
 mat-dialog-content {
-  padding: 20px 24px;
+  padding: 24px 28px !important;
   margin: 0;
   overflow: visible;
   max-height: none;
 }
 
+// ─── Form ─────────────────────────────────────────────────────────────────────
 .client-form {
   display: flex;
   flex-direction: column;
@@ -62,13 +65,12 @@ mat-dialog-content {
   .form-field {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 
     .field-label {
-      font-size: 0.75rem;
+      font-size: 0.8125rem;
       font-weight: 600;
       color: #374151;
-      margin-bottom: 2px;
     }
 
     mat-form-field {
@@ -76,49 +78,49 @@ mat-dialog-content {
 
       ::ng-deep {
         .mat-mdc-text-field-wrapper {
-          background: #f9fafb;
+          background: #f8f9fc;
+          border-radius: 10px !important;
         }
 
-        .mdc-text-field--outlined {
-          .mdc-notched-outline {
-            .mdc-notched-outline__leading,
-            .mdc-notched-outline__notch,
-            .mdc-notched-outline__trailing {
-              border-color: #e5e7eb;
-            }
+        .mdc-text-field--outlined .mdc-notched-outline {
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #e2e8f0;
           }
+        }
 
-          &:hover:not(.mdc-text-field--focused):not(.mdc-text-field--disabled) .mdc-notched-outline {
-            .mdc-notched-outline__leading,
-            .mdc-notched-outline__notch,
-            .mdc-notched-outline__trailing {
-              border-color: #d1d5db;
-            }
+        .mdc-text-field--outlined:hover:not(.mdc-text-field--focused):not(.mdc-text-field--disabled) .mdc-notched-outline {
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #c7d2fe;
           }
+        }
 
-          &.mdc-text-field--focused .mdc-notched-outline {
-            .mdc-notched-outline__leading,
-            .mdc-notched-outline__notch,
-            .mdc-notched-outline__trailing {
-              border-color: var(--sn-primary-start);
-              border-width: 2px;
-            }
+        .mdc-text-field--focused .mdc-notched-outline {
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #2563eb !important;
+            border-width: 2px;
           }
         }
 
         .mat-mdc-form-field-icon-prefix {
-          color: #9ca3af;
+          color: #94a3b8;
           padding-right: 8px;
+          transition: color 0.2s;
         }
 
         .mdc-text-field--focused .mat-mdc-form-field-icon-prefix {
-          color: var(--sn-primary-start);
+          color: #2563eb;
         }
 
         input,
         .mat-mdc-select-trigger {
           font-size: 0.875rem;
-          color: #1f2937;
+          color: #0f172a;
         }
 
         .mdc-floating-label {
@@ -128,7 +130,7 @@ mat-dialog-content {
         .mat-mdc-form-field-infix {
           padding-top: 10px;
           padding-bottom: 10px;
-          min-height: 40px;
+          min-height: 42px;
         }
 
         .mat-mdc-form-field-subscript-wrapper {
@@ -140,42 +142,49 @@ mat-dialog-content {
   }
 }
 
+// ─── Actions ─────────────────────────────────────────────────────────────────
 mat-dialog-actions {
-  padding: 16px 24px;
+  padding: 16px 28px !important;
   margin: 0;
-  border-top: 1px solid #f3f4f6;
-  background: white;
+  border-top: 1px solid #e8eaf0;
+  background: #f8f9fc;
   display: flex;
   justify-content: flex-end;
   gap: 8px;
 
   button {
-    min-width: 80px;
-    height: 36px;
-    border-radius: 6px;
-    font-weight: 500;
+    min-width: 92px;
+    height: 40px;
+    border-radius: 10px;
+    font-weight: 600;
     font-size: 0.875rem;
-    text-transform: none;
 
     &[mat-button] {
-      color: #6b7280;
+      color: #64748b;
 
       &:hover:not(:disabled) {
-        background: #f3f4f6;
+        background: #f1f5f9;
+        color: #0f172a;
       }
     }
 
     &[mat-flat-button] {
-      background: linear-gradient(135deg, var(--sn-primary-start) 0%, var(--sn-primary-end) 100%);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-      color: white; // Ensure text inside the button is white
+      background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
 
       &:hover:not(:disabled) {
-        box-shadow: 0 2px 4px var(--sn-primary-light);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        transform: translateY(-1px);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
       }
 
       &:disabled {
         opacity: 0.6;
+        box-shadow: none;
       }
 
       mat-spinner {
@@ -196,25 +205,15 @@ mat-dialog-actions {
   }
 
   .dialog-header {
-    padding: 16px 20px;
-
-    .header-icon {
-      font-size: 28px;
-      width: 28px;
-      height: 28px;
-    }
+    padding: 20px 20px 16px;
   }
 
   mat-dialog-content {
-    padding: 16px 20px;
-  }
-
-  .client-form {
-    gap: 14px;
+    padding: 20px !important;
   }
 
   mat-dialog-actions {
-    padding: 14px 20px;
+    padding: 14px 20px !important;
     flex-direction: column-reverse;
 
     button {

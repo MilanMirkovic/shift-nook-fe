@@ -95,7 +95,7 @@
 
       <!-- Empty State -->
       <div class="empty-state" *ngIf="tasks.length === 0">
-        <mat-icon class="empty-state__icon">task</mat-icon>
+        <div class="empty-state__icon"><mat-icon>task</mat-icon></div>
         <h3 class="empty-state__title">No tasks yet</h3>
         <p class="empty-state__description">Create and manage tasks for {{ jobsite.name }}</p>
         <button mat-flat-button color="primary" (click)="onAddTask()" *ngIf="canManageJobsites$ | async">

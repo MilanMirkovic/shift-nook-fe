@@ -1,6 +1,6 @@
 <ng-container *ngIf="jobsite$ | async as jobsite; else loading">
   <!-- Premium Header Section -->
-  <div class="jobsite-header">
+  <header class="jobsite-header">
     <div class="jobsite-header__breadcrumb">
       <a routerLink="/jobsites" class="breadcrumb-link">
         <mat-icon>arrow_back</mat-icon>
@@ -13,7 +13,7 @@
         <mat-icon>location_on</mat-icon>
       </div>
       <div class="jobsite-header__info">
-        <h1 class="jobsite-header__name">{{ jobsite.name }} - {{jobsite.clientName}}</h1>
+        <h1 class="jobsite-header__name">{{ jobsite.name }}<span *ngIf="jobsite.clientName"> — {{ jobsite.clientName }}</span></h1>
         <p class="jobsite-header__meta">
           <mat-icon class="meta-icon">place</mat-icon>
           {{ jobsite.address }}
@@ -25,16 +25,16 @@
     </div>
 
     <div class="jobsite-header__actions">
-      <button mat-stroked-button class="white-button" (click)="onEditJobsite()">
+      <button mat-stroked-button type="button" (click)="onEditJobsite()">
         <mat-icon>edit</mat-icon>
         Edit Jobsite
       </button>
-      <button mat-flat-button color="primary" (click)="onViewOnMap()">
+      <button mat-flat-button color="primary" type="button" (click)="onViewOnMap()">
         <mat-icon>map</mat-icon>
         View on Map
       </button>
     </div>
-  </div>
+  </header>
 
   <!-- Tabs Section -->
   <div class="jobsite-content">

@@ -65,10 +65,15 @@
       </div>
       <div class="card-body">
         <div class="loading-state" *ngIf="loading">
-          <mat-spinner diameter="32"></mat-spinner>
+          <div class="sn-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <p>Loading activity…</p>
         </div>
         <div class="empty-state" *ngIf="!loading && todayTimesheets.length === 0">
-          <mat-icon>event_busy</mat-icon>
+          <div class="empty-icon">
+            <mat-icon>event_busy</mat-icon>
+          </div>
           <p>No activity recorded today</p>
         </div>
         <div class="activity-summary" *ngIf="!loading && todayTimesheets.length > 0">
@@ -97,10 +102,15 @@
       </div>
       <div class="card-body">
         <div class="loading-state" *ngIf="loading">
-          <mat-spinner diameter="32"></mat-spinner>
+          <div class="sn-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <p>Loading workers…</p>
         </div>
         <div class="empty-state" *ngIf="!loading && activeTimesheets.length === 0">
-          <mat-icon>person_off</mat-icon>
+          <div class="empty-icon">
+            <mat-icon>person_off</mat-icon>
+          </div>
           <p>No workers currently clocked in</p>
         </div>
         <div class="active-workers-list" *ngIf="!loading && activeTimesheets.length > 0">
@@ -131,10 +141,15 @@
       </div>
       <div class="card-body">
         <div class="loading-state" *ngIf="loading">
-          <mat-spinner diameter="32"></mat-spinner>
+          <div class="sn-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <p>Loading timesheets…</p>
         </div>
         <div class="empty-state" *ngIf="!loading && recentTimesheets.length === 0">
-          <mat-icon>assignment</mat-icon>
+          <div class="empty-icon">
+            <mat-icon>assignment</mat-icon>
+          </div>
           <p>No recent timesheets</p>
         </div>
         <div class="timesheets-table" *ngIf="!loading && recentTimesheets.length > 0">

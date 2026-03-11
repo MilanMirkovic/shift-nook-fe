@@ -17,115 +17,80 @@ html {
     density: 0,
   ));
 
-  /* Shift Nook design tokens (SaaS look) */
-  --sn-page-bg: #f6f8fc;
-  --sn-surface: #ffffff;
-  --sn-surface-border: rgba(11, 42, 74, 0.10);
-  --sn-shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+  /* ─── Shift Nook Design Tokens ───────────────────────────────────────────── */
 
-  --sn-text: rgba(17, 24, 39, 0.96);
-  --sn-text-muted: rgba(17, 24, 39, 0.62);
+  /* Backgrounds */
+  --sn-page-bg:        #f8f9fc;
+  --sn-surface:        #ffffff;
+  --sn-surface-border: #e8eaf0;
+  --sn-border-hover:   #c7d2fe;
 
-  /* PRIMARY THEME: Deep Blue Gradient */
-  --sn-primary-start: #0b2a4a;
-  --sn-primary-end: #1a4570;
-  --sn-primary-gradient: linear-gradient(135deg, #0b2a4a 0%, #1a4570 100%);
-  --sn-primary-light: rgba(11, 42, 74, 0.1);
-  --sn-primary-hover: rgba(26, 69, 112, 0.15);
+  /* Shadows */
+  --sn-shadow:         0 1px 4px rgba(15, 23, 42, 0.05);
+  --sn-shadow-hover:   0 12px 40px rgba(37, 99, 235, 0.10), 0 2px 8px rgba(15, 23, 42, 0.06);
+  --sn-shadow-btn:     0 4px 14px rgba(37, 99, 235, 0.30);
+  --sn-shadow-modal:   0 24px 64px rgba(15, 23, 42, 0.12);
 
-  /* Alternative Premium Palettes - Uncomment to use */
+  /* Text */
+  --sn-text:           #0f172a;
+  --sn-text-secondary: #64748b;
+  --sn-text-muted:     #94a3b8;
 
-  /* Midnight Blue - Professional & Trustworthy */
-  /* --sn-primary-start: #2D3561;
-  --sn-primary-end: #3B4A8C;
-  --sn-primary-light: rgba(45, 53, 97, 0.1);
-  --sn-primary-hover: rgba(45, 53, 97, 0.15); */
+  /* Accent */
+  --sn-blue:           #2563eb;
+  --sn-violet:         #7c3aed;
+  --sn-cyan:           #06b6d4;
+  --sn-amber:          #d97706;
+  --sn-green:          #059669;
+  --sn-red:            #dc2626;
 
-  /* Teal Ocean - Modern & Fresh */
-  /* --sn-primary-start: #0EA5E9;
-  --sn-primary-end: #06B6D4;
-  --sn-primary-light: rgba(14, 165, 233, 0.1);
-  --sn-primary-hover: rgba(14, 165, 233, 0.15); */
-
-  /* Emerald Luxury - Growth & Wealth */
-  /* --sn-primary-start: #059669;
-  --sn-primary-end: #10B981;
-  --sn-primary-light: rgba(5, 150, 105, 0.1);
-  --sn-primary-hover: rgba(5, 150, 105, 0.15); */
-
-  /* Sunset Warm - Energetic & Bold */
-  /* --sn-primary-start: #F59E0B;
-  --sn-primary-end: #EF4444;
-  --sn-primary-light: rgba(245, 158, 11, 0.1);
-  --sn-primary-hover: rgba(245, 158, 11, 0.15); */
-
-  /* Rose Gold - Premium & Elegant */
-  /* --sn-primary-start: #BE185D;
-  --sn-primary-end: #EC4899;
-  --sn-primary-light: rgba(190, 24, 93, 0.1);
-  --sn-primary-hover: rgba(190, 24, 93, 0.15); */
-
-  /* Indigo Deep - Sophisticated */
-  /* --sn-primary-start: #4F46E5;
-  --sn-primary-end: #6366F1;
-  --sn-primary-light: rgba(79, 70, 229, 0.1);
-  --sn-primary-hover: rgba(79, 70, 229, 0.15); */
-
-  /* Slate Professional - Corporate & Clean */
-  /* --sn-primary-start: #475569;
-  --sn-primary-end: #64748B;
-  --sn-primary-light: rgba(71, 85, 105, 0.1);
-  --sn-primary-hover: rgba(71, 85, 105, 0.15); */
+  /* Primary */
+  --sn-primary-start:    #2563eb;
+  --sn-primary-end:      #7c3aed;
+  --sn-primary-gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --sn-primary-light:    rgba(37, 99, 235, 0.08);
+  --sn-primary-hover:    rgba(37, 99, 235, 0.12);
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
   color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
+  background-color: var(--sn-page-bg);
+  color: var(--sn-text);
+  font-family: 'Roboto', sans-serif;
   margin: 0;
   height: 100%;
   overflow-x: hidden;
 }
 
-/* SaaS surface card utility */
+/* ─── Surface card utility ────────────────────────────────────────────────── */
 .sn-card {
   background: var(--sn-surface);
   border: 1px solid var(--sn-surface-border);
   box-shadow: var(--sn-shadow);
 }
 
-/* Ensure the persistent sidebar toggle is always visible and clickable */
+/* ─── Nav edge handle ─────────────────────────────────────────────────────── */
 .nav-edge-handle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-/* prevent horizontal scrollbar from Material layout containers */
+/* Prevent horizontal scrollbar from Material layout containers */
 .mat-drawer-container,
 .mat-drawer-content,
 .mat-drawer-inner-container {
   overflow-x: hidden;
 }
 
-/* Tiny global helper for muted text used inside cards */
+/* ─── Muted helper ────────────────────────────────────────────────────────── */
 .muted {
   color: var(--sn-text-muted);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   margin-top: 6px;
 }
 
-/* Snackbar notification styles - Override Material defaults */
+/* ─── Snackbar styles ─────────────────────────────────────────────────────── */
 .mat-mdc-snack-bar-container,
 .mdc-snackbar {
   --mdc-snackbar-container-color: transparent !important;
@@ -140,6 +105,7 @@ body {
     padding: 0 !important;
     max-width: 672px !important;
     margin: 0 !important;
+    border-radius: 12px !important;
 
     .mat-mdc-snack-bar-label,
     .mdc-snackbar__label {
@@ -168,89 +134,53 @@ body {
   }
 
   &.snackbar-success {
-    --mdc-snackbar-container-color: #10b981 !important;
-    background: #10b981 !important;
-    background-color: #10b981 !important;
-    box-shadow: 0 10px 40px rgba(16, 185, 129, 0.35), 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-    border-radius: 12px !important;
-
-    .mdc-snackbar__surface {
-      background: #10b981 !important;
-      background-color: #10b981 !important;
-    }
+    background: #059669 !important;
+    box-shadow: 0 10px 40px rgba(5, 150, 105, 0.35), 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+    .mdc-snackbar__surface { background: #059669 !important; }
   }
 
   &.snackbar-error {
-    --mdc-snackbar-container-color: #ef4444 !important;
-    background: #ef4444 !important;
-    background-color: #ef4444 !important;
-    box-shadow: 0 10px 40px rgba(239, 68, 68, 0.35), 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-    border-radius: 12px !important;
-
-    .mdc-snackbar__surface {
-      background: #ef4444 !important;
-      background-color: #ef4444 !important;
-    }
+    background: #dc2626 !important;
+    box-shadow: 0 10px 40px rgba(220, 38, 38, 0.35), 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+    .mdc-snackbar__surface { background: #dc2626 !important; }
   }
 
   &.snackbar-warning {
-    --mdc-snackbar-container-color: #f59e0b !important;
-    background: #f59e0b !important;
-    background-color: #f59e0b !important;
-    box-shadow: 0 10px 40px rgba(245, 158, 11, 0.35), 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-    border-radius: 12px !important;
-
-    .mdc-snackbar__surface {
-      background: #f59e0b !important;
-      background-color: #f59e0b !important;
-    }
+    background: #d97706 !important;
+    box-shadow: 0 10px 40px rgba(217, 119, 6, 0.35), 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+    .mdc-snackbar__surface { background: #d97706 !important; }
   }
 
   &.snackbar-info {
-    --mdc-snackbar-container-color: #3b82f6 !important;
-    background: #3b82f6 !important;
-    background-color: #3b82f6 !important;
-    box-shadow: 0 10px 40px rgba(59, 130, 246, 0.35), 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-    border-radius: 12px !important;
-
-    .mdc-snackbar__surface {
-      background: #3b82f6 !important;
-      background-color: #3b82f6 !important;
-    }
+    background: #2563eb !important;
+    box-shadow: 0 10px 40px rgba(37, 99, 235, 0.35), 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+    .mdc-snackbar__surface { background: #2563eb !important; }
   }
 }
 
-/* Additional global snackbar positioning */
 .cdk-overlay-container {
   .cdk-global-overlay-wrapper {
     justify-content: center !important;
     align-items: flex-start !important;
-
-    &.mat-snack-bar-handset {
-      justify-content: center !important;
-    }
   }
 }
 
-/* Confirmation Dialog - Professional Centered Styling */
+/* ─── Dialog panels ───────────────────────────────────────────────────────── */
 .confirmation-dialog-panel {
   .mat-mdc-dialog-container {
-    border-radius: 16px !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1) !important;
-    overflow: visible !important;
-
-    .mdc-dialog__surface {
-      border-radius: 16px !important;
-    }
+    border-radius: 20px !important;
+    box-shadow: var(--sn-shadow-modal) !important;
+    overflow: hidden !important;
+    .mdc-dialog__surface { border-radius: 20px !important; }
   }
 }
 
-.confirmation-dialog-backdrop {
-  background: rgba(11, 42, 74, 0.4) !important;
+.confirmation-dialog-backdrop,
+.stop-session-dialog-backdrop {
+  background: rgba(15, 23, 42, 0.4) !important;
   backdrop-filter: blur(4px);
 }
 
-/* Center dialog properly */
 .cdk-overlay-pane.confirmation-dialog-panel {
   position: fixed !important;
   top: 50% !important;
@@ -258,26 +188,19 @@ body {
   transform: translate(-50%, -50%) !important;
 }
 
-/* Stop Session Dialog - Professional Centered Styling */
 .stop-session-dialog-panel {
   .mat-mdc-dialog-container {
-    border-radius: 16px !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1) !important;
-    overflow: visible !important;
-
+    border-radius: 20px !important;
+    box-shadow: var(--sn-shadow-modal) !important;
+    overflow: hidden !important;
     .mdc-dialog__surface {
-      border-radius: 16px !important;
-      overflow: visible !important;
+      border-radius: 20px !important;
+      overflow: hidden !important;
     }
-
-    .mat-mdc-dialog-content {
-      max-height: none !important;
-      overflow: visible !important;
-    }
+    .mat-mdc-dialog-content { max-height: none !important; }
   }
 }
 
-/* Center stop session dialog properly */
 .cdk-overlay-pane.stop-session-dialog-panel {
   position: fixed !important;
   top: 50% !important;
@@ -285,11 +208,11 @@ body {
   transform: translate(-50%, -50%) !important;
 }
 
-/* Estimate Dialog - Remove Material's Built-in Padding */
 .estimate-dialog-container .mat-mdc-dialog-container,
 .estimate-dialog-container .mdc-dialog__surface {
   padding: 0 !important;
   overflow: hidden;
+  border-radius: 20px !important;
 }
 
 /* You can add global styles to this file, and also import other style files */

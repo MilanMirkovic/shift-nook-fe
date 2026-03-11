@@ -1,26 +1,21 @@
 .check-in-fab {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: 28px;
+  right: 28px;
   z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.40);
+  transition: box-shadow 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 28px rgba(37, 99, 235, 0.50);
+    transform: translateY(-3px);
   }
 
-  &:active {
-    transform: scale(0.95);
-  }
+  &:active { transform: translateY(0) scale(0.96); }
 }
 
 // Responsive positioning
 @media (max-width: 600px) {
-  .check-in-fab {
-    bottom: 16px;
-    right: 16px;
-  }
+  .check-in-fab { bottom: 20px; right: 20px; }
 }
-

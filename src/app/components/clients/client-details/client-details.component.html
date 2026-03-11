@@ -1,6 +1,6 @@
 <ng-container *ngIf="client$ | async as client; else loading">
   <!-- Premium Header Section -->
-  <div class="client-header">
+  <header class="client-header">
     <div class="client-header__breadcrumb">
       <a routerLink="/clients" class="breadcrumb-link">
         <mat-icon>arrow_back</mat-icon>
@@ -25,16 +25,16 @@
     </div>
 
     <div class="client-header__actions">
-      <button mat-stroked-button color="primary">
+      <button mat-stroked-button type="button">
         <mat-icon>edit</mat-icon>
         Edit Client
       </button>
-      <button mat-flat-button color="primary">
+      <button mat-flat-button color="primary" type="button">
         <mat-icon>add</mat-icon>
         New Invoice
       </button>
     </div>
-  </div>
+  </header>
 
   <!-- Tabs Section -->
   <div class="client-content">
@@ -47,7 +47,9 @@
         <ng-template matTabContent>
           <div class="tab-content">
             <div class="empty-state">
-              <mat-icon class="empty-state__icon">receipt_long</mat-icon>
+              <div class="empty-state__icon">
+                <mat-icon>receipt_long</mat-icon>
+              </div>
               <h3 class="empty-state__title">No invoices yet</h3>
               <p class="empty-state__description">Get started by creating your first invoice for {{ client.name }}</p>
               <button mat-flat-button color="primary">
@@ -82,22 +84,19 @@
                 </button>
               </div>
 
-              <!-- Loading -->
               <div *ngIf="vm.loading" class="loading-state">
                 <mat-spinner diameter="40"></mat-spinner>
                 <p>Loading estimates…</p>
               </div>
 
-              <!-- Error -->
               <div *ngIf="vm.error && !vm.loading" class="empty-state">
-                <mat-icon class="empty-state__icon">error_outline</mat-icon>
+                <div class="empty-state__icon"><mat-icon>error_outline</mat-icon></div>
                 <h3 class="empty-state__title">Could not load estimates</h3>
                 <p class="empty-state__description">{{ vm.error }}</p>
               </div>
 
-              <!-- Empty -->
               <div *ngIf="!vm.loading && !vm.error && vm.estimates?.length === 0" class="empty-state">
-                <mat-icon class="empty-state__icon">request_quote</mat-icon>
+                <div class="empty-state__icon"><mat-icon>request_quote</mat-icon></div>
                 <h3 class="empty-state__title">No estimates yet</h3>
                 <p class="empty-state__description">Create your first estimate for {{ client.name }}</p>
                 <button mat-flat-button color="primary" (click)="onAddEstimate()">
@@ -106,7 +105,6 @@
                 </button>
               </div>
 
-              <!-- Table -->
               <div *ngIf="!vm.loading && !vm.error && vm.estimates && vm.estimates.length > 0" class="estimates-table-wrap">
                 <table class="estimates-table">
                   <thead>
@@ -131,15 +129,9 @@
                           <span *ngIf="estimate.notes" class="est-notes">{{ estimate.notes }}</span>
                         </div>
                       </td>
-                      <td class="col-date">
-                        {{ estimate.estimateDate | date:'MMM d, yyyy' }}
-                      </td>
-                      <td class="col-items">
-                        {{ estimate.lineItems.length }} item{{ estimate.lineItems.length !== 1 ? 's' : '' }}
-                      </td>
-                      <td class="col-total">
-                        <span class="est-total">{{ estimate.total | currency }}</span>
-                      </td>
+                      <td class="col-date">{{ estimate.estimateDate | date:'MMM d, yyyy' }}</td>
+                      <td class="col-items">{{ estimate.lineItems.length }} item{{ estimate.lineItems.length !== 1 ? 's' : '' }}</td>
+                      <td class="col-total"><span class="est-total">{{ estimate.total | currency }}</span></td>
                       <td class="col-status">
                         <span class="estimate-status-badge" [ngClass]="getEstimateStatusClass(estimate.status)">
                           {{ estimate.status }}
@@ -147,24 +139,15 @@
                       </td>
                       <td class="col-actions">
                         <div class="row-actions">
-                          <button mat-icon-button
-                            class="action-btn action-btn--edit"
-                            matTooltip="Edit estimate"
-                            (click)="onEditEstimate(estimate)">
+                          <button mat-icon-button class="action-btn action-btn--edit" matTooltip="Edit estimate" (click)="onEditEstimate(estimate)">
                             <mat-icon>edit</mat-icon>
                           </button>
-                          <button mat-icon-button
-                            class="action-btn action-btn--pdf"
-                            matTooltip="Download PDF"
-                            [disabled]="pdfDownloading.has(estimate.id)"
-                            (click)="onDownloadEstimatePdf(estimate)">
+                          <button mat-icon-button class="action-btn action-btn--pdf" matTooltip="Download PDF"
+                            [disabled]="pdfDownloading.has(estimate.id)" (click)="onDownloadEstimatePdf(estimate)">
                             <mat-spinner *ngIf="pdfDownloading.has(estimate.id)" diameter="18"></mat-spinner>
                             <mat-icon *ngIf="!pdfDownloading.has(estimate.id)">picture_as_pdf</mat-icon>
                           </button>
-                          <button mat-icon-button
-                            class="action-btn action-btn--delete"
-                            matTooltip="Delete estimate"
-                            (click)="onDeleteEstimate(estimate)">
+                          <button mat-icon-button class="action-btn action-btn--delete" matTooltip="Delete estimate" (click)="onDeleteEstimate(estimate)">
                             <mat-icon>delete_outline</mat-icon>
                           </button>
                         </div>
@@ -172,7 +155,6 @@
                     </tr>
                   </tbody>
                 </table>
-
                 <div class="estimates-table-footer">
                   <span>{{ vm.estimates.length }} estimate{{ vm.estimates.length !== 1 ? 's' : '' }}</span>
                 </div>
@@ -201,22 +183,19 @@
               </button>
             </div>
 
-            <!-- Loading State -->
             <div *ngIf="jobsitesLoading" class="loading-state">
               <mat-spinner diameter="48"></mat-spinner>
               <p>Loading jobsites...</p>
             </div>
 
-            <!-- Error State -->
             <div *ngIf="jobsitesError && !jobsitesLoading" class="empty-state">
-              <mat-icon class="empty-state__icon">error</mat-icon>
+              <div class="empty-state__icon"><mat-icon>error</mat-icon></div>
               <h3 class="empty-state__title">Error Loading Jobsites</h3>
               <p class="empty-state__description">{{ jobsitesError }}</p>
             </div>
 
-            <!-- Empty State -->
             <div *ngIf="!jobsitesLoading && !jobsitesError && jobsites.length === 0" class="empty-state">
-              <mat-icon class="empty-state__icon">location_on</mat-icon>
+              <div class="empty-state__icon"><mat-icon>location_on</mat-icon></div>
               <h3 class="empty-state__title">No jobsites yet</h3>
               <p class="empty-state__description">Add jobsite locations for {{ client.name }}</p>
               <button mat-flat-button color="primary" (click)="onAddJobsite()">
@@ -225,7 +204,6 @@
               </button>
             </div>
 
-            <!-- Jobsites Grid -->
             <div *ngIf="!jobsitesLoading && !jobsitesError && jobsites.length > 0" class="jobsites-grid">
               <div *ngFor="let jobsite of jobsites" class="jobsite-card" [routerLink]="['/jobsites', jobsite.id]">
                 <div class="jobsite-card__header">
@@ -243,7 +221,6 @@
                     <mat-icon class="info-icon">place</mat-icon>
                     <span>{{ jobsite.address }}</span>
                   </div>
-
                   <div class="jobsite-card__coordinates" *ngIf="jobsite.latitude && jobsite.longitude">
                     <mat-icon class="info-icon">my_location</mat-icon>
                     <span>{{ jobsite.latitude }}, {{ jobsite.longitude }}</span>
@@ -251,20 +228,19 @@
                 </div>
 
                 <div class="jobsite-card__actions" (click)="$event.stopPropagation()">
-                  <button mat-icon-button color="primary" [title]="'View on map'">
+                  <button mat-icon-button color="primary" title="View on map">
                     <mat-icon>map</mat-icon>
                   </button>
-                  <button mat-icon-button color="primary" [title]="'Edit jobsite'" (click)="onEditJobsite(jobsite)">
+                  <button mat-icon-button color="primary" title="Edit jobsite" (click)="onEditJobsite(jobsite)">
                     <mat-icon>edit</mat-icon>
                   </button>
-                  <button mat-icon-button color="warn" [title]="'Delete jobsite'" (click)="onDeleteJobsite(jobsite)">
+                  <button mat-icon-button color="warn" title="Delete jobsite" (click)="onDeleteJobsite(jobsite)">
                     <mat-icon>delete</mat-icon>
                   </button>
                 </div>
               </div>
             </div>
 
-            <!-- Jobsites Count -->
             <div *ngIf="jobsites.length > 0" class="jobsites-footer">
               <p>Showing {{ jobsites.length }} of {{ totalJobsites }} jobsite{{ totalJobsites !== 1 ? 's' : '' }}</p>
             </div>
@@ -279,41 +255,31 @@
         </ng-template>
         <ng-template matTabContent>
           <div class="tab-content">
+            <h2>Client Information</h2>
             <div class="details-grid">
               <div class="detail-card">
-                <div class="detail-card__icon">
-                  <mat-icon>business</mat-icon>
-                </div>
+                <div class="detail-card__icon"><mat-icon>business</mat-icon></div>
                 <div class="detail-card__content">
                   <label>Company Name</label>
                   <p>{{ client.name }}</p>
                 </div>
               </div>
-
               <div class="detail-card">
-                <div class="detail-card__icon">
-                  <mat-icon>email</mat-icon>
-                </div>
+                <div class="detail-card__icon"><mat-icon>email</mat-icon></div>
                 <div class="detail-card__content">
                   <label>Email Address</label>
                   <p>{{ client.email }}</p>
                 </div>
               </div>
-
               <div class="detail-card">
-                <div class="detail-card__icon">
-                  <mat-icon>phone</mat-icon>
-                </div>
+                <div class="detail-card__icon"><mat-icon>phone</mat-icon></div>
                 <div class="detail-card__content">
                   <label>Phone Number</label>
                   <p>{{ client.phone }}</p>
                 </div>
               </div>
-
               <div class="detail-card">
-                <div class="detail-card__icon">
-                  <mat-icon>calendar_today</mat-icon>
-                </div>
+                <div class="detail-card__icon"><mat-icon>calendar_today</mat-icon></div>
                 <div class="detail-card__content">
                   <label>Client Since</label>
                   <p>{{ client.createdAt | date:'MMMM d, yyyy' }}</p>
@@ -342,7 +308,6 @@
               </button>
             </div>
 
-            <!-- Date Range Filters -->
             <div *ngIf="showFilters" class="activity-filters">
               <mat-form-field appearance="outline">
                 <mat-label>Start Date</mat-label>
@@ -350,14 +315,12 @@
                 <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
                 <mat-datepicker #startPicker></mat-datepicker>
               </mat-form-field>
-
               <mat-form-field appearance="outline">
                 <mat-label>End Date</mat-label>
                 <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate">
                 <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
                 <mat-datepicker #endPicker></mat-datepicker>
               </mat-form-field>
-
               <div class="filter-actions">
                 <button mat-flat-button color="primary" (click)="applyFilters()">
                   <mat-icon>search</mat-icon>
@@ -377,18 +340,16 @@
 
             <ng-template #activityContent>
               <div *ngIf="activitiesError; else activityList" class="empty-state">
-                <mat-icon class="empty-state__icon">error</mat-icon>
+                <div class="empty-state__icon"><mat-icon>error</mat-icon></div>
                 <h3 class="empty-state__title">Error Loading Activities</h3>
                 <p class="empty-state__description">{{ activitiesError }}</p>
               </div>
 
               <ng-template #activityList>
                 <div *ngIf="activities.length === 0" class="empty-state">
-                  <mat-icon class="empty-state__icon">history</mat-icon>
+                  <div class="empty-state__icon"><mat-icon>history</mat-icon></div>
                   <h3 class="empty-state__title">No activity yet</h3>
-                  <p class="empty-state__description">
-                    Activity timeline will appear here as you interact with this client
-                  </p>
+                  <p class="empty-state__description">Activity timeline will appear here as you interact with this client</p>
                 </div>
 
                 <div *ngIf="activities.length > 0" class="activity-timeline">
@@ -399,15 +360,11 @@
                     <div class="activity-item__content">
                       <div class="activity-item__header">
                         <h4 class="activity-item__title">{{ activity.title }}</h4>
-                        <span class="activity-item__time">
-                          {{ activity.timestamp | date:'MMM d, yyyy • h:mm a' }}
-                        </span>
+                        <span class="activity-item__time">{{ activity.timestamp | date:'MMM d, yyyy • h:mm a' }}</span>
                       </div>
                       <p class="activity-item__description">{{ activity.description }}</p>
                       <div class="activity-item__meta">
-                        <span class="activity-badge" [ngClass]="getBadgeClass(activity.category)">
-                          {{ activity.category }}
-                        </span>
+                        <span class="activity-badge" [ngClass]="getBadgeClass(activity.category)">{{ activity.category }}</span>
                         <span *ngIf="activity.metadata['amount']" class="activity-amount"
                               [ngClass]="activity.metadata['amount'] > 0 ? 'activity-amount--positive' : 'activity-amount--negative'">
                           {{ activity.metadata['amount'] | currency }}
@@ -416,7 +373,6 @@
                     </div>
                   </div>
 
-                  <!-- Load More Button -->
                   <div *ngIf="hasMoreActivities" class="load-more-container">
                     <button mat-stroked-button (click)="loadMoreActivities()" [disabled]="loadingMore">
                       <mat-spinner *ngIf="loadingMore" diameter="20"></mat-spinner>

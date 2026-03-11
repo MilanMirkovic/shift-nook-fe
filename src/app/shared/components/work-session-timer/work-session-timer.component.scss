@@ -1,84 +1,82 @@
 .work-session-timer {
   position: fixed;
-  top: 24px;
-  right: 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  top: 76px;
+  right: 20px;
+  background: #ffffff;
+  border: 1px solid #e8eaf0;
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  padding: 16px 20px;
+  box-shadow: 0 12px 40px rgba(37, 99, 235, 0.10), 0 2px 8px rgba(15, 23, 42, 0.06);
+  padding: 14px 18px;
   z-index: 1000;
-  animation: slideInUp 0.3s ease-out;
+  animation: slideInDown 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  // Blue accent line at top
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 16px; right: 16px;
+    height: 3px;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #2563eb, #7c3aed, #06b6d4);
+  }
 
   .timer-content {
     display: flex;
     align-items: center;
-    gap: 16px;
-    color: white;
+    gap: 12px;
+  }
 
-    .timer-icon {
-      mat-icon {
-        font-size: 32px;
-        width: 32px;
-        height: 32px;
-        animation: pulse 2s ease-in-out infinite;
-      }
+  .timer-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: rgba(37, 99, 235, 0.08);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 20px; width: 20px; height: 20px;
+      color: #2563eb;
+      animation: pulse 2s ease-in-out infinite;
+    }
+  }
+
+  .timer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+
+    .timer-label {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94a3b8;
     }
 
-    .timer-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-
-      .timer-label {
-        font-size: 11px;
-        opacity: 0.8;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      .timer-company {
-        font-size: 15px;
-        font-weight: 600;
-        line-height: 1.2;
-      }
-
-      .timer-elapsed {
-        font-size: 20px;
-        font-weight: 700;
-        font-variant-numeric: tabular-nums;
-        letter-spacing: 0.5px;
-      }
+    .timer-company {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #0f172a;
+      line-height: 1.2;
     }
 
-    .timer-stop {
-      mat-icon {
-        color: rgba(255, 255, 255, 0.9);
-        transition: color 0.2s;
-      }
-
-      &:hover mat-icon {
-        color: #ff6b6b;
-      }
+    .timer-elapsed {
+      font-size: 1.125rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.5px;
+      color: #2563eb;
     }
   }
 }
 
-@keyframes slideInUp {
-  from {
-    transform: translateY(100px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+@keyframes slideInDown {
+  from { transform: translateY(-16px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
 }
 
 @keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
 }

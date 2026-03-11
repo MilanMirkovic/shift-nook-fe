@@ -45,14 +45,14 @@
 
   <ng-template #activityContent>
     <div *ngIf="activitiesError; else activityList" class="empty-state">
-      <mat-icon class="empty-state__icon">error</mat-icon>
+      <div class="empty-state__icon"><mat-icon>error</mat-icon></div>
       <h3 class="empty-state__title">Error Loading Activities</h3>
       <p class="empty-state__description">{{ activitiesError }}</p>
     </div>
 
     <ng-template #activityList>
       <div *ngIf="activities.length === 0" class="empty-state">
-        <mat-icon class="empty-state__icon">history</mat-icon>
+        <div class="empty-state__icon"><mat-icon>history</mat-icon></div>
         <h3 class="empty-state__title">No activity yet</h3>
         <p class="empty-state__description">
           Activity timeline will appear here as you interact with this jobsite
@@ -97,4 +97,3 @@
     </ng-template>
   </ng-template>
 </div>
-
