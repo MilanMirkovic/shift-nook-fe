@@ -139,3 +139,20 @@
    =============================== */
 
 /* (moved into src/app/sidebar/sidebar.component.scss) */
+
+// Use the new deep blue gradient for app backgrounds and key UI elements
+.app-header, .main-header, .sn-primary-bg {
+  background: var(--sn-primary-gradient);
+  color: #fff;
+}
+
+button.mat-primary, .sn-primary-btn {
+  background: var(--sn-primary-gradient);
+  color: #fff;
+  border: none;
+  transition: background 0.2s;
+}
+
+button.mat-primary:hover, .sn-primary-btn:hover {
+  background: var(--sn-primary-hover);
+}

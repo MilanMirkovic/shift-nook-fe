@@ -1,11 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard.component';
+import { dashboardRoleGuard } from './dashboard-role.guard';
 
 const routes: Routes = [
   {
     path: '',
-    component: DashboardComponent
+    component: DashboardComponent,
+    canActivate: [dashboardRoleGuard]
   }
 ];
 
@@ -14,4 +16,3 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class DashboardRoutingModule {}
-

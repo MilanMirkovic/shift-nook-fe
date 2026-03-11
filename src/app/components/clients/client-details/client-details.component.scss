@@ -774,6 +774,143 @@ p {
   }
 }
 
+// ── Estimates Table ────────────────────────────────────────────────────────────
+.estimates-table-wrap {
+  border: 1px solid var(--sn-surface-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.estimates-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  thead tr {
+    background: #f8fafc;
+    border-bottom: 2px solid var(--sn-surface-border);
+
+    th {
+      padding: 11px 16px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      white-space: nowrap;
+      text-align: left;
+
+      &.col-total,
+      &.col-items,
+      &.col-date { text-align: right; }
+      &.col-status { text-align: center; }
+      &.col-actions { text-align: right; }
+    }
+  }
+
+  tbody .estimate-row {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s;
+
+    &:last-child { border-bottom: none; }
+    &:hover { background: #fafbff; }
+
+    td {
+      padding: 13px 16px;
+      vertical-align: middle;
+      color: var(--sn-text);
+
+      &.col-total,
+      &.col-items,
+      &.col-date { text-align: right; }
+      &.col-status { text-align: center; }
+      &.col-actions { text-align: right; }
+    }
+  }
+}
+
+.col-num { width: 60px; }
+.col-date { width: 130px; white-space: nowrap; color: var(--sn-text-muted) !important; font-size: 0.825rem !important; }
+.col-items { width: 90px; color: var(--sn-text-muted) !important; font-size: 0.825rem !important; }
+.col-total { width: 110px; }
+.col-status { width: 110px; }
+.col-actions { width: 90px; }
+
+.est-number {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #94a3b8;
+  font-family: monospace;
+  letter-spacing: 0.02em;
+}
+
+.est-title-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.est-title {
+  font-weight: 600;
+  color: var(--sn-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+.est-notes {
+  font-size: 0.78rem;
+  color: var(--sn-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+.est-total {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--sn-primary-start);
+}
+
+.row-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  .estimate-row:hover & { opacity: 1; }
+}
+
+.action-btn {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+  &.action-btn--edit mat-icon  { color: var(--sn-primary-start); }
+  &.action-btn--delete mat-icon { color: #ef4444; }
+}
+
+.estimates-table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: #f8fafc;
+  border-top: 1px solid var(--sn-surface-border);
+  font-size: 0.8rem;
+  color: var(--sn-text-muted);
+}
+
+// Remove old card styles (keep status badges)
+.estimates-list,
+.estimate-card { display: none; }
+
 // Responsive design
 @media (max-width: 768px) {
   .client-header {
@@ -901,6 +1038,27 @@ p {
 
       button {
         width: 100%;
+      }
+    }
+  }
+
+  // Estimates Responsive
+  .estimates-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .estimate-card {
+    &__header {
+      flex-wrap: wrap;
+    }
+
+    &__actions {
+      flex-wrap: wrap;
+
+      button[mat-stroked-button] {
+        width: 100%;
+        justify-content: center;
       }
     }
   }

@@ -18,6 +18,7 @@ import {reducer as clientsReducer} from './store/clients/clients.reducer';
 import {activityTimelineReducer} from './store/activity-timeline/activity-timeline.reducer';
 import { companyWorkSessionsReducer } from './store/company-work-sessions/company-work-sessions.reducer';
 import { notificationsReducer } from './store/notifications/notifications.reducer';
+import { estimatesReducer } from './store/estimates/estimates.reducer';
 
 // Import effects
 import { UserEffects } from './store/user/user.effects';
@@ -29,6 +30,7 @@ import { ClientsEffects } from './store/clients/clients.effects';
 import { ActivityTimelineEffects } from './store/activity-timeline/activity-timeline.effects';
 import { CompanyWorkSessionsEffects } from './store/company-work-sessions/company-work-sessions.effects';
 import { NotificationsEffects } from './store/notifications/notifications.effects';
+import { EstimatesEffects } from './store/estimates/estimates.effects';
 
 // Import feature keys
 import { USER_FEATURE_KEY } from './store/user/user.selectors';
@@ -39,6 +41,7 @@ import {COMPANY_MEMBERS_FEATURE_KEY} from './store/company-members/company-membe
 import { CLIENTS_FEATURE_KEY } from './store/clients/clients.selectors';
 import { ACTIVITY_TIMELINE_FEATURE_KEY } from './store/activity-timeline/activity-timeline.selectors';
 import { NOTIFICATIONS_FEATURE_KEY } from './store/notifications/notifications.selectors';
+import { ESTIMATES_FEATURE_KEY } from './store/estimates/estimates.selectors';
 
 export const COMPANY_WORK_SESSIONS_FEATURE_KEY = 'companyWorkSessions';
 
@@ -57,7 +60,8 @@ export const appConfig: ApplicationConfig = {
       [CLIENTS_FEATURE_KEY]: clientsReducer,
       [ACTIVITY_TIMELINE_FEATURE_KEY]: activityTimelineReducer,
       [COMPANY_WORK_SESSIONS_FEATURE_KEY]: companyWorkSessionsReducer,
-      [NOTIFICATIONS_FEATURE_KEY]: notificationsReducer
+      [NOTIFICATIONS_FEATURE_KEY]: notificationsReducer,
+      [ESTIMATES_FEATURE_KEY]: estimatesReducer
     }),
     provideEffects([
       UserEffects,
@@ -68,7 +72,8 @@ export const appConfig: ApplicationConfig = {
       ClientsEffects,
       ActivityTimelineEffects,
       CompanyWorkSessionsEffects,
-      NotificationsEffects
+      NotificationsEffects,
+      EstimatesEffects
     ]),
     provideStoreDevtools({
       maxAge: 25,

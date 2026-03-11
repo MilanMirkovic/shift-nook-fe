@@ -67,8 +67,13 @@ export class CompanySelectionComponent implements OnInit, OnDestroy {
             this.startNewCompanySession(company);
           }
         });
+    } else if (company.role === CompanyRole.WORKER) {
+      // For WORKER role, select company and navigate to jobsites
+      this.userStore.selectCompany(company.companyId);
+      console.log('Switched company (worker):', company);
+      this.router.navigate(['/jobsites']);
     } else {
-      // For non-ACCOUNTANT roles, just select the company without time tracking
+      // For other roles, just select the company without time tracking
       this.userStore.selectCompany(company.companyId);
       console.log('Switched company (no time tracking):', company);
       this.router.navigate(['/dashboard']);

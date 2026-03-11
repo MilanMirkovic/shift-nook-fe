@@ -26,21 +26,20 @@ html {
   --sn-text: rgba(17, 24, 39, 0.96);
   --sn-text-muted: rgba(17, 24, 39, 0.62);
 
-  /* Premium Color Palette System - Easy to switch themes */
-
-  /* ACTIVE THEME: Purple Violet (Current) */
-  //--sn-primary-start: #667eea;
-  //--sn-primary-end: #764ba2;
-  //--sn-primary-light: rgba(102, 126, 234, 0.1);
-  //--sn-primary-hover: rgba(102, 126, 234, 0.15);
+  /* PRIMARY THEME: Deep Blue Gradient */
+  --sn-primary-start: #0b2a4a;
+  --sn-primary-end: #1a4570;
+  --sn-primary-gradient: linear-gradient(135deg, #0b2a4a 0%, #1a4570 100%);
+  --sn-primary-light: rgba(11, 42, 74, 0.1);
+  --sn-primary-hover: rgba(26, 69, 112, 0.15);
 
   /* Alternative Premium Palettes - Uncomment to use */
 
   /* Midnight Blue - Professional & Trustworthy */
-   --sn-primary-start: #2D3561;
+  /* --sn-primary-start: #2D3561;
   --sn-primary-end: #3B4A8C;
   --sn-primary-light: rgba(45, 53, 97, 0.1);
-  --sn-primary-hover: rgba(45, 53, 97, 0.15);
+  --sn-primary-hover: rgba(45, 53, 97, 0.15); */
 
   /* Teal Ocean - Modern & Fresh */
   /* --sn-primary-start: #0EA5E9;
@@ -284,6 +283,13 @@ body {
   top: 50% !important;
   left: 50% !important;
   transform: translate(-50%, -50%) !important;
+}
+
+/* Estimate Dialog - Remove Material's Built-in Padding */
+.estimate-dialog-container .mat-mdc-dialog-container,
+.estimate-dialog-container .mdc-dialog__surface {
+  padding: 0 !important;
+  overflow: hidden;
 }
 
 /* You can add global styles to this file, and also import other style files */

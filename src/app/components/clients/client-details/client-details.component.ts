@@ -17,17 +17,36 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { ActivityTimelineService } from '../../../api/activity-timeline.service';
-import { Activity, ActivityCategory } from '../../../shared/models/activity.models';
+import { Activity } from '../../../shared/models/activity.models';
 import { ApiService } from '../../../api/api.service';
 import { Jobsite } from '../../../store/jobsites/jobsites.models';
-import {JobsiteDialogComponent} from '../../../shared/components/jobsite-dialog/jobsite-dialog.component';
-import {createJobsite, createJobsiteFailure, createJobsiteSuccess, deleteJobsite, deleteJobsiteSuccess, deleteJobsiteFailure, updateJobsite, updateJobsiteFailure, updateJobsiteSuccess} from '../../../store/jobsites/jobsites.actions';
-import {MatDialog} from '@angular/material/dialog';
-import {NotificationService} from '../../../shared/services/notification.service';
+import { Estimate, EstimateStatus } from '../../../store/estimates/estimates.models';
+import { JobsiteDialogComponent } from '../../../shared/components/jobsite-dialog/jobsite-dialog.component';
+import {
+  createJobsite, createJobsiteFailure, createJobsiteSuccess,
+  deleteJobsite, deleteJobsiteSuccess, deleteJobsiteFailure,
+  updateJobsite, updateJobsiteFailure, updateJobsiteSuccess
+} from '../../../store/jobsites/jobsites.actions';
+import {
+  loadEstimates,
+  createEstimate, createEstimateSuccess, createEstimateFailure,
+  updateEstimateStatus, updateEstimateStatusSuccess, updateEstimateStatusFailure,
+  deleteEstimate, deleteEstimateSuccess, deleteEstimateFailure
+} from '../../../store/estimates/estimates.actions';
+import {
+  selectEstimatesByClientId,
+  selectEstimatesLoading,
+  selectEstimatesError
+} from '../../../store/estimates/estimates.selectors';
+import { MatDialog } from '@angular/material/dialog';
+import { NotificationService } from '../../../shared/services/notification.service';
 import { Actions, ofType } from '@ngrx/effects';
 import { ConfirmationDialogComponent } from '../../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { EstimateDialogComponent } from '../../../shared/components/estimate-dialog/estimate-dialog.component';
+import { EstimatesApiService } from '../../../store/estimates/estimates.api';
 
 @Component({
   selector: 'app-client-details',
@@ -49,6 +68,7 @@ import { ConfirmationDialogComponent } from '../../../shared/components/confirma
     MatFormFieldModule,
     MatNativeDateModule,
     MatInputModule,
+    MatTooltipModule,
     RouterLink
   ],
   styleUrls: ['./client-details.component.scss']
@@ -60,6 +80,7 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
   private readonly notificationService = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
   private readonly apiService = inject(ApiService);
+  private readonly estimatesApi = inject(EstimatesApiService);
   private readonly destroy$ = new Subject<void>();
 
   // Use BehaviorSubject to cache the client and prevent it from becoming null
@@ -85,6 +106,14 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
   protected jobsitesLoading = false;
   protected jobsitesError: string | null = null;
   protected totalJobsites = 0;
+
+  // Estimates state (driven by NgRx store)
+  protected estimates$!: Observable<Estimate[]>;
+  protected estimatesLoading$!: Observable<boolean>;
+  protected estimatesError$!: Observable<string | null>;
+
+  // Track which estimates are currently downloading PDF
+  protected pdfDownloading = new Set<string>();
 
   private currentClientId: string | null = null;
   private currentCompanyId: string | null = null;
@@ -123,7 +152,7 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
         // Wait for the client to be loaded in the store
         this.client$.pipe(
           filter(client => client !== null && client?.id !== undefined),
-          take(1), // Only take the first emission after the client is loaded
+          take(1),
           distinctUntilChanged()
         ).subscribe(client => {
           if (client?.id) {
@@ -132,6 +161,19 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
             setTimeout(() => {
               this.loadActivities(cid, true);
               this.loadJobsites(cid);
+              // Wire estimates observables from store
+              this.estimates$ = this.store.select(selectEstimatesByClientId(cid));
+              this.estimatesLoading$ = this.store.select(selectEstimatesLoading);
+              this.estimatesError$ = this.store.select(selectEstimatesError);
+              // Load estimates from store
+              if (this.currentCompanyId) {
+                this.store.dispatch(loadEstimates({
+                  companyId: this.currentCompanyId,
+                  clientId: cid,
+                  page: 0,
+                  size: 100
+                }));
+              }
             });
           }
         });
@@ -417,38 +459,154 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
-  protected getCategoryClass(category: ActivityCategory): string {
-    switch (category) {
-      case ActivityCategory.SUCCESS:
-        return 'activity-item--success';
-      case ActivityCategory.INFO:
-        return 'activity-item--info';
-      case ActivityCategory.WARNING:
-        return 'activity-item--warning';
-      case ActivityCategory.ERROR:
-        return 'activity-item--danger';
-      default:
-        return 'activity-item--info';
+  protected onAddEstimate(): void {
+    this.client$.pipe(
+      filter(client => client !== null),
+      take(1)
+    ).subscribe(client => {
+      const dialogRef = this.dialog.open(EstimateDialogComponent, {
+        width: '700px',
+        maxWidth: '95vw',
+        maxHeight: '92vh',
+        disableClose: false,
+        autoFocus: true,
+        panelClass: 'estimate-dialog-container',
+        data: {
+          clientId: client?.id,
+          clientName: client?.name
+        }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result && this.currentCompanyId) {
+          this.store.dispatch(
+            createEstimate({
+              companyId: this.currentCompanyId,
+              estimate: result
+            })
+          );
+
+          this.actions$.pipe(
+            ofType(createEstimateSuccess, createEstimateFailure),
+            take(1)
+          ).subscribe(action => {
+            if (action.type === createEstimateSuccess.type) {
+              this.notificationService.success('Estimate created successfully!');
+              // Reload estimates from backend to reflect latest state
+              if (this.currentCompanyId && this.currentClientId) {
+                this.store.dispatch(loadEstimates({
+                  companyId: this.currentCompanyId,
+                  clientId: this.currentClientId,
+                  page: 0,
+                  size: 100
+                }));
+              }
+            } else {
+              this.notificationService.error('Failed to create estimate. Please try again.');
+            }
+          });
+        }
+      });
+    });
+  }
+
+  protected onEditEstimate(estimate: Estimate): void {
+    this.notificationService.success(`Editing estimate #${estimate.estimateNumber} coming soon!`);
+  }
+
+  protected onDeleteEstimate(estimate: Estimate): void {
+    if (!this.currentCompanyId) return;
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Estimate',
+        message: `Are you sure you want to delete estimate "${estimate.title}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        type: 'danger'
+      },
+      position: { top: '80px' }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed && this.currentCompanyId) {
+        this.store.dispatch(deleteEstimate({
+          companyId: this.currentCompanyId,
+          estimateId: estimate.id
+        }));
+
+        this.actions$.pipe(
+          ofType(deleteEstimateSuccess, deleteEstimateFailure),
+          take(1)
+        ).subscribe(action => {
+          if (action.type === deleteEstimateSuccess.type) {
+            this.notificationService.success('Estimate deleted successfully!');
+          } else {
+            this.notificationService.error('Failed to delete estimate. Please try again.');
+          }
+        });
+      }
+    });
+  }
+
+  protected onConvertEstimate(estimate: Estimate): void {
+    this.notificationService.success(`Converting estimate #${estimate.estimateNumber} to invoice coming soon!`);
+  }
+
+  protected onUpdateEstimateStatus(estimate: Estimate, status: EstimateStatus): void {
+    if (!this.currentCompanyId) return;
+
+    this.store.dispatch(updateEstimateStatus({
+      companyId: this.currentCompanyId,
+      estimateId: estimate.id,
+      statusUpdate: { status }
+    }));
+
+    this.actions$.pipe(
+      ofType(updateEstimateStatusSuccess, updateEstimateStatusFailure),
+      take(1)
+    ).subscribe(result => {
+      if (result.type === updateEstimateStatusSuccess.type) {
+        this.notificationService.success(`Estimate marked as ${status.toLowerCase()}.`);
+      } else {
+        this.notificationService.error('Failed to update estimate status.');
+      }
+    });
+  }
+
+  protected getEstimateStatusClass(status: EstimateStatus): string {
+    switch (status) {
+      case 'ACCEPTED': return 'estimate-status--accepted';
+      case 'SENT':     return 'estimate-status--sent';
+      case 'DRAFT':    return 'estimate-status--draft';
+      case 'DECLINED': return 'estimate-status--rejected';
+      case 'VOID':     return 'estimate-status--expired';
+      default:         return 'estimate-status--draft';
     }
   }
 
-  protected getBadgeClass(category: ActivityCategory): string {
+  protected getCategoryClass(category: string): string {
     switch (category) {
-      case ActivityCategory.SUCCESS:
-        return 'activity-badge--success';
-      case ActivityCategory.INFO:
-        return 'activity-badge--info';
-      case ActivityCategory.WARNING:
-        return 'activity-badge--warning';
-      case ActivityCategory.ERROR:
-        return 'activity-badge--danger';
-      default:
-        return 'activity-badge--info';
+      case 'SUCCESS': return 'activity-item--success';
+      case 'INFO':    return 'activity-item--info';
+      case 'WARNING': return 'activity-item--warning';
+      case 'ERROR':   return 'activity-item--danger';
+      default:        return 'activity-item--info';
+    }
+  }
+
+  protected getBadgeClass(category: string): string {
+    switch (category) {
+      case 'SUCCESS': return 'activity-badge--success';
+      case 'INFO':    return 'activity-badge--info';
+      case 'WARNING': return 'activity-badge--warning';
+      case 'ERROR':   return 'activity-badge--danger';
+      default:        return 'activity-badge--info';
     }
   }
 
   protected getActivityIcon(type: string): string {
-    // Map event types to Material icons
     const iconMap: Record<string, string> = {
       'CLIENT_CREATED': 'person_add',
       'CLIENT_UPDATED': 'edit',
@@ -467,5 +625,27 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
       'STATUS_CHANGED': 'swap_horiz',
     };
     return iconMap[type] || 'info';
+  }
+
+  protected onDownloadEstimatePdf(estimate: Estimate): void {
+    if (!this.currentCompanyId || this.pdfDownloading.has(estimate.id)) return;
+
+    this.pdfDownloading.add(estimate.id);
+
+    this.estimatesApi.downloadPdf(this.currentCompanyId, estimate.id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `estimate-${estimate.estimateNumber}.pdf`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+        this.pdfDownloading.delete(estimate.id);
+      },
+      error: () => {
+        this.notificationService.error('Failed to download PDF. Please try again.');
+        this.pdfDownloading.delete(estimate.id);
+      }
+    });
   }
 }

@@ -1,74 +1,99 @@
-<div class="company-selection-container">
-  <div class="company-selection-content">
-    <!-- Header Section -->
-    <div class="header">
-      <div class="brand-logo">
-        <span class="logo-mark">SN</span>
+<div class="cs-root">
+  <!-- Animated background -->
+  <div class="cs-bg">
+    <div class="cs-orb cs-orb--1"></div>
+    <div class="cs-orb cs-orb--2"></div>
+    <div class="cs-orb cs-orb--3"></div>
+    <div class="cs-noise"></div>
+  </div>
+
+  <!-- Left panel -->
+  <aside class="cs-panel">
+    <div class="cs-panel__inner">
+      <div class="cs-logo">
+        <span class="cs-logo__mark">SN</span>
       </div>
-      <h1 class="title">Choose Your Company</h1>
-      <p class="subtitle">Select which company you'd like to manage</p>
+      <div class="cs-panel__copy">
+        <h1 class="cs-panel__title">
+          Shift<br /><em>Nook</em>
+        </h1>
+        <p class="cs-panel__desc">
+          Your workspace, your rules. Select the company you want to manage today.
+        </p>
+      </div>
+      <div class="cs-panel__footer">
+        <p>Need help? <a href="#">Contact Support</a></p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Right content area -->
+  <main class="cs-main">
+    <!-- Loading -->
+    <div *ngIf="loading" class="cs-loading">
+      <div class="cs-spinner">
+        <span></span><span></span><span></span>
+      </div>
+      <p>Loading your workspaces…</p>
     </div>
 
-    <!-- Loading State -->
-    <div *ngIf="loading" class="loading-state">
-      <mat-spinner diameter="48"></mat-spinner>
-      <p class="loading-text">Loading your companies...</p>
-    </div>
+    <!-- Companies list -->
+    <ng-container *ngIf="!loading">
+      <div class="cs-header">
+        <span class="cs-header__label">WORKSPACES</span>
+        <h2 class="cs-header__title">Choose a company</h2>
+        <p class="cs-header__sub">
+          {{ companies.length }} {{ companies.length === 1 ? 'workspace' : 'workspaces' }} available
+        </p>
+      </div>
 
-    <!-- Companies Grid -->
-    <div *ngIf="!loading && companies.length > 0" class="companies-grid">
-      <div
-        *ngFor="let company of companies"
-        class="company-card"
-        (click)="selectCompany(company)"
-        role="button"
-        tabindex="0"
-        (keydown.enter)="selectCompany(company)"
-        (keydown.space)="selectCompany(company)"
-      >
-        <div class="card-header">
-          <div class="company-avatar">
-            {{ getCompanyInitials(company.companyName) }}
+      <!-- Cards grid -->
+      <div *ngIf="companies.length > 0" class="cs-grid">
+        <button
+          *ngFor="let company of companies; let i = index"
+          class="cs-card"
+          [style.--i]="i"
+          (click)="selectCompany(company)"
+          type="button"
+        >
+          <div class="cs-card__glow"></div>
+
+          <div class="cs-card__top">
+            <div class="cs-card__avatar">
+              {{ getCompanyInitials(company.companyName) }}
+            </div>
+            <div class="cs-card__role" [class.cs-card__role--owner]="company.role === 'OWNER'">
+              <mat-icon>
+                {{ company.role === 'OWNER' ? 'stars' : company.role === 'WORKER' ? 'construction' : 'manage_accounts' }}
+              </mat-icon>
+              <span>{{ company.role }}</span>
+            </div>
           </div>
-          <div class="company-badge">
-            <mat-icon>{{ company.role === 'OWNER' ? 'stars' : 'badge' }}</mat-icon>
-            <span>{{ company.role }}</span>
+
+          <div class="cs-card__body">
+            <h3 class="cs-card__name">{{ company.companyName }}</h3>
+            <p class="cs-card__since">Since {{ formatMemberSince(company.memberSince) }}</p>
           </div>
-        </div>
 
-        <div class="card-body">
-          <h3 class="company-name">{{ company.companyName }}</h3>
-          <p class="member-since">Member since {{ formatMemberSince(company.memberSince) }}</p>
-        </div>
-
-        <div class="card-footer">
-          <div class="select-button">
-            <span>Select Company</span>
+          <div class="cs-card__action">
+            <span>Open workspace</span>
             <mat-icon>arrow_forward</mat-icon>
           </div>
-        </div>
-
-        <!-- Decorative element -->
-        <div class="card-decoration"></div>
+        </button>
       </div>
-    </div>
 
-    <!-- Empty State -->
-    <div *ngIf="!loading && companies.length === 0" class="empty-state">
-      <mat-icon class="empty-icon">business</mat-icon>
-      <h3>No Companies Found</h3>
-      <p>You don't have access to any companies yet.</p>
-      <button mat-flat-button color="primary" (click)="router.navigate(['/dashboard'])">
-        Go to Dashboard
-      </button>
-    </div>
-
-    <!-- Footer -->
-    <div class="footer">
-      <p class="footer-text">
-        Need help? <a href="#">Contact Support</a>
-      </p>
-    </div>
-  </div>
+      <!-- Empty state -->
+      <div *ngIf="companies.length === 0" class="cs-empty">
+        <div class="cs-empty__icon">
+          <mat-icon>domain_disabled</mat-icon>
+        </div>
+        <h3>No workspaces found</h3>
+        <p>You don't have access to any companies yet.</p>
+        <button mat-flat-button (click)="router.navigate(['/dashboard'])">
+          Go to Dashboard <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+    </ng-container>
+  </main>
 </div>
 
