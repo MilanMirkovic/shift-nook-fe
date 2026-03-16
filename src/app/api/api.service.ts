@@ -23,7 +23,7 @@ export class ApiService {
    */
   getJobsitesByClient(companyId: string, clientId: string, page = 0, size = 20): Observable<JobsitesPageResponse> {
     return this.http.get<JobsitesPageResponse>(
-      `/api/companies/${companyId}/jobsites/by-client/${clientId}?page=${page}&size=${size}`
+      `${this.baseUrl}/companies/${companyId}/jobsites/by-client/${clientId}?page=${page}&size=${size}`
     );
   }
 }

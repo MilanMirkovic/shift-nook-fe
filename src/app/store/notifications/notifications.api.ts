@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { NotificationsPageResponse, UnreadCountResponse } from './notifications.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationsApi {
-  private readonly baseUrl = '/api/notifications';
+  private readonly baseUrl = `${environment.apiBaseUrl}/notifications`;
 
   constructor(private readonly http: HttpClient) {}
 

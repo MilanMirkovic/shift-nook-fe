@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 import { CompanyRole } from '../../shared/models/company-role';
 import { CompanyMember, PagedResponse } from './company-members.models';
@@ -14,6 +15,7 @@ type SpringPage<T> = {
 
 @Injectable({ providedIn: 'root' })
 export class CompanyMembersApi {
+  private readonly baseUrl = environment.apiBaseUrl;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -40,7 +42,7 @@ export class CompanyMembersApi {
     }
 
     return this.http
-      .get<SpringPage<CompanyMember>>(`/api/companies/${companyId}/members`, { params: httpParams })
+      .get<SpringPage<CompanyMember>>(`${this.baseUrl}/companies/${companyId}/members`, { params: httpParams })
       .pipe(
         map((res) => ({
           items: res.content ?? [],
@@ -55,6 +57,6 @@ export class CompanyMembersApi {
    * Get single member by ID
    */
   getMemberById(companyId: string, userId: string): Observable<CompanyMember> {
-    return this.http.get<CompanyMember>(`/api/companies/${companyId}/members/${userId}`);
+    return this.http.get<CompanyMember>(`${this.baseUrl}/companies/${companyId}/members/${userId}`);
   }
 }
