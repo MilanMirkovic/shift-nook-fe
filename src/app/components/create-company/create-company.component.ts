@@ -76,6 +76,7 @@ export class CreateCompanyComponent {
 
     this.http.post(`${environment.apiBaseUrl}/companies`, payload).subscribe({
       next: () => {
+        this.isLoading = false;
         this.userStore.loadUser();
         this.router.navigate(['/dashboard']);
       },
