@@ -1,9 +1,10 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { from, switchMap, catchError, throwError } from 'rxjs';
+import { from, switchMap, catchError, throwError, of } from 'rxjs';
 import { AuthService } from './auth.service';
 import { UserStoreService } from '../../store/user/user-store.service';
+import { environment } from '../../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
@@ -13,6 +14,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // Public endpoints — skip
   if (!req.url.includes('/api/') || req.url.includes('/api/health')) {
     return next(req);
+  }
+
+  // Local dev mode — skip Cognito, inject a hardcoded token
+  if (environment.skipCognito) {
+    const token = environment.localAuthToken;
+    const localReq = token
+      ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+      : req;
+    return next(localReq);
   }
 
   return from(authService.getAccessToken()).pipe(
@@ -36,4 +46,3 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     }),
   );
 };
-

@@ -11,11 +11,15 @@ import {
   resendSignUpCode,
   SignInOutput,
 } from 'aws-amplify/auth';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   /** Sign in — returns the Amplify SignInOutput (check nextStep for MFA etc.) */
   async signIn(email: string, password: string): Promise<SignInOutput> {
+    if (environment.skipCognito) {
+      return { isSignedIn: true, nextStep: { signInStep: 'DONE' } } as SignInOutput;
+    }
     return signIn({ username: email, password });
   }
 
@@ -55,6 +59,7 @@ export class AuthService {
   }
 
   async signOut(): Promise<void> {
+    if (environment.skipCognito) return;
     await signOut();
   }
 
@@ -64,6 +69,9 @@ export class AuthService {
    * for user provisioning — the Access Token does not contain email by default.
    */
   async getAccessToken(): Promise<string | null> {
+    if (environment.skipCognito) {
+      return environment.localAuthToken || null;
+    }
     try {
       const session = await fetchAuthSession();
       return session.tokens?.idToken?.toString() ?? null;
@@ -73,6 +81,7 @@ export class AuthService {
   }
 
   async isAuthenticated(): Promise<boolean> {
+    if (environment.skipCognito) return true;
     try {
       await getCurrentUser();
       return true;
