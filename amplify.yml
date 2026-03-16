@@ -7,7 +7,7 @@ applications:
             - npm ci
         build:
           commands:
-            - npm run build
+            - if [ "${AWS_BRANCH}" = "dev" ]; then npm run build -- --configuration=development; else npm run build; fi
       artifacts:
         baseDirectory: dist/shift-nook/browser
         files:
