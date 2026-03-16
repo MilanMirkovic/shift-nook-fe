@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard, publicGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+  { path: '', pathMatch: 'full', redirectTo: 'login' },
 
   // ── Public auth routes ────────────────────────────────────────────────────
   {
