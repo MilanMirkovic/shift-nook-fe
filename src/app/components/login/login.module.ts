@@ -11,12 +11,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { LoginComponent } from './login.component';
 
-const routes: Routes = [
-  {
-    path: '',
-    component: LoginComponent
-  }
-];
+const routes: Routes = [{ path: '', component: LoginComponent }];
 
 @NgModule({
   declarations: [LoginComponent],
@@ -28,7 +23,7 @@ const routes: Routes = [
     MatInputModule,
     MatIconModule,
     MatCheckboxModule,
-    RouterModule.forChild(routes)
-  ]
+    RouterModule.forChild(routes),
+  ],
 })
 export class LoginModule {}

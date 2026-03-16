@@ -28,13 +28,18 @@ export class CompanySelectionComponent implements OnInit, OnDestroy {
     this.userStore.getUserCompanies()
       .pipe(takeUntil(this.destroy$))
       .subscribe(companies => {
-        console.log('User companies:', companies);
         this.companies = companies;
         this.loading = false;
 
-        // If user has no companies or is not an owner, redirect to dashboard
         if (companies.length === 0) {
-          this.router.navigate(['/dashboard']);
+          // Check if user can create a company
+          this.userStore.user$.pipe(take(1)).subscribe(user => {
+            if (user?.canCreateCompany) {
+              this.router.navigate(['/create-company']);
+            } else {
+              this.router.navigate(['/dashboard']);
+            }
+          });
         }
       });
   }

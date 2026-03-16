@@ -17,43 +17,35 @@ export class NotificationService {
    * Show a success message
    */
   success(message: string, duration = 3500): void {
-    this.snackBar.open(message, '✕', {
-      ...this.defaultConfig,
-      duration,
-      panelClass: ['snackbar-success']
-    });
+    this.show(message, 'snackbar-success', duration);
   }
 
   /**
    * Show an error message
    */
   error(message: string, duration = 5000): void {
-    this.snackBar.open(message, '✕', {
-      ...this.defaultConfig,
-      duration,
-      panelClass: ['snackbar-error']
-    });
+    this.show(message, 'snackbar-error', duration);
   }
 
   /**
    * Show an info message
    */
   info(message: string, duration = 3500): void {
-    this.snackBar.open(message, '✕', {
-      ...this.defaultConfig,
-      duration,
-      panelClass: ['snackbar-info']
-    });
+    this.show(message, 'snackbar-info', duration);
   }
 
   /**
    * Show a warning message
    */
   warning(message: string, duration = 4000): void {
+    this.show(message, 'snackbar-warning', duration);
+  }
+
+  private show(message: string, panelClass: string, duration: number): void {
     this.snackBar.open(message, '✕', {
       ...this.defaultConfig,
       duration,
-      panelClass: ['snackbar-warning']
+      panelClass: [panelClass],
     });
   }
 }

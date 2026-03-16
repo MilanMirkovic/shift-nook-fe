@@ -1,60 +1,111 @@
 import { Routes } from '@angular/router';
+import { authGuard, publicGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+
+  // ── Public auth routes ────────────────────────────────────────────────────
+  {
+    path: 'login',
+    canActivate: [publicGuard],
+    loadChildren: () => import('./components/login/login.module').then((m) => m.LoginModule),
+  },
+  {
+    path: 'signup',
+    canActivate: [publicGuard],
+    loadComponent: () =>
+      import('./components/signup/signup.component').then((m) => m.SignupComponent),
+  },
+  {
+    path: 'confirm',
+    canActivate: [publicGuard],
+    loadComponent: () =>
+      import('./components/confirm-email/confirm-email.component').then(
+        (m) => m.ConfirmEmailComponent,
+      ),
+  },
+  {
+    path: 'forgot-password',
+    canActivate: [publicGuard],
+    loadComponent: () =>
+      import('./components/forgot-password/forgot-password.component').then(
+        (m) => m.ForgotPasswordComponent,
+      ),
+  },
+
+  // ── Protected routes ──────────────────────────────────────────────────────
   {
     path: 'dashboard',
-    loadChildren: () => import('./components/dashboard/dashboard.module').then(m => m.DashboardModule)
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./components/dashboard/dashboard.module').then((m) => m.DashboardModule),
   },
   {
     path: 'shifts',
-    loadComponent: () => import('./pages/shifts.page').then((m) => m.ShiftsPage)
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/shifts.page').then((m) => m.ShiftsPage),
   },
   {
     path: 'team',
-    loadChildren: () => import('./components/team-members/team-members.module').then(m => m.TeamMembersModule)
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./components/team-members/team-members.module').then((m) => m.TeamMembersModule),
   },
   {
     path: 'settings',
-    loadComponent: () => import('./pages/settings.page').then((m) => m.SettingsPage)
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/settings.page').then((m) => m.SettingsPage),
   },
   {
     path: 'work-time',
-    loadChildren: () => import('./components/work-time/work-time.module').then(m => m.WorkTimeModule)
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./components/work-time/work-time.module').then((m) => m.WorkTimeModule),
   },
-
   {
     path: 'workers',
-    loadChildren: () => import('./components/workers/workers.module').then(m => m.WorkersModule)
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./components/workers/workers.module').then((m) => m.WorkersModule),
   },
-
   {
     path: 'jobsites',
-    loadChildren: () => import('./components/jobsites/jobsites.module').then(m => m.JobsitesModule)
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./components/jobsites/jobsites.module').then((m) => m.JobsitesModule),
   },
-
   {
     path: 'clients',
-    loadChildren: () => import('./components/clients/clients.module').then(m => m.ClientsModule)
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./components/clients/clients.module').then((m) => m.ClientsModule),
   },
-
   {
     path: 'notifications',
-    loadComponent: () => import('./components/notifications/notifications.component').then(m => m.NotificationsComponent)
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/notifications/notifications.component').then(
+        (m) => m.NotificationsComponent,
+      ),
   },
-
-  {
-    path: 'login',
-    loadChildren: () => import('./components/login/login.module').then((m) => m.LoginModule)
-  },
-
   {
     path: 'select-company',
-    loadChildren: () => import('./components/company-selection/company-selection.module').then((m) => m.CompanySelectionModule)
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./components/company-selection/company-selection.module').then(
+        (m) => m.CompanySelectionModule,
+      ),
   },
-
+  {
+    path: 'create-company',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/create-company/create-company.component').then(
+        (m) => m.CreateCompanyComponent,
+      ),
+  },
   {
     path: '**',
-    loadComponent: () => import('./pages/not-found.page').then((m) => m.NotFoundPage)
-  }
+    loadComponent: () => import('./pages/not-found.page').then((m) => m.NotFoundPage),
+  },
 ];

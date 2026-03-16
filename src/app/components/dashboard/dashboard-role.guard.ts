@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { map, take } from 'rxjs';
+import { filter, map, take } from 'rxjs';
 import { UserStoreService } from '../../store/user/user-store.service';
 import { CompanyRole } from '../../shared/models/company-role';
 
@@ -8,16 +8,29 @@ export const dashboardRoleGuard: CanActivateFn = () => {
   const userStore = inject(UserStoreService);
   const router = inject(Router);
 
+  // Trigger load in case user data isn't in the store yet
+  userStore.loadUser();
+
   return userStore.user$.pipe(
+    filter(user => user !== null),  // wait until user is actually loaded
     take(1),
     map(user => {
-      // Get the user's role in their current company (first company as fallback)
-      const role = user?.companies?.[0]?.role;
+      // No companies at all — send to create-company or jobsites
+      if (!user?.companies || user.companies.length === 0) {
+        if (user?.canCreateCompany) {
+          return router.createUrlTree(['/create-company']);
+        }
+        return router.createUrlTree(['/jobsites']);
+      }
+
+      const role = user.companies[0].role;
       const allowed = [CompanyRole.OWNER, CompanyRole.ACCOUNTANT];
-      if (role && allowed.includes(role)) {
+      if (allowed.includes(role)) {
         return true;
       }
-      return router.createUrlTree(['/unauthorized']);
+
+      // Workers and other roles go to jobsites
+      return router.createUrlTree(['/jobsites']);
     })
   );
 };

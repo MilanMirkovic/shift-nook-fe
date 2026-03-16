@@ -15,6 +15,7 @@ import { CompanyRole } from '../shared/models/company-role';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { StopSessionDialogComponent, StopSessionDialogResult } from '../shared/components/stop-session-dialog/stop-session-dialog.component';
 import { CompanyWorkSessionsStoreService } from '../store/company-work-sessions/company-work-sessions-store.service';
+import { AuthService } from '../core/auth/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -34,6 +35,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly workSessionStore = inject(CompanyWorkSessionsStoreService);
+  private readonly authService = inject(AuthService);
   private readonly destroy$ = new Subject<void>();
 
   protected currentCompany: CompanyMembership | null = null;
@@ -206,12 +208,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
       backdropClass: 'confirmation-dialog-backdrop'
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(async result => {
       if (result === true) {
-        // User confirmed, perform logout
+        // Sign out from Cognito first, then clear the store and redirect
+        await this.authService.signOut();
         this.userStore.logout();
+        this.linkClicked.emit();
         this.router.navigate(['/login']);
-        this.linkClicked.emit(); // Close mobile nav if open
       }
     });
   }

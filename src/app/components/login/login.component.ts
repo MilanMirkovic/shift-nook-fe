@@ -1,31 +1,40 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, takeUntil, filter, take } from 'rxjs';
+import { AuthService } from '../../core/auth/auth.service';
 import { UserStoreService } from '../../store/user/user-store.service';
 
 @Component({
   selector: 'app-login',
   standalone: false,
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss',
 })
-export class LoginComponent implements OnDestroy {
+export class LoginComponent implements OnInit, OnDestroy {
   loginForm: FormGroup;
   hidePassword = true;
   isLoading = false;
+  errorMessage = '';
   private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private userStore: UserStoreService
+    private authService: AuthService,
+    private userStore: UserStoreService,
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      rememberMe: [false]
+      rememberMe: [false],
     });
+  }
+
+  async ngOnInit(): Promise<void> {
+    if (await this.authService.isAuthenticated()) {
+      this.router.navigate(['/dashboard']);
+    }
   }
 
   ngOnDestroy(): void {
@@ -33,43 +42,70 @@ export class LoginComponent implements OnDestroy {
     this.destroy$.complete();
   }
 
-  onSubmit(): void {
-    if (this.loginForm.valid) {
-      this.isLoading = true;
+  async onSubmit(): Promise<void> {
+    if (this.loginForm.invalid) return;
 
-      // TODO: Implement actual authentication
-      // For now, simulate login and load user
-      setTimeout(() => {
-        // Load user data from /api/me
-        this.userStore.loadUser();
+    this.isLoading = true;
+    this.errorMessage = '';
+    const { email, password } = this.loginForm.value;
 
-        // Wait for user data to be loaded, then redirect
-        this.userStore.user$
-          .pipe(
-            filter(user => user !== null), // Wait until user is loaded
-            take(1), // Take only the first emission
-            takeUntil(this.destroy$)
-          )
-          .subscribe(user => {
-            this.isLoading = false;
+    try {
+      const result = await this.authService.signIn(email, password);
 
-            // Check if user has multiple companies
-            if (user.companies && user.companies.length > 1) {
-              // User has multiple companies, let them select
-              this.router.navigate(['/select-company']);
-            } else if (user.companies && user.companies.length === 1) {
-              // User has only one company, go to dashboard
-              this.router.navigate(['/dashboard']);
+      if (result.nextStep?.signInStep === 'CONFIRM_SIGN_UP') {
+        this.router.navigate(['/confirm'], { state: { email } });
+        return;
+      }
+
+      // Load user data from /api/me then redirect
+      this.userStore.loadUser();
+      this.userStore.user$
+        .pipe(
+          filter((user) => user !== null),
+          take(1),
+          takeUntil(this.destroy$),
+        )
+        .subscribe((user) => {
+          this.isLoading = false;
+          if (user.companies && user.companies.length > 1) {
+            this.router.navigate(['/select-company']);
+          } else if (!user.companies || user.companies.length === 0) {
+            if (user.canCreateCompany) {
+              this.router.navigate(['/create-company']);
             } else {
-              // No companies, still go to dashboard (might show empty state)
               this.router.navigate(['/dashboard']);
             }
-          });
-      }, 1500);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
+        });
+    } catch (err: any) {
+      this.isLoading = false;
+      // A session is already active — just navigate to the app
+      if (err?.name === 'UserAlreadyAuthenticatedException') {
+        this.router.navigate(['/dashboard']);
+        return;
+      }
+      this.errorMessage = this.mapError(err);
     }
   }
 
   togglePasswordVisibility(): void {
     this.hidePassword = !this.hidePassword;
+  }
+
+  private mapError(err: any): string {
+    switch (err?.name) {
+      case 'NotAuthorizedException':
+        return 'Incorrect email or password.';
+      case 'UserNotFoundException':
+        return 'No account found with this email.';
+      case 'UserNotConfirmedException':
+        return 'Please confirm your email before signing in.';
+      case 'LimitExceededException':
+        return 'Too many attempts. Please try again later.';
+      default:
+        return err?.message ?? 'Sign-in failed. Please try again.';
+    }
   }
 }

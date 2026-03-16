@@ -1,0 +1,141 @@
+<div class="auth-container">
+  <div class="auth-hero">
+    <div class="hero-content">
+      <div class="brand-section">
+        <div class="brand-logo">
+          <span class="logo-mark">SN</span>
+        </div>
+        <h1 class="brand-title">Shift Nook</h1>
+        <p class="brand-tagline">Workforce management made simple</p>
+      </div>
+      <div class="hero-illustration">
+        <div class="feature-card">
+          <mat-icon class="feature-icon">mark_email_read</mat-icon>
+          <div class="feature-text">
+            <h3>Check Your Inbox</h3>
+            <p>We sent a 6-digit code to your email</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <mat-icon class="feature-icon">lock_open</mat-icon>
+          <div class="feature-text">
+            <h3>Verify & Unlock</h3>
+            <p>Enter the code to activate your account</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <mat-icon class="feature-icon">rocket_launch</mat-icon>
+          <div class="feature-text">
+            <h3>You're All Set</h3>
+            <p>Start managing your workforce right away</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-form-container">
+    <div class="auth-form-wrapper">
+      <div class="mobile-brand">
+        <div class="brand-logo-small">
+          <span class="logo-mark-small">SN</span>
+        </div>
+        <h2 class="mobile-brand-title">Shift Nook</h2>
+      </div>
+
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="email-icon-badge">
+            <mat-icon>mail_outline</mat-icon>
+          </div>
+          <h2 class="auth-title">Verify your email</h2>
+          <p class="auth-subtitle">
+            Enter the 6-digit code we sent to
+            <strong>{{ email || 'your email address' }}</strong>
+          </p>
+        </div>
+
+        <form [formGroup]="confirmForm" (ngSubmit)="onSubmit()" class="auth-form">
+          <mat-form-field appearance="outline" class="full-width" *ngIf="!email">
+            <mat-label>Email address</mat-label>
+            <input matInput type="email" formControlName="email" placeholder="you@example.com" autocomplete="email" />
+            <mat-icon matPrefix>email</mat-icon>
+            <mat-error *ngIf="confirmForm.get('email')?.hasError('required')">Email is required</mat-error>
+            <mat-error *ngIf="confirmForm.get('email')?.hasError('email')">Please enter a valid email</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Verification code</mat-label>
+            <input
+              matInput
+              formControlName="code"
+              placeholder="123456"
+              maxlength="6"
+              autocomplete="one-time-code"
+              inputmode="numeric"
+              class="code-input"
+            />
+            <mat-icon matPrefix>pin</mat-icon>
+            <mat-error *ngIf="confirmForm.get('code')?.hasError('required')">Code is required</mat-error>
+            <mat-error *ngIf="confirmForm.get('code')?.hasError('minlength') || confirmForm.get('code')?.hasError('maxlength')">
+              Code must be exactly 6 digits
+            </mat-error>
+          </mat-form-field>
+
+          <div class="error-banner" *ngIf="errorMessage">
+            <mat-icon class="error-icon">error_outline</mat-icon>
+            <span>{{ errorMessage }}</span>
+          </div>
+
+          <div class="success-banner" *ngIf="successMessage">
+            <mat-icon class="success-icon">check_circle_outline</mat-icon>
+            <span>{{ successMessage }}</span>
+          </div>
+
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            class="auth-button"
+            [disabled]="confirmForm.invalid || isLoading"
+          >
+            <span *ngIf="!isLoading">Verify email</span>
+            <span *ngIf="isLoading" class="loading-text">
+              <mat-icon class="spinner">refresh</mat-icon>
+              Verifying...
+            </span>
+          </button>
+        </form>
+
+        <div class="alt-section">
+          <p class="alt-text">
+            Didn't receive a code?
+            <button
+              type="button"
+              class="resend-btn"
+              (click)="resendCode()"
+              [disabled]="isResending"
+            >
+              {{ isResending ? 'Sending...' : 'Resend code' }}
+            </button>
+          </p>
+          <p class="alt-text" style="margin-top: 10px;">
+            <a [routerLink]="['/login']" class="alt-link">← Back to sign in</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="auth-footer">
+        <p class="footer-text">© 2026 Shift Nook. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="#">Privacy</a>
+          <span class="separator">•</span>
+          <a href="#">Terms</a>
+          <span class="separator">•</span>
+          <a href="#">Help</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

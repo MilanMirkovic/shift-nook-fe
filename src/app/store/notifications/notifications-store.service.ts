@@ -1,6 +1,6 @@
 import { Injectable, inject, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Subject, interval, takeUntil, take } from 'rxjs';
+import { Subject, takeUntil, take, distinctUntilChanged } from 'rxjs';
 
 import {
   selectNotifications,
@@ -25,6 +25,8 @@ import { selectSelectedCompanyId } from '../user/user.selectors';
 export class NotificationsStoreService implements OnDestroy {
   private readonly store = inject(Store);
   private readonly destroy$ = new Subject<void>();
+  /** Separate subject so polling can be stopped/restarted without completing destroy$ */
+  private readonly pollingStop$ = new Subject<void>();
   private pollingStarted = false;
 
   // Observables
@@ -38,6 +40,8 @@ export class NotificationsStoreService implements OnDestroy {
 
   ngOnDestroy(): void {
     this.stopPolling();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   /**
@@ -120,29 +124,40 @@ export class NotificationsStoreService implements OnDestroy {
   }
 
   /**
-   * Start polling for unread count every 30 seconds
+   * Start polling for unread count every 30 seconds.
+   * Automatically restarts when the selected company changes.
+   *
+   * NOTE: polling is currently disabled — uncomment the interval() block to re-enable.
    */
   startPolling(): void {
     if (this.pollingStarted) return;
     this.pollingStarted = true;
 
-    // Initial load
-    this.loadUnreadCount();
+    // React to company changes: stop the current poll cycle and start a new one
+    this.store.select(selectSelectedCompanyId)
+      .pipe(distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(companyId => {
+        // Cancel any in-flight poll cycle for the previous company
+        this.pollingStop$.next();
 
-    // Poll every 30 seconds
-    interval(30000)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.loadUnreadCount();
+        // Initial load for the (new) company
+        this.store.dispatch(loadUnreadCount({ companyId: companyId ?? undefined }));
+
+        // Poll every 30 seconds
+        // TODO: uncomment when polling should be re-enabled
+        // interval(30000)
+        //   .pipe(takeUntil(this.pollingStop$), takeUntil(this.destroy$))
+        //   .subscribe(() => {
+        //     this.store.dispatch(loadUnreadCount({ companyId: companyId ?? undefined }));
+        //   });
       });
   }
 
   /**
-   * Stop polling
+   * Stop polling (can be safely called and restarted afterwards)
    */
   stopPolling(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.pollingStop$.next();
     this.pollingStarted = false;
   }
 }

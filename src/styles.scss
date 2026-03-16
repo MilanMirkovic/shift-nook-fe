@@ -101,7 +101,7 @@ body {
   &.snackbar-error,
   &.snackbar-warning,
   &.snackbar-info {
-    min-width: 344px !important;
+    min-width: min(344px, 90vw) !important;
     padding: 0 !important;
     max-width: 672px !important;
     margin: 0 !important;

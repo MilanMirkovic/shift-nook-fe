@@ -15,6 +15,7 @@ import { NotificationBellComponent } from './shared/components/notification-bell
 import { CommonModule } from '@angular/common';
 import { CompanyWorkSessionsStoreService } from './store/company-work-sessions/company-work-sessions-store.service';
 import { UserStoreService } from './store/user/user-store.service';
+import { AuthService } from './core/auth/auth.service';
 import { CompanyRole } from './shared/models/company-role';
 
 @Component({
@@ -54,6 +55,7 @@ export class App implements OnInit {
   private readonly router = inject(Router);
   private readonly workSessionStore = inject(CompanyWorkSessionsStoreService);
   private readonly userStore = inject(UserStoreService);
+  private readonly authService = inject(AuthService);
 
   protected readonly sidenavMode = computed(() => (this.isHandset() ? 'over' : 'side'));
 
@@ -95,8 +97,12 @@ export class App implements OnInit {
   }
 
   ngOnInit(): void {
-    // Load current active work session on app startup
-    this.workSessionStore.loadCurrentSession();
+    // Check real auth state (Amplify/Cognito) before hitting protected endpoints
+    this.authService.isAuthenticated().then(isAuth => {
+      if (isAuth) {
+        this.workSessionStore.loadCurrentSession();
+      }
+    });
   }
 
   protected toggleNavigation(): void {

@@ -424,3 +424,47 @@
     border-radius: 16px;
   }
 }
+
+// ─── Error banner ─────────────────────────────────────────────────────────────
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #dc2626;
+  font-size: 0.875rem;
+
+  .error-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+}
+
+// ─── Sign-up section ──────────────────────────────────────────────────────────
+.signup-section {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.signup-text {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.signup-link {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+  }
+}

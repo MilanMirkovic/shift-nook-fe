@@ -1,6 +1,5 @@
-<div class="login-container">
-  <!-- Left side - Branding & Hero -->
-  <div class="login-hero">
+<div class="auth-container">
+  <div class="auth-hero">
     <div class="hero-content">
       <div class="brand-section">
         <div class="brand-logo">
@@ -9,7 +8,6 @@
         <h1 class="brand-title">Shift Nook</h1>
         <p class="brand-tagline">Workforce management made simple</p>
       </div>
-
       <div class="hero-illustration">
         <div class="feature-card">
           <mat-icon class="feature-icon">schedule</mat-icon>
@@ -36,10 +34,8 @@
     </div>
   </div>
 
-  <!-- Right side - Login Form -->
-  <div class="login-form-container">
-    <div class="login-form-wrapper">
-      <!-- Mobile brand (hidden on desktop) -->
+  <div class="auth-form-container">
+    <div class="auth-form-wrapper">
       <div class="mobile-brand">
         <div class="brand-logo-small">
           <span class="logo-mark-small">SN</span>
@@ -47,104 +43,82 @@
         <h2 class="mobile-brand-title">Shift Nook</h2>
       </div>
 
-      <div class="login-card">
-        <div class="login-header">
-          <h2 class="login-title">Welcome back</h2>
-          <p class="login-subtitle">Sign in to your account to continue</p>
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2 class="auth-title">Create an account</h2>
+          <p class="auth-subtitle">Get started with Shift Nook today</p>
         </div>
 
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-          <!-- Email Field -->
+        <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="auth-form">
+          <div class="name-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>First name</mat-label>
+              <input matInput formControlName="firstName" placeholder="Jane" autocomplete="given-name" />
+              <mat-error *ngIf="signupForm.get('firstName')?.hasError('required')">First name is required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Last name</mat-label>
+              <input matInput formControlName="lastName" placeholder="Doe" autocomplete="family-name" />
+              <mat-error *ngIf="signupForm.get('lastName')?.hasError('required')">Last name is required</mat-error>
+            </mat-form-field>
+          </div>
+
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Email address</mat-label>
-            <input
-              matInput
-              type="email"
-              formControlName="email"
-              placeholder="you@example.com"
-              autocomplete="email"
-            />
+            <input matInput type="email" formControlName="email" placeholder="you@example.com" autocomplete="email" />
             <mat-icon matPrefix>email</mat-icon>
-            <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
-              Email is required
-            </mat-error>
-            <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
-              Please enter a valid email
-            </mat-error>
+            <mat-error *ngIf="signupForm.get('email')?.hasError('required')">Email is required</mat-error>
+            <mat-error *ngIf="signupForm.get('email')?.hasError('email')">Please enter a valid email</mat-error>
           </mat-form-field>
 
-          <!-- Password Field -->
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Password</mat-label>
             <input
               matInput
               [type]="hidePassword ? 'password' : 'text'"
               formControlName="password"
-              placeholder="Enter your password"
-              autocomplete="current-password"
+              placeholder="Min. 8 characters"
+              autocomplete="new-password"
             />
             <mat-icon matPrefix>lock</mat-icon>
-            <button
-              mat-icon-button
-              matSuffix
-              type="button"
-              (click)="togglePasswordVisibility()"
-              [attr.aria-label]="'Toggle password visibility'"
-            >
+            <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()">
               <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
             </button>
-            <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
-              Password is required
-            </mat-error>
-            <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')">
-              Password must be at least 6 characters
-            </mat-error>
+            <mat-error *ngIf="signupForm.get('password')?.hasError('required')">Password is required</mat-error>
+            <mat-error *ngIf="signupForm.get('password')?.hasError('minlength')">Password must be at least 8 characters</mat-error>
           </mat-form-field>
 
-          <!-- Remember me & Forgot password -->
-          <div class="form-options">
-            <mat-checkbox formControlName="rememberMe" color="primary">
-              Remember me
-            </mat-checkbox>
-            <a [routerLink]="['/forgot-password']" class="forgot-link">Forgot password?</a>
-          </div>
-
-          <!-- Error message -->
           <div class="error-banner" *ngIf="errorMessage">
             <mat-icon class="error-icon">error_outline</mat-icon>
             <span>{{ errorMessage }}</span>
           </div>
 
-          <!-- Submit Button -->
           <button
             mat-flat-button
             color="primary"
             type="submit"
-            class="login-button"
-            [disabled]="loginForm.invalid || isLoading"
+            class="auth-button"
+            [disabled]="signupForm.invalid || isLoading"
           >
-            <span *ngIf="!isLoading">Sign in</span>
+            <span *ngIf="!isLoading">Create account</span>
             <span *ngIf="isLoading" class="loading-text">
               <mat-icon class="spinner">refresh</mat-icon>
-              Signing in...
+              Creating account...
             </span>
           </button>
         </form>
 
-        <!-- Sign up link -->
-        <div class="signup-section">
-          <p class="signup-text">
-            Don't have an account?
-            <a [routerLink]="['/signup']" class="signup-link">Sign up</a>
+        <div class="alt-section">
+          <p class="alt-text">
+            Already have an account?
+            <a [routerLink]="['/login']" class="alt-link">Sign in</a>
           </p>
         </div>
       </div>
 
-      <!-- Footer -->
-      <div class="login-footer">
-        <p class="footer-text">
-          © 2026 Shift Nook. All rights reserved.
-        </p>
+      <div class="auth-footer">
+        <p class="footer-text">© 2026 Shift Nook. All rights reserved.</p>
         <div class="footer-links">
           <a href="#">Privacy</a>
           <span class="separator">•</span>
@@ -156,3 +130,4 @@
     </div>
   </div>
 </div>
+

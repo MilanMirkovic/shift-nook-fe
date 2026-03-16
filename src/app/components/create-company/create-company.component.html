@@ -1,0 +1,174 @@
+<div class="page">
+
+  <!-- ── Left brand rail ──────────────────────────────────────────────────── -->
+  <aside class="rail">
+    <div class="rail__inner">
+      <div class="rail__logo">
+        <span class="logo-mark">SN</span>
+      </div>
+
+      <div class="rail__copy">
+        <h1 class="rail__title">Shift<br /><em>Nook</em></h1>
+        <p class="rail__tagline">Your workforce,<br />beautifully managed.</p>
+      </div>
+
+      <ul class="rail__steps">
+        <li class="step step--done">
+          <span class="step__dot"><mat-icon>check</mat-icon></span>
+          <div class="step__text">
+            <strong>Account created</strong>
+            <span>You're signed in and verified</span>
+          </div>
+        </li>
+        <li class="step step--active">
+          <span class="step__dot"><mat-icon>domain_add</mat-icon></span>
+          <div class="step__text">
+            <strong>Create your company</strong>
+            <span>Set up your workspace now</span>
+          </div>
+        </li>
+        <li class="step step--upcoming">
+          <span class="step__dot">3</span>
+          <div class="step__text">
+            <strong>Invite your team</strong>
+            <span>Add workers and managers</span>
+          </div>
+        </li>
+        <li class="step step--upcoming">
+          <span class="step__dot">4</span>
+          <div class="step__text">
+            <strong>Start scheduling</strong>
+            <span>Manage shifts and jobsites</span>
+          </div>
+        </li>
+      </ul>
+
+      <div class="rail__footer">
+        <p>Need help? <a href="#">Contact Support</a></p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main form area ───────────────────────────────────────────────────── -->
+  <main class="main">
+    <div class="form-wrap">
+
+      <!-- Header -->
+      <div class="form-head">
+        <div class="form-head__badge">
+          <mat-icon>domain_add</mat-icon>
+        </div>
+        <div>
+          <h2 class="form-head__title">Create your company</h2>
+          <p class="form-head__sub">Fill in your company details. Only the name is required — you can update everything later.</p>
+        </div>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off" novalidate>
+
+        <!-- ── Section: Identity ── -->
+        <div class="section">
+          <div class="section__label">
+            <span class="section__num">01</span>
+            <span class="section__title">Identity</span>
+          </div>
+
+          <div class="fields">
+            <!-- Name (full-width) -->
+            <mat-form-field appearance="outline" class="field field--full">
+              <mat-label>Company name <span class="req">*</span></mat-label>
+              <mat-icon matPrefix>business</mat-icon>
+              <input matInput formControlName="name" placeholder="e.g. Acme Construction Ltd." maxlength="255" />
+              <mat-hint align="end">{{ form.get('name')!.value.length }}/255</mat-hint>
+              <mat-error *ngIf="form.get('name')?.hasError('required')">Company name is required</mat-error>
+              <mat-error *ngIf="form.get('name')?.hasError('maxlength')">Max 255 characters</mat-error>
+            </mat-form-field>
+
+            <!-- Email -->
+            <mat-form-field appearance="outline" class="field">
+              <mat-label>Business email</mat-label>
+              <mat-icon matPrefix>email</mat-icon>
+              <input matInput type="email" formControlName="email" placeholder="info@company.com" maxlength="255" />
+              <mat-error *ngIf="form.get('email')?.hasError('email')">Enter a valid email address</mat-error>
+              <mat-error *ngIf="form.get('email')?.hasError('maxlength')">Max 255 characters</mat-error>
+            </mat-form-field>
+
+            <!-- Phone -->
+            <mat-form-field appearance="outline" class="field">
+              <mat-label>Phone number</mat-label>
+              <mat-icon matPrefix>phone</mat-icon>
+              <input matInput type="tel" formControlName="phone" placeholder="+1 555 000 0000" maxlength="50" />
+              <mat-error *ngIf="form.get('phone')?.hasError('maxlength')">Max 50 characters</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- ── Section: Location & Web ── -->
+        <div class="section">
+          <div class="section__label">
+            <span class="section__num">02</span>
+            <span class="section__title">Location &amp; Web</span>
+          </div>
+
+          <div class="fields">
+            <!-- Address (full-width) -->
+            <mat-form-field appearance="outline" class="field field--full">
+              <mat-label>Address</mat-label>
+              <mat-icon matPrefix>location_on</mat-icon>
+              <textarea
+                matInput
+                formControlName="address"
+                placeholder="123 Main St, City, State, Country"
+                maxlength="500"
+                rows="2"
+                cdkTextareaAutosize
+              ></textarea>
+              <mat-hint align="end">{{ form.get('address')!.value.length }}/500</mat-hint>
+              <mat-error *ngIf="form.get('address')?.hasError('maxlength')">Max 500 characters</mat-error>
+            </mat-form-field>
+
+            <!-- Website (full-width) -->
+            <mat-form-field appearance="outline" class="field field--full">
+              <mat-label>Website</mat-label>
+              <mat-icon matPrefix>language</mat-icon>
+              <input matInput type="url" formControlName="website" placeholder="https://www.yourcompany.com" maxlength="1024" />
+              <mat-error *ngIf="form.get('website')?.hasError('url')">Enter a valid URL (must start with http:// or https://)</mat-error>
+              <mat-error *ngIf="form.get('website')?.hasError('maxlength')">Max 1024 characters</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Error banner -->
+        <div class="error-banner" *ngIf="errorMessage">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+          <button
+            mat-flat-button
+            type="submit"
+            class="btn-submit"
+            [disabled]="isLoading"
+          >
+            <ng-container *ngIf="!isLoading">
+              <mat-icon>rocket_launch</mat-icon>
+              Create company
+            </ng-container>
+            <ng-container *ngIf="isLoading">
+              <mat-spinner diameter="20" strokeWidth="2"></mat-spinner>
+              Creating…
+            </ng-container>
+          </button>
+
+          <p class="actions__note">
+            <mat-icon>info_outline</mat-icon>
+            You'll be set as the <strong>Owner</strong> of this company.
+          </p>
+        </div>
+
+      </form>
+    </div>
+  </main>
+</div>
