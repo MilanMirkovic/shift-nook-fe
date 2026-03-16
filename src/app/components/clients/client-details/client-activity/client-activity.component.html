@@ -1,0 +1,88 @@
+<div class="activity-header">
+  <div>
+    <h2>Activity Timeline</h2>
+    <p class="activity-subtitle">Track all interactions and changes for this client</p>
+  </div>
+  <button mat-stroked-button (click)="toggleFilters()">
+    <mat-icon>{{ showFilters ? 'filter_list_off' : 'filter_list' }}</mat-icon>
+    {{ showFilters ? 'Hide Filters' : 'Show Filters' }}
+  </button>
+</div>
+
+<div *ngIf="showFilters" class="activity-filters">
+  <mat-form-field appearance="outline">
+    <mat-label>Start Date</mat-label>
+    <input matInput [matDatepicker]="startPicker" [(ngModel)]="startDate">
+    <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+    <mat-datepicker #startPicker></mat-datepicker>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>End Date</mat-label>
+    <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate">
+    <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+    <mat-datepicker #endPicker></mat-datepicker>
+  </mat-form-field>
+  <div class="filter-actions">
+    <button mat-flat-button color="primary" (click)="applyFilters()">
+      <mat-icon>search</mat-icon>
+      Apply Filters
+    </button>
+    <button mat-stroked-button (click)="clearFilters()">
+      <mat-icon>clear</mat-icon>
+      Clear
+    </button>
+  </div>
+</div>
+
+<div *ngIf="activitiesLoading; else activityContent" class="loading-state">
+  <mat-spinner diameter="48"></mat-spinner>
+  <p>Loading activity timeline...</p>
+</div>
+
+<ng-template #activityContent>
+  <div *ngIf="activitiesError; else activityList" class="empty-state">
+    <div class="empty-state__icon"><mat-icon>error</mat-icon></div>
+    <h3 class="empty-state__title">Error Loading Activities</h3>
+    <p class="empty-state__description">{{ activitiesError }}</p>
+  </div>
+
+  <ng-template #activityList>
+    <div *ngIf="activities.length === 0" class="empty-state">
+      <div class="empty-state__icon"><mat-icon>history</mat-icon></div>
+      <h3 class="empty-state__title">No activity yet</h3>
+      <p class="empty-state__description">Activity timeline will appear here as you interact with this client</p>
+    </div>
+
+    <div *ngIf="activities.length > 0" class="activity-timeline">
+      <div *ngFor="let activity of activities" class="activity-item" [ngClass]="getCategoryClass(activity.category)">
+        <div class="activity-item__icon">
+          <mat-icon>{{ getActivityIcon(activity.type) }}</mat-icon>
+        </div>
+        <div class="activity-item__content">
+          <div class="activity-item__header">
+            <h4 class="activity-item__title">{{ activity.title }}</h4>
+            <span class="activity-item__time">{{ activity.timestamp | date:'MMM d, yyyy • h:mm a' }}</span>
+          </div>
+          <p class="activity-item__description">{{ activity.description }}</p>
+          <div class="activity-item__meta">
+            <span class="activity-badge" [ngClass]="getBadgeClass(activity.category)">{{ activity.category }}</span>
+            <span *ngIf="activity.metadata['amount']" class="activity-amount"
+                  [ngClass]="activity.metadata['amount'] > 0 ? 'activity-amount--positive' : 'activity-amount--negative'">
+              {{ activity.metadata['amount'] | currency }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="hasMoreActivities" class="load-more-container">
+        <button mat-stroked-button (click)="loadMoreActivities()" [disabled]="loadingMore">
+          <mat-spinner *ngIf="loadingMore" diameter="20"></mat-spinner>
+          <mat-icon *ngIf="!loadingMore">expand_more</mat-icon>
+          {{ loadingMore ? 'Loading...' : 'Load More Activities' }}
+        </button>
+        <p class="load-more-info">Showing {{ activities.length }} of {{ totalActivities }} activities</p>
+      </div>
+    </div>
+  </ng-template>
+</ng-template>
+

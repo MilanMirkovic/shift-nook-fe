@@ -1,0 +1,94 @@
+<ng-container *ngIf="{ estimates: estimates$ | async, loading: estimatesLoading$ | async, error: estimatesError$ | async } as vm">
+
+  <!-- Header -->
+  <div class="estimates-header">
+    <div>
+      <h2>Estimates</h2>
+      <p class="estimates-subtitle">
+        {{ (vm.estimates?.length || 0) }} estimate{{ (vm.estimates?.length || 0) !== 1 ? 's' : '' }} for {{ clientName }}
+      </p>
+    </div>
+    <button mat-flat-button color="primary" (click)="onAddEstimate()">
+      <mat-icon>add</mat-icon>
+      New Estimate
+    </button>
+  </div>
+
+  <div *ngIf="vm.loading" class="loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading estimates…</p>
+  </div>
+
+  <div *ngIf="vm.error && !vm.loading" class="empty-state">
+    <div class="empty-state__icon"><mat-icon>error_outline</mat-icon></div>
+    <h3 class="empty-state__title">Could not load estimates</h3>
+    <p class="empty-state__description">{{ vm.error }}</p>
+  </div>
+
+  <div *ngIf="!vm.loading && !vm.error && vm.estimates?.length === 0" class="empty-state">
+    <div class="empty-state__icon"><mat-icon>request_quote</mat-icon></div>
+    <h3 class="empty-state__title">No estimates yet</h3>
+    <p class="empty-state__description">Create your first estimate for {{ clientName }}</p>
+    <button mat-flat-button color="primary" (click)="onAddEstimate()">
+      <mat-icon>add</mat-icon>
+      New Estimate
+    </button>
+  </div>
+
+  <div *ngIf="!vm.loading && !vm.error && vm.estimates && vm.estimates.length > 0" class="estimates-table-wrap">
+    <table class="estimates-table">
+      <thead>
+        <tr>
+          <th class="col-num">#</th>
+          <th class="col-title">Title</th>
+          <th class="col-date">Date</th>
+          <th class="col-items">Items</th>
+          <th class="col-total">Total</th>
+          <th class="col-status">Status</th>
+          <th class="col-actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let estimate of vm.estimates" class="estimate-row">
+          <td class="col-num">
+            <span class="est-number">#{{ estimate.estimateNumber }}</span>
+          </td>
+          <td class="col-title">
+            <div class="est-title-cell">
+              <span class="est-title">{{ estimate.title }}</span>
+              <span *ngIf="estimate.notes" class="est-notes">{{ estimate.notes }}</span>
+            </div>
+          </td>
+          <td class="col-date">{{ estimate.estimateDate | date:'MMM d, yyyy' }}</td>
+          <td class="col-items">{{ estimate.lineItems.length }} item{{ estimate.lineItems.length !== 1 ? 's' : '' }}</td>
+          <td class="col-total"><span class="est-total">{{ estimate.total | currency }}</span></td>
+          <td class="col-status">
+            <span class="estimate-status-badge" [ngClass]="getEstimateStatusClass(estimate.status)">
+              {{ estimate.status }}
+            </span>
+          </td>
+          <td class="col-actions">
+            <div class="row-actions">
+              <button mat-icon-button class="action-btn action-btn--edit" matTooltip="Edit estimate" (click)="onEditEstimate(estimate)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn action-btn--pdf" matTooltip="Download PDF"
+                [disabled]="pdfDownloading.has(estimate.id)" (click)="onDownloadEstimatePdf(estimate)">
+                <mat-spinner *ngIf="pdfDownloading.has(estimate.id)" diameter="18"></mat-spinner>
+                <mat-icon *ngIf="!pdfDownloading.has(estimate.id)">picture_as_pdf</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn action-btn--delete" matTooltip="Delete estimate" (click)="onDeleteEstimate(estimate)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="estimates-table-footer">
+      <span>{{ vm.estimates.length }} estimate{{ vm.estimates.length !== 1 ? 's' : '' }}</span>
+    </div>
+  </div>
+
+</ng-container>
+

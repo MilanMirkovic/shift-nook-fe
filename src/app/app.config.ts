@@ -19,6 +19,7 @@ import {activityTimelineReducer} from './store/activity-timeline/activity-timeli
 import { companyWorkSessionsReducer } from './store/company-work-sessions/company-work-sessions.reducer';
 import { notificationsReducer } from './store/notifications/notifications.reducer';
 import { estimatesReducer } from './store/estimates/estimates.reducer';
+import { invoicesReducer } from './store/invoices/invoices.reducer';
 
 // Import effects
 import { UserEffects } from './store/user/user.effects';
@@ -31,6 +32,7 @@ import { ActivityTimelineEffects } from './store/activity-timeline/activity-time
 import { CompanyWorkSessionsEffects } from './store/company-work-sessions/company-work-sessions.effects';
 import { NotificationsEffects } from './store/notifications/notifications.effects';
 import { EstimatesEffects } from './store/estimates/estimates.effects';
+import { InvoicesEffects } from './store/invoices/invoices.effects';
 
 // Import feature keys
 import { USER_FEATURE_KEY } from './store/user/user.selectors';
@@ -42,6 +44,7 @@ import { CLIENTS_FEATURE_KEY } from './store/clients/clients.selectors';
 import { ACTIVITY_TIMELINE_FEATURE_KEY } from './store/activity-timeline/activity-timeline.selectors';
 import { NOTIFICATIONS_FEATURE_KEY } from './store/notifications/notifications.selectors';
 import { ESTIMATES_FEATURE_KEY } from './store/estimates/estimates.selectors';
+import { INVOICES_FEATURE_KEY } from './store/invoices/invoices.selectors';
 
 export const COMPANY_WORK_SESSIONS_FEATURE_KEY = 'companyWorkSessions';
 
@@ -61,7 +64,8 @@ export const appConfig: ApplicationConfig = {
       [ACTIVITY_TIMELINE_FEATURE_KEY]: activityTimelineReducer,
       [COMPANY_WORK_SESSIONS_FEATURE_KEY]: companyWorkSessionsReducer,
       [NOTIFICATIONS_FEATURE_KEY]: notificationsReducer,
-      [ESTIMATES_FEATURE_KEY]: estimatesReducer
+      [ESTIMATES_FEATURE_KEY]: estimatesReducer,
+      [INVOICES_FEATURE_KEY]: invoicesReducer,
     }),
     provideEffects([
       UserEffects,
@@ -73,7 +77,8 @@ export const appConfig: ApplicationConfig = {
       ActivityTimelineEffects,
       CompanyWorkSessionsEffects,
       NotificationsEffects,
-      EstimatesEffects
+      EstimatesEffects,
+      InvoicesEffects,
     ]),
     provideStoreDevtools({
       maxAge: 25,

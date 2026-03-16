@@ -1,0 +1,73 @@
+<div class="jobsites-header">
+  <div>
+    <h2>Jobsite Locations</h2>
+    <p class="jobsites-subtitle">Manage work locations for {{ clientName }}</p>
+  </div>
+  <button mat-flat-button color="primary" (click)="onAddJobsite()">
+    <mat-icon>add</mat-icon>
+    Add Jobsite
+  </button>
+</div>
+
+<div *ngIf="jobsitesLoading" class="loading-state">
+  <mat-spinner diameter="48"></mat-spinner>
+  <p>Loading jobsites...</p>
+</div>
+
+<div *ngIf="jobsitesError && !jobsitesLoading" class="empty-state">
+  <div class="empty-state__icon"><mat-icon>error</mat-icon></div>
+  <h3 class="empty-state__title">Error Loading Jobsites</h3>
+  <p class="empty-state__description">{{ jobsitesError }}</p>
+</div>
+
+<div *ngIf="!jobsitesLoading && !jobsitesError && jobsites.length === 0" class="empty-state">
+  <div class="empty-state__icon"><mat-icon>location_on</mat-icon></div>
+  <h3 class="empty-state__title">No jobsites yet</h3>
+  <p class="empty-state__description">Add jobsite locations for {{ clientName }}</p>
+  <button mat-flat-button color="primary" (click)="onAddJobsite()">
+    <mat-icon>add</mat-icon>
+    Add Jobsite
+  </button>
+</div>
+
+<div *ngIf="!jobsitesLoading && !jobsitesError && jobsites.length > 0" class="jobsites-grid">
+  <div *ngFor="let jobsite of jobsites" class="jobsite-card" [routerLink]="['/jobsites', jobsite.id]">
+    <div class="jobsite-card__header">
+      <div class="jobsite-card__icon">
+        <mat-icon>location_on</mat-icon>
+      </div>
+      <div class="jobsite-card__title">
+        <h3>{{ jobsite.name }}</h3>
+        <p class="jobsite-card__date">Added {{ jobsite.createdAt | date:'MMM d, yyyy' }}</p>
+      </div>
+    </div>
+
+    <div class="jobsite-card__content">
+      <div class="jobsite-card__info">
+        <mat-icon class="info-icon">place</mat-icon>
+        <span>{{ jobsite.address }}</span>
+      </div>
+      <div class="jobsite-card__coordinates" *ngIf="jobsite.latitude && jobsite.longitude">
+        <mat-icon class="info-icon">my_location</mat-icon>
+        <span>{{ jobsite.latitude }}, {{ jobsite.longitude }}</span>
+      </div>
+    </div>
+
+    <div class="jobsite-card__actions" (click)="$event.stopPropagation()">
+      <button mat-icon-button color="primary" matTooltip="View on map">
+        <mat-icon>map</mat-icon>
+      </button>
+      <button mat-icon-button color="primary" matTooltip="Edit jobsite" (click)="onEditJobsite(jobsite)">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-icon-button color="warn" matTooltip="Delete jobsite" (click)="onDeleteJobsite(jobsite)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="jobsites.length > 0" class="jobsites-footer">
+  <p>Showing {{ jobsites.length }} of {{ totalJobsites }} jobsite{{ totalJobsites !== 1 ? 's' : '' }}</p>
+</div>
+

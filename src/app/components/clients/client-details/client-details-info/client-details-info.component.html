@@ -1,0 +1,32 @@
+<h2>Client Information</h2>
+<div class="details-grid">
+  <div class="detail-card">
+    <div class="detail-card__icon"><mat-icon>business</mat-icon></div>
+    <div class="detail-card__content">
+      <label>Company Name</label>
+      <p>{{ client.name }}</p>
+    </div>
+  </div>
+  <div class="detail-card">
+    <div class="detail-card__icon"><mat-icon>email</mat-icon></div>
+    <div class="detail-card__content">
+      <label>Email Address</label>
+      <p>{{ client.email }}</p>
+    </div>
+  </div>
+  <div class="detail-card" *ngIf="client.phone">
+    <div class="detail-card__icon"><mat-icon>phone</mat-icon></div>
+    <div class="detail-card__content">
+      <label>Phone Number</label>
+      <p>{{ client.phone }}</p>
+    </div>
+  </div>
+  <div class="detail-card" *ngIf="client.createdAt">
+    <div class="detail-card__icon"><mat-icon>calendar_today</mat-icon></div>
+    <div class="detail-card__content">
+      <label>Client Since</label>
+      <p>{{ client.createdAt | date:'MMMM d, yyyy' }}</p>
+    </div>
+  </div>
+</div>
+

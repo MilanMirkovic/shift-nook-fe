@@ -1,0 +1,237 @@
+// ─── Invoices section ─────────────────────────────────────────────────────────
+.invoices-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 1rem;
+
+  h2 { margin-bottom: 0.5rem; }
+
+  .invoices-subtitle {
+    color: var(--sn-text-muted);
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  button { flex-shrink: 0; }
+}
+
+.invoices-table-wrap {
+  border: 1px solid #e8eaf0;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.invoices-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  thead tr {
+    background: #f8f9fc;
+    border-bottom: 2px solid #e8eaf0;
+
+    th {
+      padding: 11px 16px;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #94a3b8;
+      white-space: nowrap;
+      text-align: left;
+
+      &.col-total,
+      &.col-items,
+      &.col-date,
+      &.col-due { text-align: right; }
+      &.col-status { text-align: center; }
+      &.col-actions { text-align: right; }
+    }
+  }
+
+  tbody .invoice-row {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s;
+
+    &:last-child { border-bottom: none; }
+    &:hover { background: #fafbff; }
+
+    td {
+      padding: 13px 16px;
+      vertical-align: middle;
+      color: var(--sn-text);
+
+      &.col-total,
+      &.col-items,
+      &.col-date,
+      &.col-due { text-align: right; }
+      &.col-status { text-align: center; }
+      &.col-actions { text-align: right; }
+    }
+  }
+}
+
+.col-num     { width: 60px; }
+.col-date    { width: 130px; white-space: nowrap; color: #94a3b8 !important; font-size: 0.825rem !important; }
+.col-due     { width: 130px; white-space: nowrap; color: #94a3b8 !important; font-size: 0.825rem !important; }
+.col-items   { width: 90px; color: #94a3b8 !important; font-size: 0.825rem !important; }
+.col-total   { width: 110px; }
+.col-status  { width: 110px; }
+.col-actions { width: 90px; }
+
+.inv-number {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #94a3b8;
+  font-family: monospace;
+  letter-spacing: 0.02em;
+}
+
+.inv-title-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.inv-title {
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+.inv-notes {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+.inv-total {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: #2563eb;
+}
+
+.row-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  .invoice-row:hover & { opacity: 1; }
+}
+
+.action-btn {
+  width: 32px; height: 32px; line-height: 32px;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  &.action-btn--edit mat-icon   { color: #2563eb; }
+  &.action-btn--pdf mat-icon    { color: #7c3aed; }
+  &.action-btn--delete mat-icon { color: #ef4444; }
+}
+
+.invoices-table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: #f8f9fc;
+  border-top: 1px solid #e8eaf0;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+// ─── Status badges ────────────────────────────────────────────────────────────
+.invoice-status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+
+  &.invoice-status--paid {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+  &.invoice-status--sent {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+  &.invoice-status--draft {
+    background: rgba(148, 163, 184, 0.1);
+    color: #64748b;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+  &.invoice-status--overdue {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+  &.invoice-status--void {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+}
+
+// ─── Shared states ────────────────────────────────────────────────────────────
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  gap: 16px;
+
+  p { color: #94a3b8; font-size: 0.9rem; margin: 0; }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  gap: 8px;
+
+  &__icon {
+    width: 72px; height: 72px;
+    border-radius: 18px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 12px;
+    mat-icon { font-size: 2rem; width: 2rem; height: 2rem; color: #cbd5e1; }
+  }
+
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px;
+  }
+
+  &__description {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin: 0 0 20px;
+    max-width: 380px;
+    line-height: 1.6;
+  }
+
+  button { gap: 6px; }
+}
+

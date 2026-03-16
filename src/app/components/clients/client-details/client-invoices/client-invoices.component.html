@@ -1,0 +1,96 @@
+<ng-container *ngIf="{ invoices: invoices$ | async, loading: invoicesLoading$ | async, error: invoicesError$ | async } as vm">
+
+  <!-- Header -->
+  <div class="invoices-header">
+    <div>
+      <h2>Invoices</h2>
+      <p class="invoices-subtitle">
+        {{ (vm.invoices?.length || 0) }} invoice{{ (vm.invoices?.length || 0) !== 1 ? 's' : '' }} for {{ clientName }}
+      </p>
+    </div>
+    <button mat-flat-button color="primary" (click)="onAddInvoice()">
+      <mat-icon>add</mat-icon>
+      New Invoice
+    </button>
+  </div>
+
+  <div *ngIf="vm.loading" class="loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading invoices…</p>
+  </div>
+
+  <div *ngIf="vm.error && !vm.loading" class="empty-state">
+    <div class="empty-state__icon"><mat-icon>error_outline</mat-icon></div>
+    <h3 class="empty-state__title">Could not load invoices</h3>
+    <p class="empty-state__description">{{ vm.error }}</p>
+  </div>
+
+  <div *ngIf="!vm.loading && !vm.error && vm.invoices?.length === 0" class="empty-state">
+    <div class="empty-state__icon"><mat-icon>receipt_long</mat-icon></div>
+    <h3 class="empty-state__title">No invoices yet</h3>
+    <p class="empty-state__description">Create your first invoice for {{ clientName }}</p>
+    <button mat-flat-button color="primary" (click)="onAddInvoice()">
+      <mat-icon>add</mat-icon>
+      New Invoice
+    </button>
+  </div>
+
+  <div *ngIf="!vm.loading && !vm.error && vm.invoices && vm.invoices.length > 0" class="invoices-table-wrap">
+    <table class="invoices-table">
+      <thead>
+        <tr>
+          <th class="col-num">#</th>
+          <th class="col-title">Title</th>
+          <th class="col-date">Date</th>
+          <th class="col-due">Due</th>
+          <th class="col-items">Items</th>
+          <th class="col-total">Total</th>
+          <th class="col-status">Status</th>
+          <th class="col-actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let invoice of vm.invoices" class="invoice-row">
+          <td class="col-num">
+            <span class="inv-number">#{{ invoice.invoiceNumber }}</span>
+          </td>
+          <td class="col-title">
+            <div class="inv-title-cell">
+              <span class="inv-title">{{ invoice.title }}</span>
+              <span *ngIf="invoice.notes" class="inv-notes">{{ invoice.notes }}</span>
+            </div>
+          </td>
+          <td class="col-date">{{ invoice.invoiceDate | date:'MMM d, yyyy' }}</td>
+          <td class="col-due">{{ invoice.dueDate | date:'MMM d, yyyy' }}</td>
+          <td class="col-items">{{ invoice.lineItems.length }} item{{ invoice.lineItems.length !== 1 ? 's' : '' }}</td>
+          <td class="col-total"><span class="inv-total">{{ invoice.total | currency }}</span></td>
+          <td class="col-status">
+            <span class="invoice-status-badge" [ngClass]="getInvoiceStatusClass(invoice.status)">
+              {{ invoice.status }}
+            </span>
+          </td>
+          <td class="col-actions">
+            <div class="row-actions">
+              <button mat-icon-button class="action-btn action-btn--edit" matTooltip="Edit invoice" (click)="onEditInvoice(invoice)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn action-btn--pdf" matTooltip="Download PDF"
+                [disabled]="pdfDownloading.has(invoice.id)" (click)="onDownloadInvoicePdf(invoice)">
+                <mat-spinner *ngIf="pdfDownloading.has(invoice.id)" diameter="18"></mat-spinner>
+                <mat-icon *ngIf="!pdfDownloading.has(invoice.id)">picture_as_pdf</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn action-btn--delete" matTooltip="Delete invoice" (click)="onDeleteInvoice(invoice)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="invoices-table-footer">
+      <span>{{ vm.invoices.length }} invoice{{ vm.invoices.length !== 1 ? 's' : '' }}</span>
+    </div>
+  </div>
+
+</ng-container>
+

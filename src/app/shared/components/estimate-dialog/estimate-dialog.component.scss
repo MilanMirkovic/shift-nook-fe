@@ -74,10 +74,11 @@
     flex-shrink: 0;
     width: 32px;
     height: 32px;
+    line-height: 32px;
     border-radius: 8px;
     transition: background 0.2s ease, color 0.2s ease;
 
-    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    mat-icon { font-size: 18px; width: 18px; height: 18px; line-height: 18px; }
 
     &:hover { color: #0f172a; background: #f1f5f9; }
   }
