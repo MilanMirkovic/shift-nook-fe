@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Actions, ofType } from '@ngrx/effects';
+import { switchMap, take } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -11,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { environment } from '../../../environments/environment';
 import { UserStoreService } from '../../store/user/user-store.service';
+import { loadUserSuccess } from '../../store/user/user.actions';
 
 function urlValidator(control: AbstractControl): ValidationErrors | null {
   if (!control.value) return null;
@@ -40,10 +43,11 @@ function urlValidator(control: AbstractControl): ValidationErrors | null {
   ],
 })
 export class CreateCompanyComponent {
-  private readonly fb     = inject(FormBuilder);
-  private readonly router = inject(Router);
-  private readonly http   = inject(HttpClient);
+  private readonly fb        = inject(FormBuilder);
+  private readonly router    = inject(Router);
+  private readonly http      = inject(HttpClient);
   private readonly userStore = inject(UserStoreService);
+  private readonly actions$  = inject(Actions);
 
   isLoading    = false;
   errorMessage = '';
@@ -74,10 +78,14 @@ export class CreateCompanyComponent {
       phone:   raw.phone?.trim()    || null,
     };
 
-    this.http.post(`${environment.apiBaseUrl}/companies`, payload).subscribe({
+    this.http.post(`${environment.apiBaseUrl}/companies`, payload).pipe(
+      switchMap(() => {
+        this.userStore.loadUser();
+        return this.actions$.pipe(ofType(loadUserSuccess), take(1));
+      })
+    ).subscribe({
       next: () => {
         this.isLoading = false;
-        this.userStore.loadUser();
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
