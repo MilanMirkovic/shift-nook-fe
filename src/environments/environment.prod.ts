@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiBaseUrl: '/api',
+  apiBaseUrl: 'https://i7cggvdtsm.us-east-1.awsapprunner.com/api',
   cognito: {
     userPoolId: 'us-east-1_KiB8SY9mN',
     userPoolClientId: '3npjs7hkkjad3tnleo21q2imvi',
