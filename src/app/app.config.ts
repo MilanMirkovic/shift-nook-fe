@@ -21,6 +21,7 @@ import { companyWorkSessionsReducer } from './store/company-work-sessions/compan
 import { notificationsReducer } from './store/notifications/notifications.reducer';
 import { estimatesReducer } from './store/estimates/estimates.reducer';
 import { invoicesReducer } from './store/invoices/invoices.reducer';
+import { invitationsReducer, INVITATIONS_FEATURE_KEY } from './store/invitations/invitations.reducer';
 
 // Import effects
 import { UserEffects } from './store/user/user.effects';
@@ -34,6 +35,7 @@ import { CompanyWorkSessionsEffects } from './store/company-work-sessions/compan
 import { NotificationsEffects } from './store/notifications/notifications.effects';
 import { EstimatesEffects } from './store/estimates/estimates.effects';
 import { InvoicesEffects } from './store/invoices/invoices.effects';
+import { InvitationsEffects } from './store/invitations/invitations.effects';
 
 // Import feature keys
 import { USER_FEATURE_KEY } from './store/user/user.selectors';
@@ -67,6 +69,7 @@ export const appConfig: ApplicationConfig = {
       [NOTIFICATIONS_FEATURE_KEY]: notificationsReducer,
       [ESTIMATES_FEATURE_KEY]: estimatesReducer,
       [INVOICES_FEATURE_KEY]: invoicesReducer,
+      [INVITATIONS_FEATURE_KEY]: invitationsReducer,
     }),
     provideEffects([
       UserEffects,
@@ -80,6 +83,7 @@ export const appConfig: ApplicationConfig = {
       NotificationsEffects,
       EstimatesEffects,
       InvoicesEffects,
+      InvitationsEffects,
     ]),
     provideStoreDevtools({
       maxAge: 25,

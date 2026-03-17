@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject } from '@
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil, filter } from 'rxjs';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 
 import { DataTableColumn, DataTableAction } from '../../layout/data-table/data-table.component';
 
@@ -16,7 +17,9 @@ import {
   updatePage
 } from '../../store/company-members/company-members.actions';
 import { CompanyMember } from '../../store/company-members/company-members.models';
-import { selectSelectedCompanyId } from '../../store/user/user.selectors';
+import { selectSelectedCompanyId, selectCurrentUserRole } from '../../store/user/user.selectors';
+import { InviteWorkerDialogComponent } from '../../shared/components/invite-worker-dialog/invite-worker-dialog.component';
+import { CompanyRole } from '../../shared/models/company-role';
 
 @Component({
   selector: 'app-team-members',
@@ -28,12 +31,16 @@ import { selectSelectedCompanyId } from '../../store/user/user.selectors';
 export class TeamMembersComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
   private readonly destroy$ = new Subject<void>();
 
   readonly selectedCompanyId$ = this.store.select(selectSelectedCompanyId);
   readonly members$ = this.store.select(selectMembers);
   readonly total$ = this.store.select(selectTotal);
   readonly loading$ = this.store.select(selectLoading);
+  readonly currentUserRole$ = this.store.select(selectCurrentUserRole);
+
+  protected readonly CompanyRole = CompanyRole;
 
   private companyId: string | null = null;
   private currentQuery: string | null = null;
@@ -141,5 +148,9 @@ export class TeamMembersComponent implements OnInit, OnDestroy {
 
   onRowClick(member: CompanyMember): void {
     this.onViewDetails(member);
+  }
+
+  openInviteDialog(): void {
+    this.dialog.open(InviteWorkerDialogComponent, { width: '480px', disableClose: false });
   }
 }

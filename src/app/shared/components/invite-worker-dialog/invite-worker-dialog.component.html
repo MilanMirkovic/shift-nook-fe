@@ -1,0 +1,64 @@
+<div class="invite-dialog">
+  <div class="dialog-header">
+    <mat-icon class="header-icon">person_add</mat-icon>
+    <div class="header-text">
+      <h2 mat-dialog-title>Invite Worker</h2>
+      <p class="subtitle">Send an email invitation to join your company</p>
+    </div>
+  </div>
+
+  <mat-dialog-content>
+    <form [formGroup]="inviteForm" class="invite-form">
+
+      <div class="form-field">
+        <label class="field-label">Email Address</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>email</mat-icon>
+          <input matInput type="email" formControlName="email" placeholder="worker@example.com" autocomplete="off">
+          @if (getErrorMessage('email')) {
+            <mat-error>{{ getErrorMessage('email') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label">Role</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>badge</mat-icon>
+          <mat-select formControlName="role">
+            @for (opt of roleOptions; track opt.value) {
+              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+            }
+          </mat-select>
+          @if (getErrorMessage('role')) {
+            <mat-error>{{ getErrorMessage('role') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      @if (sendError$ | async; as err) {
+        <div class="send-error">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ err }}</span>
+        </div>
+      }
+
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button (click)="onCancel()" [disabled]="sending$ | async">Cancel</button>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="(sending$ | async) || inviteForm.invalid">
+      @if (sending$ | async) {
+        <mat-spinner diameter="16"></mat-spinner>
+      } @else {
+        Send Invitation
+      }
+    </button>
+  </mat-dialog-actions>
+</div>
+

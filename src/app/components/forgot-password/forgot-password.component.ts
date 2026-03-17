@@ -1,11 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
@@ -21,9 +22,10 @@ import { AuthService } from '../../core/auth/auth.service';
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
+    MatProgressSpinnerModule,
   ],
 })
-export class ForgotPasswordComponent {
+export class ForgotPasswordComponent implements OnInit {
   /** Step 1: enter email → Step 2: enter code + new password */
   step: 1 | 2 = 1;
 
@@ -36,9 +38,18 @@ export class ForgotPasswordComponent {
   hidePassword = true;
   email = '';
 
+  /**
+   * When mode === 'set' the copy changes to "Set your password" and after
+   * completing the flow the user is signed in automatically then redirected
+   * to `returnTo` (restored from the query param or sessionStorage).
+   */
+  mode: 'reset' | 'set' = 'reset';
+  private returnTo = '/login';
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService,
   ) {
     this.emailForm = this.fb.group({
@@ -49,6 +60,48 @@ export class ForgotPasswordComponent {
       code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
     });
+  }
+
+  ngOnInit(): void {
+    const params = this.route.snapshot.queryParamMap;
+
+    // mode param
+    if (params.get('mode') === 'set') {
+      this.mode = 'set';
+    }
+
+    // returnTo param
+    const returnTo = params.get('returnTo');
+    if (returnTo) {
+      this.returnTo = returnTo;
+    }
+
+    // Pre-fill email when coming from the invite flow
+    const emailParam = params.get('email');
+    if (emailParam) {
+      this.email = emailParam;
+      this.emailForm.patchValue({ email: emailParam });
+
+      // Automatically request the code if we already know the email
+      // (worker was pre-provisioned — skip the email-entry step)
+      if (this.mode === 'set') {
+        this.requestCode();
+      }
+    }
+  }
+
+  get pageTitle(): string {
+    return this.mode === 'set' ? 'Set Your Password' : 'Forgot Password';
+  }
+
+  get step2Title(): string {
+    return this.mode === 'set' ? 'Set Your Password' : 'Reset Password';
+  }
+
+  get step2Subtitle(): string {
+    return this.mode === 'set'
+      ? `We sent a verification code to ${this.email}. Enter it below to set your password.`
+      : `Enter the code sent to ${this.email} and choose a new password.`;
   }
 
   async requestCode(): Promise<void> {
@@ -77,7 +130,24 @@ export class ForgotPasswordComponent {
 
     try {
       await this.authService.confirmForgotPassword(this.email, code, newPassword);
-      this.router.navigate(['/login'], { state: { passwordReset: true } });
+
+      if (this.mode === 'set') {
+        // Sign the worker in automatically after setting their password
+        await this.authService.signIn(this.email, newPassword);
+
+        // Restore the pending invite token that was saved before the redirect
+        const pendingToken = sessionStorage.getItem('pendingInviteToken');
+        const destination = this.returnTo;
+
+        if (pendingToken) {
+          sessionStorage.removeItem('pendingInviteToken');
+          this.router.navigate([destination], { queryParams: { token: pendingToken } });
+        } else {
+          this.router.navigate([destination]);
+        }
+      } else {
+        this.router.navigate(['/login'], { state: { passwordReset: true } });
+      }
     } catch (err: any) {
       this.errorMessage = this.mapError(err);
     } finally {

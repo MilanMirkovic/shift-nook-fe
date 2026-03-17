@@ -1,0 +1,67 @@
+.invitations-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #64748b;
+  font-size: 0.875rem;
+  padding: 12px 0;
+}
+
+.invitations-section {
+  margin-top: 24px;
+}
+
+.invitations-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 12px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #f59e0b;
+  }
+}
+
+.invitations-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.invitation-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+
+  .invitation-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .invitation-email {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1e293b;
+  }
+
+  .invitation-role {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: capitalize;
+  }
+}
+

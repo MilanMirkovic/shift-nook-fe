@@ -16,7 +16,15 @@
   (rowClick)="onRowClick($event)"
 >
   <ng-container pageActions>
-    <button mat-flat-button color="primary" type="button">Add member</button>
+    @if ((currentUserRole$ | async) === CompanyRole.OWNER) {
+      <button mat-flat-button color="primary" type="button" (click)="openInviteDialog()">
+        <mat-icon>person_add</mat-icon>
+        Invite Member
+      </button>
+    }
   </ng-container>
 </app-list-page>
 
+@if ((currentUserRole$ | async) === CompanyRole.OWNER && (selectedCompanyId$ | async); as companyId) {
+  <app-pending-invitations [companyId]="companyId"></app-pending-invitations>
+}

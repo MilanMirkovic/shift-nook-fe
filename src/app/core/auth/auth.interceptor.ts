@@ -12,7 +12,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const userStore = inject(UserStoreService);
 
   // Public endpoints — skip
-  if (!req.url.includes('/api/') || req.url.includes('/api/health')) {
+  if (
+    !req.url.includes('/api/') ||
+    req.url.includes('/api/health') ||
+    req.url.includes('/invitations/preview')
+  ) {
     return next(req);
   }
 

@@ -1,0 +1,32 @@
+@if (loading$ | async) {
+  <div class="invitations-loading">
+    <mat-spinner diameter="24"></mat-spinner>
+    <span>Loading pending invitations…</span>
+  </div>
+} @else if ((invitations$ | async)?.length) {
+  <div class="invitations-section">
+    <h3 class="invitations-title">
+      <mat-icon>schedule_send</mat-icon>
+      Pending Invitations
+    </h3>
+    <ul class="invitations-list">
+      @for (invite of invitations$ | async; track trackById($index, invite)) {
+        <li class="invitation-row">
+          <div class="invitation-info">
+            <span class="invitation-email">{{ invite.email }}</span>
+            <span class="invitation-role">{{ invite.role }}</span>
+          </div>
+          <button
+            mat-icon-button
+            color="warn"
+            matTooltip="Revoke invitation"
+            [disabled]="revoking$ | async"
+            (click)="onRevoke(invite)">
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </li>
+      }
+    </ul>
+  </div>
+}
+

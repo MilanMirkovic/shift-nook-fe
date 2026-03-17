@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, filter, take } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { UserStoreService } from '../../store/user/user-store.service';
@@ -17,10 +17,12 @@ export class LoginComponent implements OnInit, OnDestroy {
   isLoading = false;
   errorMessage = '';
   private destroy$ = new Subject<void>();
+  private returnUrl: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService,
     private userStore: UserStoreService,
   ) {
@@ -32,8 +34,9 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
+    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
     if (await this.authService.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigateByUrl(this.returnUrl ?? '/dashboard');
     }
   }
 
@@ -67,6 +70,13 @@ export class LoginComponent implements OnInit, OnDestroy {
         )
         .subscribe((user) => {
           this.isLoading = false;
+
+          // If there is a returnUrl (e.g. from accept-invite), honour it
+          if (this.returnUrl) {
+            this.router.navigateByUrl(this.returnUrl);
+            return;
+          }
+
           if (user.companies && user.companies.length > 1) {
             this.router.navigate(['/select-company']);
           } else if (!user.companies || user.companies.length === 0) {
@@ -81,9 +91,8 @@ export class LoginComponent implements OnInit, OnDestroy {
         });
     } catch (err: any) {
       this.isLoading = false;
-      // A session is already active — just navigate to the app
       if (err?.name === 'UserAlreadyAuthenticatedException') {
-        this.router.navigate(['/dashboard']);
+        this.router.navigateByUrl(this.returnUrl ?? '/dashboard');
         return;
       }
       this.errorMessage = this.mapError(err);

@@ -14,4 +14,13 @@ export class UserApi {
   getCurrentUser(): Observable<User> {
     return this.http.get<User>(`${environment.apiBaseUrl}/me`);
   }
+
+  /**
+   * Update the user profile
+   * @param firstName - The new first name of the user
+   * @param lastName - The new last name of the user
+   */
+  updateProfile(firstName: string, lastName: string): Observable<User> {
+    return this.http.put<User>(`${environment.apiBaseUrl}/me`, { firstName, lastName });
+  }
 }

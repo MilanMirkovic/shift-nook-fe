@@ -32,6 +32,13 @@ export const routes: Routes = [
         (m) => m.ForgotPasswordComponent,
       ),
   },
+  {
+    path: 'auth/reset-password',
+    loadComponent: () =>
+      import('./components/forgot-password/forgot-password.component').then(
+        (m) => m.ForgotPasswordComponent,
+      ),
+  },
 
   // ── Protected routes ──────────────────────────────────────────────────────
   {
@@ -103,6 +110,17 @@ export const routes: Routes = [
       import('./components/create-company/create-company.component').then(
         (m) => m.CreateCompanyComponent,
       ),
+  },
+  {
+    path: 'accept-invite',
+    loadComponent: () =>
+      import('./components/accept-invite/accept-invite.component').then((m) => m.AcceptInviteComponent),
+  },
+  {
+    path: 'companies/:companyId',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/company-redirect.page').then((m) => m.CompanyRedirectPage),
   },
   {
     path: '**',

@@ -1,0 +1,132 @@
+.accept-invite-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  padding: 24px;
+}
+
+.accept-invite-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: 48px 40px;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.state-icon {
+  font-size: 56px;
+  width: 56px;
+  height: 56px;
+
+  &--error {
+    color: #dc2626;
+  }
+}
+
+.state-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.state-message {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.state--loading {
+  mat-spinner {
+    margin-bottom: 8px;
+  }
+}
+
+// ── Preview state ──────────────────────────────────────────────────────────────
+.invite-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.invite-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  color: #2563eb;
+}
+
+.invite-email {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.accept-btn {
+  margin-top: 8px;
+  height: 44px;
+  font-size: 1rem;
+  min-width: 180px;
+}
+
+// ── Profile form ───────────────────────────────────────────────────────────────
+.state--form {
+  align-items: stretch;
+  text-align: left;
+
+  .state-title,
+  .state-message {
+    text-align: center;
+    align-self: center;
+  }
+
+  .invite-icon-wrap {
+    align-self: center;
+  }
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-error {
+  margin: 0;
+  color: #dc2626;
+  font-size: 0.875rem;
+}
+
+.submit-btn {
+  margin-top: 8px;
+  height: 44px;
+  font-size: 1rem;
+
+  mat-spinner {
+    display: inline-block;
+  }
+}
+

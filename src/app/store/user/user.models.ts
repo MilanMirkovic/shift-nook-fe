@@ -15,6 +15,7 @@ export interface User {
   cognitoUserId: string;
   canCreateCompany: boolean;
   createdAt: string; // ISO 8601 date string
+  onboardingComplete: boolean;
   companies: CompanyMembership[];
 }
 

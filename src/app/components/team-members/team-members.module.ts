@@ -2,9 +2,12 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule } from '@angular/material/dialog';
 
 import { TeamMembersComponent } from './team-members.component';
 import { ListPageComponent } from '../../layout/list-page/list-page.component';
+import { PendingInvitationsComponent } from '../../shared/components/pending-invitations/pending-invitations.component';
 import { TEAM_MEMBERS_ROUTES } from './team-members.routes';
 
 @NgModule({
@@ -12,7 +15,10 @@ import { TEAM_MEMBERS_ROUTES } from './team-members.routes';
   imports: [
     CommonModule,
     MatButtonModule,
+    MatIconModule,
+    MatDialogModule,
     ListPageComponent,
+    PendingInvitationsComponent,
     RouterModule.forChild(TEAM_MEMBERS_ROUTES)
   ],
   exports: [TeamMembersComponent]

@@ -89,4 +89,16 @@ export class AuthService {
       return false;
     }
   }
+
+  /** Returns the email of the currently signed-in user, or null if not signed in */
+  async getCurrentUserEmail(): Promise<string | null> {
+    if (environment.skipCognito) return null;
+    try {
+      const session = await fetchAuthSession();
+      const claims = session.tokens?.idToken?.payload;
+      return (claims?.['email'] as string) ?? null;
+    } catch {
+      return null;
+    }
+  }
 }
