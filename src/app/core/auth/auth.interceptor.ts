@@ -1,7 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { from, switchMap, catchError, throwError, of } from 'rxjs';
+import { from, switchMap, catchError, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { UserStoreService } from '../../store/user/user-store.service';
 import { environment } from '../../../environments/environment';
@@ -15,7 +15,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (
     !req.url.includes('/api/') ||
     req.url.includes('/api/health') ||
-    req.url.includes('/invitations/preview')
+    req.url.includes('/invitations/preview') ||
+    req.url.includes('/invitations/accept')
   ) {
     return next(req);
   }
@@ -40,11 +41,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     }),
     catchError(err => {
       if (err?.status === 401) {
-        // Token expired or invalid — force logout and redirect to login
-        authService.signOut().finally(() => {
-          userStore.logout();
-          router.navigate(['/login']);
-        });
+        const currentUrl = router.url;
+        const publicRoutes = ['/accept-invite', '/auth/set-password', '/auth/reset-password', '/login', '/signup'];
+        const isPublicRoute = publicRoutes.some(r => currentUrl.startsWith(r));
+        if (!isPublicRoute) {
+          // Token expired or invalid — force logout and redirect to login
+          authService.signOut().finally(() => {
+            userStore.logout();
+            router.navigate(['/login']);
+          });
+        }
       }
       return throwError(() => err);
     }),
