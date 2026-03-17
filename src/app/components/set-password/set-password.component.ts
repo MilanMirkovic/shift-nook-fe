@@ -29,11 +29,12 @@ export class SetPasswordComponent implements OnInit {
   form: FormGroup;
 
   isLoading = false;
+  isSendingCode = false;
+  codeSent = false;
   errorMessage = '';
-  hideTemp = true;
   hideNew = true;
 
-  private email = '';
+  email = '';
   private returnTo = '/accept-invite';
 
   constructor(
@@ -43,7 +44,7 @@ export class SetPasswordComponent implements OnInit {
     private authService: AuthService,
   ) {
     this.form = this.fb.group({
-      temporaryPassword: ['', [Validators.required]],
+      code: ['', [Validators.required]],
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
     });
   }
@@ -55,6 +56,24 @@ export class SetPasswordComponent implements OnInit {
     if (returnTo) {
       this.returnTo = returnTo;
     }
+
+    // Automatically send the code when the page loads
+    if (this.email) {
+      this.sendCode();
+    }
+  }
+
+  async sendCode(): Promise<void> {
+    this.isSendingCode = true;
+    this.errorMessage = '';
+    try {
+      await this.authService.forgotPassword(this.email);
+      this.codeSent = true;
+    } catch (err: any) {
+      this.errorMessage = this.mapError(err);
+    } finally {
+      this.isSendingCode = false;
+    }
   }
 
   async onSubmit(): Promise<void> {
@@ -63,22 +82,14 @@ export class SetPasswordComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const { temporaryPassword, newPassword } = this.form.value;
+    const { code, newPassword } = this.form.value;
 
     try {
-      // Step 1 — sign in with the temporary password from the Cognito invite email
-      const result = await this.authService.signIn(this.email, temporaryPassword);
+      await this.authService.confirmForgotPassword(this.email, code, newPassword);
 
-      if (result.nextStep?.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
-        // Step 2 — Cognito challenge: set a permanent password
-        await this.authService.confirmSignIn(newPassword);
-      } else if (!result.isSignedIn) {
-        this.errorMessage = 'Sign-in failed. Please check your temporary password.';
-        this.isLoading = false;
-        return;
-      }
+      // Sign in with the new password
+      await this.authService.signIn(this.email, newPassword);
 
-      // Restore the pending invite token and navigate back to accept-invite
       const pendingToken = sessionStorage.getItem('pendingInviteToken');
       if (pendingToken) {
         this.router.navigate([this.returnTo], { queryParams: { token: pendingToken } });
@@ -93,10 +104,12 @@ export class SetPasswordComponent implements OnInit {
 
   private mapError(err: any): string {
     switch (err?.name) {
-      case 'NotAuthorizedException':
-        return 'Incorrect temporary password. Please check your invitation email.';
+      case 'CodeMismatchException':
+        return 'Incorrect code. Please check your email and try again.';
+      case 'ExpiredCodeException':
+        return 'This code has expired. Please request a new one.';
       case 'InvalidPasswordException':
-        return 'New password does not meet requirements (min 8 chars, upper, lower, number, symbol).';
+        return 'Password does not meet requirements (min 8 chars, upper, lower, number, symbol).';
       case 'LimitExceededException':
         return 'Too many attempts. Please try again later.';
       case 'UserNotFoundException':
