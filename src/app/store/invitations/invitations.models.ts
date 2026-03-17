@@ -50,3 +50,4 @@ export interface InvitationsState {
   acceptError: string | null;
   acceptResult: AcceptInviteResponse | null;
 }
+

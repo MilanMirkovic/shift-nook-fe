@@ -39,6 +39,13 @@ export const routes: Routes = [
         (m) => m.ForgotPasswordComponent,
       ),
   },
+  {
+    path: 'auth/set-password',
+    loadComponent: () =>
+      import('./components/set-password/set-password.component').then(
+        (m) => m.SetPasswordComponent,
+      ),
+  },
 
   // ── Protected routes ──────────────────────────────────────────────────────
   {

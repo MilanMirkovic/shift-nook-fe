@@ -86,13 +86,13 @@ export class App implements OnInit {
       )
       .subscribe((event) => {
         // Hide layout for login and other public pages
-        const publicRoutes = ['/login', '/select-company', '/create-company', '/accept-invite'];
+        const publicRoutes = ['/login', '/select-company', '/create-company', '/accept-invite', '/auth/set-password'];
         this.showLayout.set(!publicRoutes.some(route => event.urlAfterRedirects.startsWith(route)));
       });
 
     // Set initial state based on current route
     const currentUrl = this.router.url;
-    const publicRoutes = ['/login', '/select-company', '/create-company', '/accept-invite'];
+    const publicRoutes = ['/login', '/select-company', '/create-company', '/accept-invite', '/auth/set-password'];
     this.showLayout.set(!publicRoutes.some(route => currentUrl.startsWith(route)));
   }
 

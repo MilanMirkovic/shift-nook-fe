@@ -124,7 +124,7 @@ export class AcceptInviteComponent implements OnInit, OnDestroy {
     const stillLoggedIn = await this.authService.isAuthenticated();
     if (!stillLoggedIn) {
       sessionStorage.setItem('pendingInviteToken', token);
-      this.router.navigate(['/auth/reset-password'], {
+      this.router.navigate(['/auth/set-password'], {
         queryParams: {
           email: preview.invitedEmail,
           returnTo: '/accept-invite',
@@ -200,4 +200,3 @@ export class AcceptInviteComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 }
-

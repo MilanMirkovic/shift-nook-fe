@@ -4,6 +4,7 @@ import {
   signOut,
   signUp,
   confirmSignUp,
+  confirmSignIn,
   resetPassword,
   confirmResetPassword,
   getCurrentUser,
@@ -100,5 +101,13 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Confirms a sign-in challenge (CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED).
+   * Call this after signIn() returns that challenge step.
+   */
+  async confirmSignIn(newPassword: string): Promise<SignInOutput> {
+    return confirmSignIn({ challengeResponse: newPassword });
   }
 }
