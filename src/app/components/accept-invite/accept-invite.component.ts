@@ -127,7 +127,6 @@ export class AcceptInviteComponent implements OnInit, OnDestroy {
       this.router.navigate(['/auth/reset-password'], {
         queryParams: {
           email: preview.invitedEmail,
-          mode: 'set',
           returnTo: '/accept-invite',
         },
       });
