@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import { Actions, ofType } from '@ngrx/effects';
 import { Subject, takeUntil, filter, firstValueFrom } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,6 +24,7 @@ import { InvitationPreview } from '../../store/invitations/invitations.models';
 import { AuthService } from '../../core/auth/auth.service';
 import { UserApi } from '../../store/user/user.api';
 import { UserStoreService } from '../../store/user/user-store.service';
+import { loadUserSuccess } from '../../store/user/user.actions';
 
 export type PageView =
   | 'loading'
@@ -51,6 +53,7 @@ export type PageView =
 })
 export class AcceptInviteComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
+  private readonly actions$ = inject(Actions);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
@@ -174,7 +177,15 @@ export class AcceptInviteComponent implements OnInit, OnDestroy {
       .subscribe(result => {
         sessionStorage.removeItem('pendingInviteToken');
         this.userStore.loadUser();
-        this.router.navigate(['/companies', result!.companyId]);
+
+        // Wait for the fresh user profile to arrive before navigating,
+        // so canCreateCompany and company memberships are up-to-date.
+        this.actions$.pipe(
+          ofType(loadUserSuccess),
+          takeUntil(this.destroy$),
+        ).subscribe(() => {
+          this.router.navigate(['/companies', result!.companyId]);
+        });
       });
 
     this.store.select(selectInvitationsAcceptError)

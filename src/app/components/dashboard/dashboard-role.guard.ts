@@ -3,7 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, filter, map, take } from 'rxjs';
 import { UserStoreService } from '../../store/user/user-store.service';
-import { selectUserLoading } from '../../store/user/user.selectors';
+import { selectUserLoading, selectCurrentCompany } from '../../store/user/user.selectors';
 import { CompanyRole } from '../../shared/models/company-role';
 
 export const dashboardRoleGuard: CanActivateFn = () => {
@@ -11,15 +11,25 @@ export const dashboardRoleGuard: CanActivateFn = () => {
   const store     = inject(Store);
   const router    = inject(Router);
 
-  // Trigger load in case user data isn't in the store yet
-  userStore.loadUser();
+  // Only trigger a load if user data is not yet in the store.
+  // Avoid re-triggering when navigating from accept-invite, which already
+  // loaded a fresh user profile — that would create a race condition.
+  userStore.user$.pipe(take(1)).subscribe(user => {
+    if (!user) {
+      userStore.loadUser();
+    }
+  });
 
-  return combineLatest([userStore.user$, store.select(selectUserLoading)]).pipe(
+  return combineLatest([
+    userStore.user$,
+    store.select(selectUserLoading),
+    store.select(selectCurrentCompany),
+  ]).pipe(
     // Wait until the load has finished (loading = false) AND user is present
     filter(([user, loading]) => !loading && user !== null),
     take(1),
-    map(([user]) => {
-      // No companies at all — send to create-company or jobsites
+    map(([user, , currentCompany]) => {
+      // No companies at all — send to create-company or select-company
       if (!user?.companies || user.companies.length === 0) {
         if (user?.canCreateCompany) {
           return router.createUrlTree(['/create-company']);
@@ -27,7 +37,8 @@ export const dashboardRoleGuard: CanActivateFn = () => {
         return router.createUrlTree(['/jobsites']);
       }
 
-      const role = user.companies[0].role;
+      // Use the selected company's role (falls back to first company if none selected)
+      const role = currentCompany?.role ?? user.companies[0].role;
       const allowed = [CompanyRole.OWNER, CompanyRole.ACCOUNTANT];
       if (allowed.includes(role)) {
         return true;
