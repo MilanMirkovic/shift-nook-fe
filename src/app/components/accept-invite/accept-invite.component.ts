@@ -6,7 +6,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Actions, ofType } from '@ngrx/effects';
-import { Subject, takeUntil, filter, firstValueFrom } from 'rxjs';
+import { Subject, takeUntil, filter, firstValueFrom, take } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -176,7 +176,11 @@ export class AcceptInviteComponent implements OnInit, OnDestroy {
     this.store.dispatch(acceptInvitation({ companyId, token }));
 
     this.store.select(selectInvitationsAcceptResult)
-      .pipe(takeUntil(this.destroy$), filter(r => r !== null), take(1))
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((r): r is NonNullable<typeof r> => r !== null),
+        take(1)
+      )
       .subscribe(result => {
         sessionStorage.removeItem('pendingInviteToken');
         this.userStore.loadUser();
@@ -185,7 +189,7 @@ export class AcceptInviteComponent implements OnInit, OnDestroy {
           ofType(loadUserSuccess),
           takeUntil(this.destroy$),
         ).subscribe(() => {
-          this.router.navigate(['/companies', result!.companyId]);
+          this.router.navigate(['/companies', result.companyId]);
         });
       });
 
