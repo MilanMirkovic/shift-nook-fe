@@ -30,6 +30,7 @@ export class ConfirmEmailComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
   email = '';
+  private returnUrl: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -50,6 +51,9 @@ export class ConfirmEmailComponent implements OnInit {
       this.email = state.email;
       this.confirmForm.patchValue({ email: this.email });
     }
+    if (state?.returnUrl) {
+      this.returnUrl = state.returnUrl;
+    }
   }
 
   async onSubmit(): Promise<void> {
@@ -61,7 +65,10 @@ export class ConfirmEmailComponent implements OnInit {
 
     try {
       await this.authService.confirmSignUp(email, code);
-      this.router.navigate(['/login'], { state: { confirmed: true } });
+      this.router.navigate(['/login'], {
+        state: { confirmed: true, returnUrl: this.returnUrl },
+        queryParams: this.returnUrl ? { returnUrl: this.returnUrl } : {},
+      });
     } catch (err: any) {
       this.errorMessage = this.mapError(err);
     } finally {
@@ -103,4 +110,3 @@ export class ConfirmEmailComponent implements OnInit {
     }
   }
 }
-

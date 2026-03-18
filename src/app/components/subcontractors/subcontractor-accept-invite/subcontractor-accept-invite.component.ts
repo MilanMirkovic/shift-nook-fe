@@ -1,5 +1,5 @@
 import {
-  ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal,
+  ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, OnDestroy, inject, signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -21,6 +21,7 @@ import {
   selectSubcontractorInvitePreview,
   selectSubcontractorInvitePreviewError,
 } from '../../../store/subcontractors/subcontractors.selectors';
+import { UserStoreService } from '../../../store/user/user-store.service';
 
 type PageView = 'loading' | 'status' | 'invalid' | 'accepting' | 'error' | 'success';
 
@@ -37,6 +38,8 @@ export class SubcontractorAcceptInviteComponent implements OnInit, OnDestroy {
   private readonly actions$ = inject(Actions);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly userStore = inject(UserStoreService);
   private readonly destroy$ = new Subject<void>();
 
   token: string | null = null;
@@ -60,11 +63,17 @@ export class SubcontractorAcceptInviteComponent implements OnInit, OnDestroy {
 
     this.store.select(selectSubcontractorInvitePreviewError)
       .pipe(takeUntil(this.destroy$), filter((e): e is string => e !== null), take(1))
-      .subscribe(() => this.view.set('invalid'));
+      .subscribe(() => {
+        this.view.set('invalid');
+        this.cdr.markForCheck();
+      });
 
     this.store.select(selectSubcontractorInvitePreview)
       .pipe(takeUntil(this.destroy$), filter(p => p !== null), take(1))
-      .subscribe(() => this.view.set('status'));
+      .subscribe(() => {
+        this.view.set('status');
+        this.cdr.markForCheck();
+      });
   }
 
   /** Build the full current invite URL to pass as a redirect target */
@@ -98,11 +107,17 @@ export class SubcontractorAcceptInviteComponent implements OnInit, OnDestroy {
     if (!this.token) return;
 
     this.view.set('accepting');
+    this.cdr.markForCheck();
     this.store.dispatch(acceptSubcontractorInvite({ token: this.token }));
 
     this.actions$.pipe(ofType(acceptSubcontractorInviteSuccess), take(1), takeUntil(this.destroy$))
       .subscribe(() => {
+        // Reload user so company context is fresh, then navigate
+        this.userStore.loadUser();
+
         this.view.set('success');
+        this.cdr.markForCheck();
+
         setTimeout(() => this.router.navigate(['/principal-companies']), 1500);
       });
 
@@ -110,6 +125,7 @@ export class SubcontractorAcceptInviteComponent implements OnInit, OnDestroy {
       .subscribe(({ error }) => {
         this.acceptError.set(error);
         this.view.set('error');
+        this.cdr.markForCheck();
       });
   }
 

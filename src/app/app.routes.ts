@@ -1,5 +1,9 @@
 import { Routes } from '@angular/router';
+import { provideState } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
 import { authGuard, publicGuard } from './core/auth/auth.guard';
+import { SUBCONTRACTORS_FEATURE_KEY, subcontractorsReducer } from './store/subcontractors/subcontractors.reducer';
+import { SubcontractorsEffects } from './store/subcontractors/subcontractors.effects';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -126,6 +130,10 @@ export const routes: Routes = [
   // ── Subcontractor invite (public landing) ─────────────────────────────────
   {
     path: 'subcontractor-invite',
+    providers: [
+      provideState(SUBCONTRACTORS_FEATURE_KEY, subcontractorsReducer),
+      provideEffects(SubcontractorsEffects),
+    ],
     loadComponent: () =>
       import('./components/subcontractors/subcontractor-accept-invite/subcontractor-accept-invite.component').then(
         (m) => m.SubcontractorAcceptInviteComponent,

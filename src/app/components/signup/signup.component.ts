@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -28,10 +28,12 @@ export class SignupComponent {
   hidePassword = true;
   isLoading = false;
   errorMessage = '';
+  private returnUrl: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService,
   ) {
     this.signupForm = this.fb.group({
@@ -40,6 +42,7 @@ export class SignupComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
     });
+    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
   }
 
   async onSubmit(): Promise<void> {
@@ -51,7 +54,9 @@ export class SignupComponent {
 
     try {
       await this.authService.signUp(email, password, firstName, lastName);
-      this.router.navigate(['/confirm'], { state: { email } });
+      this.router.navigate(['/confirm'], {
+        state: { email, returnUrl: this.returnUrl },
+      });
     } catch (err: any) {
       this.errorMessage = this.mapError(err);
     } finally {

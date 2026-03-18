@@ -55,7 +55,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       const result = await this.authService.signIn(email, password);
 
       if (result.nextStep?.signInStep === 'CONFIRM_SIGN_UP') {
-        this.router.navigate(['/confirm'], { state: { email } });
+        this.router.navigate(['/confirm'], { state: { email, returnUrl: this.returnUrl } });
         return;
       }
 
