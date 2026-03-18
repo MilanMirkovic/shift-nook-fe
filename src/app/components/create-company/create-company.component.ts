@@ -53,6 +53,8 @@ export class CreateCompanyComponent implements OnInit {
   isLoading    = false;
   errorMessage = '';
   private returnUrl: string | null = null;
+  /** Extracted subcontractor invite token if coming from that flow */
+  private subcontractorInviteToken: string | null = null;
 
   form: FormGroup = this.fb.group({
     name:    ['', [Validators.required, Validators.maxLength(255)]],
@@ -64,6 +66,14 @@ export class CreateCompanyComponent implements OnInit {
 
   ngOnInit(): void {
     this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+
+    // Extract invite token from returnUrl if present (e.g. /subcontractor-invite?token=abc)
+    if (this.returnUrl) {
+      const match = this.returnUrl.match(/[?&]token=([^&]+)/);
+      if (match && this.returnUrl.includes('subcontractor-invite')) {
+        this.subcontractorInviteToken = match[1];
+      }
+    }
   }
 
   onSubmit(): void {
@@ -88,11 +98,26 @@ export class CreateCompanyComponent implements OnInit {
       switchMap(() => {
         this.userStore.loadUser();
         return this.actions$.pipe(ofType(loadUserSuccess), take(1));
+      }),
+      // If subcontractor invite token present, accept it immediately after company is created
+      switchMap(() => {
+        if (this.subcontractorInviteToken) {
+          return this.http.post<void>(
+            `${environment.apiBaseUrl}/subcontractor-invites/accept`,
+            null,
+            { params: { token: this.subcontractorInviteToken } }
+          );
+        }
+        return [null];
       })
     ).subscribe({
       next: () => {
         this.isLoading = false;
-        if (this.returnUrl) {
+        if (this.subcontractorInviteToken) {
+          // Invite accepted — reload user and go to principal companies
+          this.userStore.loadUser();
+          this.router.navigate(['/principal-companies']);
+        } else if (this.returnUrl) {
           this.router.navigateByUrl(this.returnUrl);
         } else {
           this.router.navigate(['/team'], { queryParams: { onboarding: true } });

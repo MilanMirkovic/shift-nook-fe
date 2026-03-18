@@ -15,8 +15,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (
     !req.url.includes('/api/') ||
     req.url.includes('/api/health') ||
-    req.url.includes('/invitations/preview') ||
-    req.url.includes('/subcontractor-invites/preview')
+    req.url.includes('/invitations/preview')
   ) {
     return next(req);
   }
