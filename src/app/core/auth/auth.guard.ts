@@ -20,7 +20,7 @@ export const publicGuard: CanActivateFn = async (route: ActivatedRouteSnapshot) 
   if (await authService.isAuthenticated()) {
     const returnUrl = route.queryParamMap.get('returnUrl');
     if (returnUrl) {
-      return router.parseUrl(returnUrl);
+      return router.parseUrl(decodeURIComponent(returnUrl));
     }
     return router.createUrlTree(['/dashboard']);
   }
