@@ -28,7 +28,6 @@ import { loadUserSuccess } from '../../store/user/user.actions';
 
 export type PageView =
   | 'loading'
-  | 'preview'
   | 'invalid-token'
   | 'profile-form'
   | 'accepting'
@@ -98,18 +97,17 @@ export class AcceptInviteComponent implements OnInit, OnDestroy {
       });
 
     this.store.select(selectInvitationsPreviewResult)
-      .pipe(takeUntil(this.destroy$), filter(r => r !== null))
+      .pipe(takeUntil(this.destroy$), filter(r => r !== null), take(1))
       .subscribe(result => {
         this.preview = result;
-        this.view.set('preview');
-        this.cdr.markForCheck();
+        // Immediately continue — no "Accept" button needed on first visit
+        this.continueAfterPreview(token, result);
       });
   }
 
+  // Keep this for the retry button on accept-error state
   async onAcceptClicked(): Promise<void> {
-    const token = this.currentToken!;
-    const preview = this.preview!;
-    await this.continueAfterPreview(token, preview);
+    await this.continueAfterPreview(this.currentToken!, this.preview!);
   }
 
   private async continueAfterPreview(token: string, preview: InvitationPreview): Promise<void> {
@@ -199,16 +197,6 @@ export class AcceptInviteComponent implements OnInit, OnDestroy {
         this.view.set('accept-error');
         this.cdr.markForCheck();
       });
-  }
-
-  roleLabel(role: string): string {
-    const map: Record<string, string> = {
-      OWNER: 'Owner',
-      ADMIN: 'Admin',
-      ACCOUNTANT: 'Accountant',
-      WORKER: 'Worker',
-    };
-    return map[role] ?? role;
   }
 
   ngOnDestroy(): void {
