@@ -1,0 +1,76 @@
+.invite-dialog {
+  min-width: 360px;
+
+  .dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px 0;
+
+    .header-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      color: var(--mat-primary);
+    }
+
+    .header-text {
+      h2 {
+        margin: 0;
+        font-size: 1.25rem;
+      }
+      .subtitle {
+        margin: 2px 0 0;
+        font-size: 0.85rem;
+        color: var(--mat-sys-on-surface-variant, #666);
+      }
+    }
+  }
+
+  .invite-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+
+      .field-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 4px;
+      }
+
+      mat-form-field {
+        width: 100%;
+      }
+    }
+
+    .send-error {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: var(--mat-sys-error-container, #fdecea);
+      color: var(--mat-sys-on-error-container, #b00020);
+      font-size: 0.875rem;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+
+  mat-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 8px 24px 16px;
+  }
+}
+

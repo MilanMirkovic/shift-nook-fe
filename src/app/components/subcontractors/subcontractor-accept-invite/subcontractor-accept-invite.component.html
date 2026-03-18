@@ -21,28 +21,89 @@
       </div>
     }
 
-    @if (view() === 'preview') {
+    @if (view() === 'status') {
       @if (preview$ | async; as preview) {
-        <div class="state">
-          <div class="company-avatar">{{ preview.ownerCompanyName[0] }}</div>
-          <h1 class="state-title">You've been invited!</h1>
-          <p class="state-msg">
-            <strong>{{ preview.ownerCompanyName }}</strong> has invited you to join as a subcontractor.
-          </p>
-          <div class="preview-detail">
-            <div class="detail-row">
-              <span class="detail-label">Invited email</span>
-              <span class="detail-value">{{ preview.invitedEmail }}</span>
+
+        <!-- NOT_AUTHENTICATED — prompt to log in or sign up -->
+        @if (preview.acceptorStatus === 'NOT_AUTHENTICATED') {
+          <div class="state">
+            <div class="company-avatar">{{ preview.ownerCompanyName[0] }}</div>
+            <h1 class="state-title">You've been invited!</h1>
+            <p class="state-msg">
+              <strong>{{ preview.ownerCompanyName }}</strong> has invited
+              <strong>{{ preview.invitedEmail }}</strong> to join as a subcontractor.
+            </p>
+            <p class="state-note">
+              You need to log in (or create an account) to accept this invitation.
+            </p>
+            <div class="btn-row">
+              <button mat-stroked-button (click)="onSignUp()">
+                <mat-icon>person_add</mat-icon>
+                Sign Up
+              </button>
+              <button mat-flat-button color="primary" (click)="onLogin()">
+                <mat-icon>login</mat-icon>
+                Log In
+              </button>
             </div>
           </div>
-          <p class="state-note">
-            You must be the <strong>owner</strong> of a company to accept this invitation.<br>
-            Your company's workers will automatically gain access to their jobsites.
-          </p>
-          <button mat-flat-button color="primary" (click)="onAccept()">
-            Accept Invitation
-          </button>
-        </div>
+        }
+
+        <!-- NO_COMPANY — logged in but no company yet -->
+        @if (preview.acceptorStatus === 'NO_COMPANY') {
+          <div class="state">
+            <div class="company-avatar">{{ preview.ownerCompanyName[0] }}</div>
+            <h1 class="state-title">One more step…</h1>
+            <p class="state-msg">
+              You're logged in, but you don't have a company yet.<br>
+              Create your company to accept the invitation from
+              <strong>{{ preview.ownerCompanyName }}</strong>.
+            </p>
+            <button mat-flat-button color="primary" (click)="onCreateCompany()">
+              <mat-icon>business</mat-icon>
+              Create My Company
+            </button>
+          </div>
+        }
+
+        <!-- READY — show the accept button -->
+        @if (preview.acceptorStatus === 'READY') {
+          <div class="state">
+            <div class="company-avatar">{{ preview.ownerCompanyName[0] }}</div>
+            <h1 class="state-title">You've been invited!</h1>
+            <p class="state-msg">
+              <strong>{{ preview.ownerCompanyName }}</strong> has invited you to join as a subcontractor.
+            </p>
+            <div class="preview-detail">
+              <div class="detail-row">
+                <span class="detail-label">Invited email</span>
+                <span class="detail-value">{{ preview.invitedEmail }}</span>
+              </div>
+            </div>
+            <p class="state-note">
+              Your company's workers will automatically gain access to their jobsites.
+            </p>
+            <button mat-flat-button color="primary" (click)="onAccept()">
+              Accept Invitation
+            </button>
+          </div>
+        }
+
+        <!-- ALREADY_LINKED — already connected -->
+        @if (preview.acceptorStatus === 'ALREADY_LINKED') {
+          <div class="state">
+            <mat-icon class="state-icon icon--success">check_circle</mat-icon>
+            <h1 class="state-title">Already Connected</h1>
+            <p class="state-msg">
+              Your company is already linked to <strong>{{ preview.ownerCompanyName }}</strong>.<br>
+              No further action is needed.
+            </p>
+            <button mat-flat-button color="primary" (click)="onGoToDashboard()">
+              Go to Dashboard
+            </button>
+          </div>
+        }
+
       }
     }
 
@@ -79,4 +140,3 @@
 
   </div>
 </div>
-

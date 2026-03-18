@@ -85,23 +85,23 @@ export class App implements OnInit {
         map((event) => event as NavigationEnd)
       )
       .subscribe((event) => {
-        // Hide layout for login and other public pages
-        const publicRoutes = ['/login', '/select-company', '/create-company', '/accept-invite', '/auth/set-password'];
+        const publicRoutes = ['/login', '/select-company', '/create-company', '/accept-invite', '/auth/set-password', '/subcontractor-invite'];
         this.showLayout.set(!publicRoutes.some(route => event.urlAfterRedirects.startsWith(route)));
       });
 
-    // Set initial state based on current route
     const currentUrl = this.router.url;
-    const publicRoutes = ['/login', '/select-company', '/create-company', '/accept-invite', '/auth/set-password'];
+    const publicRoutes = ['/login', '/select-company', '/create-company', '/accept-invite', '/auth/set-password', '/subcontractor-invite'];
     this.showLayout.set(!publicRoutes.some(route => currentUrl.startsWith(route)));
   }
 
   ngOnInit(): void {
-    // Check real auth state (Amplify/Cognito) before hitting protected endpoints
     this.authService.isAuthenticated().then(isAuth => {
       if (isAuth) {
-        this.userStore.loadUser();
-        this.workSessionStore.loadCurrentSession();
+        const currentUrl = this.router.url;
+        if (!currentUrl.startsWith('/subcontractor-invite')) {
+          this.userStore.loadUser();
+          this.workSessionStore.loadCurrentSession();
+        }
       }
     });
   }

@@ -19,15 +19,10 @@ import {
 } from '../../../store/subcontractors/subcontractors.actions';
 import {
   selectSubcontractorInvitePreview,
-  selectSubcontractorInvitePreviewLoading,
   selectSubcontractorInvitePreviewError,
-  selectSubcontractorAccepting,
 } from '../../../store/subcontractors/subcontractors.selectors';
-import { AuthService } from '../../../core/auth/auth.service';
-import { UserStoreService } from '../../../store/user/user-store.service';
-import { loadUserSuccess } from '../../../store/user/user.actions';
 
-type PageView = 'loading' | 'preview' | 'invalid' | 'accepting' | 'error' | 'success';
+type PageView = 'loading' | 'status' | 'invalid' | 'accepting' | 'error' | 'success';
 
 @Component({
   selector: 'app-subcontractor-accept-invite',
@@ -42,19 +37,14 @@ export class SubcontractorAcceptInviteComponent implements OnInit, OnDestroy {
   private readonly actions$ = inject(Actions);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly authService = inject(AuthService);
-  private readonly userStore = inject(UserStoreService);
   private readonly destroy$ = new Subject<void>();
 
-  private token: string | null = null;
+  token: string | null = null;
 
   view = signal<PageView>('loading');
   acceptError = signal<string | null>(null);
 
   readonly preview$ = this.store.select(selectSubcontractorInvitePreview);
-  readonly previewLoading$ = this.store.select(selectSubcontractorInvitePreviewLoading);
-  readonly previewError$ = this.store.select(selectSubcontractorInvitePreviewError);
-  readonly accepting$ = this.store.select(selectSubcontractorAccepting);
 
   ngOnInit(): void {
     this.store.dispatch(resetAcceptInviteState());
@@ -65,6 +55,7 @@ export class SubcontractorAcceptInviteComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Preview endpoint is public — call it immediately without auth
     this.store.dispatch(previewSubcontractorInvite({ token: this.token }));
 
     this.store.select(selectSubcontractorInvitePreviewError)
@@ -73,33 +64,46 @@ export class SubcontractorAcceptInviteComponent implements OnInit, OnDestroy {
 
     this.store.select(selectSubcontractorInvitePreview)
       .pipe(takeUntil(this.destroy$), filter(p => p !== null), take(1))
-      .subscribe(() => this.view.set('preview'));
+      .subscribe(() => this.view.set('status'));
   }
 
-  async onAccept(): Promise<void> {
-    if (!this.token) return;
+  /** Build the full current invite URL to pass as a redirect target */
+  private get inviteReturnUrl(): string {
+    return `/subcontractor-invite?token=${this.token}`;
+  }
 
-    const isLoggedIn = await this.authService.isAuthenticated();
-    if (!isLoggedIn) {
-      sessionStorage.setItem('pendingSubcontractorToken', this.token);
-      this.router.navigate(['/login'], {
-        queryParams: { returnTo: '/subcontractor-invite', token: this.token },
-      });
-      return;
-    }
+  onLogin(): void {
+    this.router.navigate(['/login'], {
+      queryParams: { returnUrl: this.inviteReturnUrl },
+    });
+  }
+
+  onSignUp(): void {
+    this.router.navigate(['/signup'], {
+      queryParams: { returnUrl: this.inviteReturnUrl },
+    });
+  }
+
+  onCreateCompany(): void {
+    this.router.navigate(['/create-company'], {
+      queryParams: { returnUrl: this.inviteReturnUrl },
+    });
+  }
+
+  onGoToDashboard(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
+  onAccept(): void {
+    if (!this.token) return;
 
     this.view.set('accepting');
     this.store.dispatch(acceptSubcontractorInvite({ token: this.token }));
 
     this.actions$.pipe(ofType(acceptSubcontractorInviteSuccess), take(1), takeUntil(this.destroy$))
       .subscribe(() => {
-        sessionStorage.removeItem('pendingSubcontractorToken');
-        this.userStore.loadUser();
-        this.actions$.pipe(ofType(loadUserSuccess), take(1), takeUntil(this.destroy$))
-          .subscribe(() => {
-            this.view.set('success');
-            setTimeout(() => this.router.navigate(['/principal-companies']), 1500);
-          });
+        this.view.set('success');
+        setTimeout(() => this.router.navigate(['/principal-companies']), 1500);
       });
 
     this.actions$.pipe(ofType(acceptSubcontractorInviteFailure), take(1), takeUntil(this.destroy$))

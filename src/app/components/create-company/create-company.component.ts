@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Actions, ofType } from '@ngrx/effects';
 import { switchMap, take } from 'rxjs';
@@ -42,15 +42,17 @@ function urlValidator(control: AbstractControl): ValidationErrors | null {
     TextFieldModule,
   ],
 })
-export class CreateCompanyComponent {
+export class CreateCompanyComponent implements OnInit {
   private readonly fb        = inject(FormBuilder);
   private readonly router    = inject(Router);
+  private readonly route     = inject(ActivatedRoute);
   private readonly http      = inject(HttpClient);
   private readonly userStore = inject(UserStoreService);
   private readonly actions$  = inject(Actions);
 
   isLoading    = false;
   errorMessage = '';
+  private returnUrl: string | null = null;
 
   form: FormGroup = this.fb.group({
     name:    ['', [Validators.required, Validators.maxLength(255)]],
@@ -59,6 +61,10 @@ export class CreateCompanyComponent {
     website: ['', [urlValidator, Validators.maxLength(1024)]],
     phone:   ['', [Validators.maxLength(50)]],
   });
+
+  ngOnInit(): void {
+    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+  }
 
   onSubmit(): void {
     if (this.form.invalid) {
@@ -86,7 +92,11 @@ export class CreateCompanyComponent {
     ).subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigate(['/team'], { queryParams: { onboarding: true } });
+        if (this.returnUrl) {
+          this.router.navigateByUrl(this.returnUrl);
+        } else {
+          this.router.navigate(['/team'], { queryParams: { onboarding: true } });
+        }
       },
       error: (err) => {
         this.isLoading    = false;

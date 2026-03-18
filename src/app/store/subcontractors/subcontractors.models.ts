@@ -34,6 +34,7 @@ export interface SubcontractorInvitePreviewResponse {
   ownerCompanyId: string;
   ownerCompanyName: string;
   invitedEmail: string;
+  acceptorStatus: 'NOT_AUTHENTICATED' | 'NO_COMPANY' | 'READY' | 'ALREADY_LINKED';
 }
 
 export interface SubcontractorInviteRequest {
@@ -84,4 +85,3 @@ export interface SubcontractorsState {
   acceptError: string | null;
   acceptSuccess: boolean;
 }
-
