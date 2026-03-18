@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -35,6 +35,7 @@ export class ConfirmEmailComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService,
   ) {
     this.confirmForm = this.fb.group({
@@ -44,16 +45,16 @@ export class ConfirmEmailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Pre-fill email if passed via router state (from signup / login redirect)
     const nav = this.router.getCurrentNavigation();
     const state = nav?.extras?.state ?? history.state;
     if (state?.email) {
       this.email = state.email;
       this.confirmForm.patchValue({ email: this.email });
     }
-    if (state?.returnUrl) {
-      this.returnUrl = state.returnUrl;
-    }
+    // Prefer router state; fall back to query param (survives refresh)
+    this.returnUrl = state?.returnUrl
+      ?? this.route.snapshot.queryParamMap.get('returnUrl')
+      ?? null;
   }
 
   async onSubmit(): Promise<void> {

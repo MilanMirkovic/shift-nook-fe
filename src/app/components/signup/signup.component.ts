@@ -56,6 +56,7 @@ export class SignupComponent {
       await this.authService.signUp(email, password, firstName, lastName);
       this.router.navigate(['/confirm'], {
         state: { email, returnUrl: this.returnUrl },
+        queryParams: { ...(this.returnUrl ? { returnUrl: this.returnUrl } : {}) },
       });
     } catch (err: any) {
       this.errorMessage = this.mapError(err);
