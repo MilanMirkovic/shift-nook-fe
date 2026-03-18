@@ -35,7 +35,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   async ngOnInit(): Promise<void> {
     this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
     if (await this.authService.isAuthenticated()) {
-      this.router.navigateByUrl(this.returnUrl ? decodeURIComponent(this.returnUrl) : '/dashboard');
+      this.router.navigateByUrl(this.returnUrl ?? '/dashboard');
     }
   }
 
@@ -70,9 +70,8 @@ export class LoginComponent implements OnInit, OnDestroy {
         .subscribe((user) => {
           this.isLoading = false;
 
-          // If there is a returnUrl (e.g. from accept-invite), honour it
           if (this.returnUrl) {
-            this.router.navigateByUrl(decodeURIComponent(this.returnUrl));
+            this.router.navigateByUrl(this.returnUrl);
             return;
           }
 
@@ -91,7 +90,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     } catch (err: any) {
       this.isLoading = false;
       if (err?.name === 'UserAlreadyAuthenticatedException') {
-        this.router.navigateByUrl(this.returnUrl ? decodeURIComponent(this.returnUrl) : '/dashboard');
+        this.router.navigateByUrl(this.returnUrl ?? '/dashboard');
         return;
       }
       this.errorMessage = this.mapError(err);

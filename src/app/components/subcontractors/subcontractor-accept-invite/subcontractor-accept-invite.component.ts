@@ -78,7 +78,7 @@ export class SubcontractorAcceptInviteComponent implements OnInit, OnDestroy {
 
   /** Build the full current invite URL to pass as a redirect target */
   private get inviteReturnUrl(): string {
-    return encodeURIComponent(`/subcontractor-invite?token=${this.token!}`);
+    return `/subcontractor-invite?token=${this.token!}`;
   }
 
   onLogin(): void {
@@ -89,7 +89,7 @@ export class SubcontractorAcceptInviteComponent implements OnInit, OnDestroy {
 
   onSignUp(): void {
     this.router.navigate(['/signup'], {
-      queryParams: { returnUrl: this.inviteReturnUrl },
+      queryParams: { inviteToken: this.token },
     });
   }
 

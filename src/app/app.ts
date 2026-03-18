@@ -85,12 +85,12 @@ export class App implements OnInit {
         map((event) => event as NavigationEnd)
       )
       .subscribe((event) => {
-        const publicRoutes = ['/login', '/select-company', '/create-company', '/accept-invite', '/auth/set-password', '/subcontractor-invite'];
+        const publicRoutes = ['/login', '/signup', '/confirm', '/forgot-password', '/select-company', '/create-company', '/accept-invite', '/auth/set-password', '/subcontractor-invite'];
         this.showLayout.set(!publicRoutes.some(route => event.urlAfterRedirects.startsWith(route)));
       });
 
     const currentUrl = this.router.url;
-    const publicRoutes = ['/login', '/select-company', '/create-company', '/accept-invite', '/auth/set-password', '/subcontractor-invite'];
+    const publicRoutes = ['/login', '/signup', '/confirm', '/forgot-password', '/select-company', '/create-company', '/accept-invite', '/auth/set-password', '/subcontractor-invite'];
     this.showLayout.set(!publicRoutes.some(route => currentUrl.startsWith(route)));
   }
 
