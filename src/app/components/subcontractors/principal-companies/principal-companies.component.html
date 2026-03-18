@@ -1,0 +1,12 @@
+<app-list-page
+  [title]="'Principal Companies'"
+  [subtitle]="'Companies that have hired you as a subcontractor'"
+  [rows]="(links$ | async) ?? []"
+  [columns]="columns"
+  [actions]="actions"
+  [searchable]="true"
+  [clientSideSearch]="true"
+  [searchPlaceholder]="'Search companies...'"
+>
+</app-list-page>
+

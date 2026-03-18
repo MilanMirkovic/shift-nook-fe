@@ -123,6 +123,32 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./components/accept-invite/accept-invite.component').then((m) => m.AcceptInviteComponent),
   },
+  // ── Subcontractor invite (public landing) ─────────────────────────────────
+  {
+    path: 'subcontractor-invite',
+    loadComponent: () =>
+      import('./components/subcontractors/subcontractor-accept-invite/subcontractor-accept-invite.component').then(
+        (m) => m.SubcontractorAcceptInviteComponent,
+      ),
+  },
+  // ── Owner: subcontractors list + detail ───────────────────────────────────
+  {
+    path: 'subcontractors',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./components/subcontractors/subcontractors-routing.module').then(
+        (m) => m.SUBCONTRACTORS_ROUTES,
+      ),
+  },
+  // ── Subcontractor owner: principal companies + manage workers ─────────────
+  {
+    path: 'principal-companies',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./components/subcontractors/principal-companies-routing.module').then(
+        (m) => m.PRINCIPAL_COMPANIES_ROUTES,
+      ),
+  },
   {
     path: 'companies/:companyId',
     canActivate: [authGuard],

@@ -62,6 +62,18 @@
           <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Work Time</span>
         </a>
       }
+      @if (canSeeSubcontractors) {
+        <a mat-list-item routerLink="/subcontractors" routerLinkActive="active" (click)="onLinkClicked()">
+          <mat-icon matListItemIcon>handshake</mat-icon>
+          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Subcontractors</span>
+        </a>
+      }
+      @if (canSeePrincipalCompanies) {
+        <a mat-list-item routerLink="/principal-companies" routerLinkActive="active" (click)="onLinkClicked()">
+          <mat-icon matListItemIcon>domain</mat-icon>
+          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Principal Companies</span>
+        </a>
+      }
       <a mat-list-item routerLink="/settings" routerLinkActive="active" (click)="onLinkClicked()">
         <mat-icon matListItemIcon>settings</mat-icon>
         <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Settings</span>

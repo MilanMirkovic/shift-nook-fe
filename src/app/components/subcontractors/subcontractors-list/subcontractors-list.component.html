@@ -1,0 +1,21 @@
+<app-page-layout
+  title="Subcontractors"
+  subtitle="Manage companies you have hired as subcontractors"
+>
+  <ng-container pageActions>
+    <button mat-flat-button color="primary" type="button" (click)="onInvite()">
+      <mat-icon>add</mat-icon>
+      Invite Subcontractor
+    </button>
+  </ng-container>
+
+  <app-data-table
+    [rows]="(links$ | async) ?? []"
+    [columns]="columns"
+    [actions]="actions"
+    [searchable]="true"
+    [clientSideSearch]="true"
+    [searchPlaceholder]="'Search subcontractors...'"
+  />
+</app-page-layout>
+

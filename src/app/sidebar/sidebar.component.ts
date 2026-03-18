@@ -45,6 +45,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   protected canSeeDashboard = false; // Only show Dashboard for OWNER and ACCOUNTANT
   protected isWorker = false; // Show Check In button only for WORKER role
   protected isAuthenticated = false;
+  protected canSeeSubcontractors = false;   // OWNER or ADMIN of a company
+  protected canSeePrincipalCompanies = false; // OWNER whose company is a sub (any company)
 
   ngOnInit(): void {
     // Check if user is authenticated
@@ -107,6 +109,27 @@ export class SidebarComponent implements OnInit, OnDestroy {
       )
       .subscribe(canSee => {
         this.canSeeDashboard = canSee;
+      });
+
+    // Subcontractors tab — OWNER or ADMIN of current company
+    this.userStore.currentCompany$
+      .pipe(
+        map(company => company?.role === CompanyRole.OWNER || company?.role === CompanyRole.ADMIN),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(canSee => {
+        this.canSeeSubcontractors = canSee;
+      });
+
+    // Principal Companies tab — OWNER of current company
+    // (a sub-company owner manages their principal links from here)
+    this.userStore.currentCompany$
+      .pipe(
+        map(company => company?.role === CompanyRole.OWNER),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(canSee => {
+        this.canSeePrincipalCompanies = canSee;
       });
 
     // Determine if user is a WORKER (to show Check In button)

@@ -31,12 +31,12 @@
   [clientSideSearch]="false"
   (rowClick)="onRowClick($event)"
 >
-  <ng-container pageActions>
+  <ng-template #pageActions>
     <button mat-flat-button color="primary" type="button" (click)="openInviteDialog()">
       <mat-icon>person_add</mat-icon>
       Invite Member
     </button>
-  </ng-container>
+  </ng-template>
 </app-list-page>
 
 @if ((currentUserRole$ | async) === CompanyRole.OWNER && (selectedCompanyId$ | async); as companyId) {
