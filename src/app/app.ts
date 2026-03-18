@@ -100,6 +100,7 @@ export class App implements OnInit {
     // Check real auth state (Amplify/Cognito) before hitting protected endpoints
     this.authService.isAuthenticated().then(isAuth => {
       if (isAuth) {
+        this.userStore.loadUser();
         this.workSessionStore.loadCurrentSession();
       }
     });

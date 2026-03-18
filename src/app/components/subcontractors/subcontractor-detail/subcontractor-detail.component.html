@@ -1,0 +1,95 @@
+<app-page-layout
+  [title]="(detail$ | async)?.subcontractorCompanyName ?? 'Subcontractor Detail'"
+  subtitle="Subcontractor details and enrolled workers"
+>
+  <ng-container pageActions>
+    <button mat-stroked-button type="button" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </button>
+    @if ((detail$ | async)?.subcontractorCompanyId) {
+      <button
+        mat-flat-button
+        color="warn"
+        type="button"
+        (click)="onRevoke()"
+        [disabled]="(revoking$ | async) ?? false"
+      >
+        <mat-icon>block</mat-icon>
+        Revoke Access
+      </button>
+    }
+  </ng-container>
+
+  @if (loading$ | async) {
+    <div class="detail-loading">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  } @else if (error$ | async; as err) {
+    <div class="detail-error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ err }}</p>
+    </div>
+  } @else if (detail$ | async; as detail) {
+    <!-- Info card -->
+    <div class="sn-card detail-info">
+      <div class="info-row">
+        <span class="info-label">Status</span>
+        <span class="info-value"><span class="role-chip">{{ detail.subcontractorCompanyId ? 'ACTIVE' : 'PENDING' }}</span></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Invited Email</span>
+        <span class="info-value">{{ detail.invitedEmail }}</span>
+      </div>
+      @if (detail.subcontractorCompanyId) {
+        <div class="info-row">
+          <span class="info-label">Company ID</span>
+          <span class="info-value mono">{{ detail.subcontractorCompanyId }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Workers table -->
+    <div class="sn-card workers-card">
+      <div class="workers-header">
+        <h2 class="workers-title">Enrolled Workers</h2>
+        <span class="workers-count">{{ detail.workers.length }}</span>
+      </div>
+      <mat-divider></mat-divider>
+
+      @if (detail.workers.length === 0) {
+        <div class="workers-empty">
+          <mat-icon>group_off</mat-icon>
+          <p>No workers enrolled yet.</p>
+        </div>
+      } @else {
+        <table class="workers-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (worker of detail.workers; track worker.userId) {
+              <tr>
+                <td>{{ worker.firstName }} {{ worker.lastName }}</td>
+                <td>{{ worker.email }}</td>
+                <td><span class="role-chip">{{ worker.role }}</span></td>
+                <td class="actions-cell">
+                  <button mat-icon-button color="warn" (click)="onRemoveWorker(worker)" aria-label="Remove worker">
+                    <mat-icon>person_remove</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  }
+
+</app-page-layout>
+

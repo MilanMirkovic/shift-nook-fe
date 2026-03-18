@@ -1,6 +1,8 @@
 <app-page-layout [title]="title()" [subtitle]="subtitle()">
   <ng-container pageActions>
-    <ng-content select="[pageActions]" />
+    @if (pageActionsTemplate) {
+      <ng-container *ngTemplateOutlet="pageActionsTemplate" />
+    }
   </ng-container>
 
   <app-data-table

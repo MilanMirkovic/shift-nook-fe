@@ -11,9 +11,9 @@
   [totalItems]="(total$ | async) ?? 0"
   [pageSizeOptions]="[5, 10, 20]"
 >
-  <ng-container pageActions>
+  <ng-template #pageActions>
     <button mat-flat-button color="primary" type="button" (click)="onAddClient()">
       Add Client
     </button>
-  </ng-container>
+  </ng-template>
 </app-list-page>

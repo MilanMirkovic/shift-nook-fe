@@ -1,0 +1,32 @@
+import { Routes } from '@angular/router';
+import { provideState } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
+import { SUBCONTRACTORS_FEATURE_KEY, subcontractorsReducer } from '../../store/subcontractors/subcontractors.reducer';
+import { SubcontractorsEffects } from '../../store/subcontractors/subcontractors.effects';
+
+export const PRINCIPAL_COMPANIES_ROUTES: Routes = [
+  {
+    path: '',
+    providers: [
+      provideState(SUBCONTRACTORS_FEATURE_KEY, subcontractorsReducer),
+      provideEffects(SubcontractorsEffects),
+    ],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./principal-companies/principal-companies.component').then(
+            m => m.PrincipalCompaniesComponent
+          ),
+      },
+      {
+        path: ':linkId/workers',
+        loadComponent: () =>
+          import('./manage-workers/manage-workers.component').then(
+            m => m.ManageWorkersComponent
+          ),
+      },
+    ],
+  },
+];
+

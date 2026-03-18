@@ -1,4 +1,5 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ContentChild, EventEmitter, input, Output, TemplateRef} from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 
 import { PageLayoutComponent } from '../page-layout/page-layout.component';
 import {
@@ -10,7 +11,7 @@ import {
 @Component({
   selector: 'app-list-page',
   standalone: true,
-  imports: [PageLayoutComponent, DataTableComponent],
+  imports: [PageLayoutComponent, DataTableComponent, NgTemplateOutlet],
   templateUrl: './list-page.component.html',
   styleUrl: './list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -43,5 +44,7 @@ export class ListPageComponent<T extends object> {
   readonly pageSizeOptions = input<number[]>([5, 10, 20, 50]);
   readonly pageSizeChange = input<((size: number) => void) | null>(null);
   @Output() rowClick = new EventEmitter<any>();
+
+  @ContentChild('pageActions') pageActionsTemplate?: TemplateRef<any>;
 
 }
