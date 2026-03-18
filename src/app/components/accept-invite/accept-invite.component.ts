@@ -13,7 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
-import { previewInvitation, acceptInvitation } from '../../store/invitations/invitations.actions';
+import { previewInvitation, acceptInvitation, resetAcceptState } from '../../store/invitations/invitations.actions';
 import {
   selectInvitationsPreviewResult,
   selectInvitationsPreviewError,
@@ -76,6 +76,9 @@ export class AcceptInviteComponent implements OnInit, OnDestroy {
   profileSaving = signal(false);
 
   ngOnInit(): void {
+    // Clear any stale accept state from a previous attempt
+    this.store.dispatch(resetAcceptState());
+
     const token = this.route.snapshot.queryParamMap.get('token');
 
     if (!token) {
@@ -173,13 +176,11 @@ export class AcceptInviteComponent implements OnInit, OnDestroy {
     this.store.dispatch(acceptInvitation({ companyId, token }));
 
     this.store.select(selectInvitationsAcceptResult)
-      .pipe(takeUntil(this.destroy$), filter(r => r !== null))
+      .pipe(takeUntil(this.destroy$), filter(r => r !== null), take(1))
       .subscribe(result => {
         sessionStorage.removeItem('pendingInviteToken');
         this.userStore.loadUser();
 
-        // Wait for the fresh user profile to arrive before navigating,
-        // so canCreateCompany and company memberships are up-to-date.
         this.actions$.pipe(
           ofType(loadUserSuccess),
           takeUntil(this.destroy$),
@@ -189,7 +190,7 @@ export class AcceptInviteComponent implements OnInit, OnDestroy {
       });
 
     this.store.select(selectInvitationsAcceptError)
-      .pipe(takeUntil(this.destroy$), filter(e => e !== null))
+      .pipe(takeUntil(this.destroy$), filter(e => e !== null), take(1))
       .subscribe(() => {
         this.view.set('accept-error');
         this.cdr.markForCheck();

@@ -5,7 +5,7 @@ import {
   sendInvitation, sendInvitationSuccess, sendInvitationFailure, resetSendState,
   revokeInvitation, revokeInvitationSuccess, revokeInvitationFailure,
   previewInvitation, previewInvitationSuccess, previewInvitationFailure,
-  acceptInvitation, acceptInvitationSuccess, acceptInvitationFailure
+  acceptInvitation, acceptInvitationSuccess, acceptInvitationFailure, resetAcceptState
 } from './invitations.actions';
 
 export const INVITATIONS_FEATURE_KEY = 'invitations';
@@ -54,4 +54,5 @@ export const invitationsReducer = createReducer(
   on(acceptInvitation, state => ({ ...state, accepting: true, acceptError: null, acceptResult: null })),
   on(acceptInvitationSuccess, (state, { result }) => ({ ...state, accepting: false, acceptResult: result })),
   on(acceptInvitationFailure, (state, { error }) => ({ ...state, accepting: false, acceptError: error })),
+  on(resetAcceptState, state => ({ ...state, accepting: false, acceptError: null, acceptResult: null })),
 );

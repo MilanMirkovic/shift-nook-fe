@@ -68,3 +68,4 @@ export const acceptInvitationFailure = createAction(
   '[Invitations] Accept Failure',
   props<{ error: string }>()
 );
+export const resetAcceptState = createAction('[Invitations] Reset Accept State');
