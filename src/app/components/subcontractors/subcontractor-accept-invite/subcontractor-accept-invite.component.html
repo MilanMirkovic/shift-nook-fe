@@ -1,104 +1,121 @@
 <div class="invite-page">
-  <div class="invite-card sn-card">
+  <div class="invite-card">
 
     @if (view() === 'loading') {
       <div class="state">
-        <mat-spinner diameter="48"></mat-spinner>
-        <h1 class="state-title">Loading Invitation…</h1>
+        <mat-spinner diameter="44"></mat-spinner>
+        <h2 class="state-title">Loading Invitation…</h2>
         <p class="state-msg">Please wait a moment.</p>
       </div>
     }
 
     @if (view() === 'invalid') {
       <div class="state">
-        <mat-icon class="state-icon icon--error">link_off</mat-icon>
-        <h1 class="state-title">Invitation Link Invalid</h1>
+        <div class="status-icon-wrap status-icon-wrap--error">
+          <mat-icon>link_off</mat-icon>
+        </div>
+        <h2 class="state-title">Invitation Link Invalid</h2>
         <p class="state-msg">
-          This invitation link is invalid, expired, or has already been accepted.<br>
+          This invitation link is invalid, expired, or has already been accepted.
           Please contact the company owner to send a new invitation.
         </p>
-        <button mat-flat-button color="primary" routerLink="/login">Go to Login</button>
+        <button mat-flat-button class="btn-primary" routerLink="/login">Go to Login</button>
       </div>
     }
 
     @if (view() === 'status') {
       @if (preview$ | async; as preview) {
 
-        <!-- NOT_AUTHENTICATED — prompt to log in or sign up -->
+        <!-- NOT_AUTHENTICATED -->
         @if (preview.acceptorStatus === 'NOT_AUTHENTICATED') {
           <div class="state">
-            <div class="company-avatar">{{ preview.ownerCompanyName[0] }}</div>
-            <h1 class="state-title">You've been invited!</h1>
-            <p class="state-msg">
-              <strong>{{ preview.ownerCompanyName }}</strong> has invited
-              <strong>{{ preview.invitedEmail }}</strong> to join as a subcontractor.
-            </p>
-            <p class="state-note">
-              You need to log in (or create an account) to accept this invitation.
-            </p>
-            <div class="btn-row">
-              <button mat-stroked-button (click)="onSignUp()">
-                <mat-icon>person_add</mat-icon>
-                Sign Up
-              </button>
-              <button mat-flat-button color="primary" (click)="onLogin()">
-                <mat-icon>login</mat-icon>
-                Log In
-              </button>
+            <div class="company-avatar">{{ preview.ownerCompanyName[0].toUpperCase() }}</div>
+            <div class="invite-header">
+              <h2 class="state-title">You've been invited!</h2>
+              <p class="state-msg">
+                <strong>{{ preview.ownerCompanyName }}</strong> has invited you to join as a subcontractor.
+              </p>
             </div>
+            <div class="email-chip">
+              <mat-icon>mail_outline</mat-icon>
+              <span>{{ preview.invitedEmail }}</span>
+            </div>
+            <button mat-flat-button class="btn-primary btn-full" (click)="onSignUp()">
+              <mat-icon>person_add</mat-icon>
+              Create Account &amp; Accept
+            </button>
+            <p class="secondary-action">
+              Already have an account?
+              <a (click)="onLogin()" class="link">Log in instead</a>
+            </p>
           </div>
         }
 
-        <!-- NO_COMPANY — logged in but no company yet -->
+        <!-- NO_COMPANY -->
         @if (preview.acceptorStatus === 'NO_COMPANY') {
           <div class="state">
-            <div class="company-avatar">{{ preview.ownerCompanyName[0] }}</div>
-            <h1 class="state-title">One more step…</h1>
-            <p class="state-msg">
-              You're logged in, but you don't have a company yet.<br>
-              Create your company to accept the invitation from
-              <strong>{{ preview.ownerCompanyName }}</strong>.
-            </p>
-            <button mat-flat-button color="primary" (click)="onCreateCompany()">
+            <div class="company-avatar">{{ preview.ownerCompanyName[0].toUpperCase() }}</div>
+            <div class="invite-header">
+              <h2 class="state-title">One more step…</h2>
+              <p class="state-msg">
+                You're logged in, but you don't have a company yet.
+                Create your company first, then you'll be able to accept the invitation from
+                <strong>{{ preview.ownerCompanyName }}</strong>.
+              </p>
+            </div>
+            <button mat-flat-button class="btn-primary btn-full" (click)="onCreateCompany()">
               <mat-icon>business</mat-icon>
               Create My Company
             </button>
           </div>
         }
 
-        <!-- READY — show the accept button -->
+        <!-- READY -->
         @if (preview.acceptorStatus === 'READY') {
           <div class="state">
-            <div class="company-avatar">{{ preview.ownerCompanyName[0] }}</div>
-            <h1 class="state-title">You've been invited!</h1>
-            <p class="state-msg">
-              <strong>{{ preview.ownerCompanyName }}</strong> has invited you to join as a subcontractor.
-            </p>
-            <div class="preview-detail">
+            <div class="company-avatar">{{ preview.ownerCompanyName[0].toUpperCase() }}</div>
+            <div class="invite-header">
+              <h2 class="state-title">Accept Invitation</h2>
+              <p class="state-msg">
+                You're accepting on behalf of your company.
+              </p>
+            </div>
+            <div class="detail-card">
               <div class="detail-row">
-                <span class="detail-label">Invited email</span>
-                <span class="detail-value">{{ preview.invitedEmail }}</span>
+                <mat-icon class="detail-icon">business</mat-icon>
+                <div>
+                  <span class="detail-label">Invited by</span>
+                  <span class="detail-value">{{ preview.ownerCompanyName }}</span>
+                </div>
+              </div>
+              <div class="detail-row">
+                <mat-icon class="detail-icon">mail_outline</mat-icon>
+                <div>
+                  <span class="detail-label">Invited email</span>
+                  <span class="detail-value">{{ preview.invitedEmail }}</span>
+                </div>
               </div>
             </div>
-            <p class="state-note">
-              Your company's workers will automatically gain access to their jobsites.
-            </p>
-            <button mat-flat-button color="primary" (click)="onAccept()">
+            <button mat-flat-button class="btn-primary btn-full" (click)="onAccept()">
               Accept Invitation
             </button>
           </div>
         }
 
-        <!-- ALREADY_LINKED — already connected -->
+        <!-- ALREADY_LINKED -->
         @if (preview.acceptorStatus === 'ALREADY_LINKED') {
           <div class="state">
-            <mat-icon class="state-icon icon--success">check_circle</mat-icon>
-            <h1 class="state-title">Already Connected</h1>
-            <p class="state-msg">
-              Your company is already linked to <strong>{{ preview.ownerCompanyName }}</strong>.<br>
-              No further action is needed.
-            </p>
-            <button mat-flat-button color="primary" (click)="onGoToDashboard()">
+            <div class="status-icon-wrap status-icon-wrap--success">
+              <mat-icon>check</mat-icon>
+            </div>
+            <div class="invite-header">
+              <h2 class="state-title">Already Connected</h2>
+              <p class="state-msg">
+                Your company is already linked to <strong>{{ preview.ownerCompanyName }}</strong>.
+                No further action is needed.
+              </p>
+            </div>
+            <button mat-flat-button class="btn-primary btn-full" (click)="onGoToDashboard()">
               Go to Dashboard
             </button>
           </div>
@@ -109,18 +126,20 @@
 
     @if (view() === 'accepting') {
       <div class="state">
-        <mat-spinner diameter="48"></mat-spinner>
-        <h1 class="state-title">Accepting Invitation…</h1>
+        <mat-spinner diameter="44"></mat-spinner>
+        <h2 class="state-title">Accepting Invitation…</h2>
         <p class="state-msg">Please wait while we set up the subcontractor relationship.</p>
       </div>
     }
 
     @if (view() === 'success') {
       <div class="state">
-        <mat-icon class="state-icon icon--success">check_circle</mat-icon>
-        <h1 class="state-title">You're in!</h1>
+        <div class="status-icon-wrap status-icon-wrap--success">
+          <mat-icon>check</mat-icon>
+        </div>
+        <h2 class="state-title">You're in!</h2>
         <p class="state-msg">
-          You have successfully joined as a subcontractor.<br>
+          You have successfully joined as a subcontractor.
           Redirecting you to your principal companies…
         </p>
       </div>
@@ -128,12 +147,14 @@
 
     @if (view() === 'error') {
       <div class="state">
-        <mat-icon class="state-icon icon--error">error_outline</mat-icon>
-        <h1 class="state-title">Something Went Wrong</h1>
-        <p class="state-msg">{{ acceptError() ?? 'We couldn\'t accept the invitation. Please try again.' }}</p>
+        <div class="status-icon-wrap status-icon-wrap--error">
+          <mat-icon>error_outline</mat-icon>
+        </div>
+        <h2 class="state-title">Something Went Wrong</h2>
+        <p class="state-msg">{{ acceptError() ?? "We couldn't accept the invitation. Please try again." }}</p>
         <div class="btn-row">
-          <button mat-stroked-button routerLink="/login">Go to Login</button>
-          <button mat-flat-button color="primary" (click)="onAccept()">Try Again</button>
+          <button mat-stroked-button class="btn-outline" routerLink="/login">Go to Login</button>
+          <button mat-flat-button class="btn-primary" (click)="onAccept()">Try Again</button>
         </div>
       </div>
     }

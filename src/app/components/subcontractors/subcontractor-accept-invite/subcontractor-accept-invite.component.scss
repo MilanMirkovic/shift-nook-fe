@@ -1,0 +1,239 @@
+:host {
+  display: block;
+}
+
+// ── Page wrapper ──────────────────────────────────────────────────────────────
+.invite-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sn-page-bg);
+  padding: 24px 16px;
+}
+
+// ── Card ──────────────────────────────────────────────────────────────────────
+.invite-card {
+  background: var(--sn-surface);
+  border: 1px solid var(--sn-surface-border);
+  border-radius: 20px;
+  box-shadow: var(--sn-shadow-modal);
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 460px;
+}
+
+// ── State container ───────────────────────────────────────────────────────────
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+// ── Company avatar ────────────────────────────────────────────────────────────
+.company-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--sn-primary-gradient);
+  color: #ffffff;
+  font-size: 1.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--sn-shadow-btn);
+  flex-shrink: 0;
+}
+
+// ── Status icon wrap (success / error) ───────────────────────────────────────
+.status-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  &--success {
+    background: rgba(5, 150, 105, 0.1);
+    mat-icon { color: var(--sn-green); }
+  }
+
+  &--error {
+    background: rgba(220, 38, 38, 0.08);
+    mat-icon { color: var(--sn-red); }
+  }
+}
+
+// ── Text ──────────────────────────────────────────────────────────────────────
+.invite-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.state-title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--sn-text);
+  line-height: 1.3;
+}
+
+.state-msg {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--sn-text-secondary);
+  line-height: 1.6;
+
+  strong {
+    color: var(--sn-text);
+    font-weight: 600;
+  }
+}
+
+// ── Email chip ────────────────────────────────────────────────────────────────
+.email-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--sn-primary-light);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 0.875rem;
+  color: var(--sn-blue);
+  font-weight: 500;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// ── Detail card (READY state) ─────────────────────────────────────────────────
+.detail-card {
+  width: 100%;
+  background: var(--sn-page-bg);
+  border: 1px solid var(--sn-surface-border);
+  border-radius: 12px;
+  padding: 4px 0;
+  text-align: left;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+
+  & + .detail-row {
+    border-top: 1px solid var(--sn-surface-border);
+  }
+}
+
+.detail-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: var(--sn-text-muted);
+  flex-shrink: 0;
+}
+
+.detail-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--sn-text-muted);
+  margin-bottom: 2px;
+}
+
+.detail-value {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--sn-text);
+}
+
+// ── Buttons ───────────────────────────────────────────────────────────────────
+.btn-primary {
+  background: var(--sn-primary-gradient) !important;
+  color: #ffffff !important;
+  border-radius: 10px !important;
+  height: 46px !important;
+  font-size: 0.9375rem !important;
+  font-weight: 600 !important;
+  box-shadow: var(--sn-shadow-btn) !important;
+  letter-spacing: 0.01em !important;
+
+  mat-icon {
+    margin-right: 6px;
+  }
+}
+
+.btn-outline {
+  border-radius: 10px !important;
+  height: 46px !important;
+  font-size: 0.9375rem !important;
+  font-weight: 500 !important;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.btn-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+
+  button {
+    flex: 1;
+  }
+}
+
+// ── Secondary action (log in link) ────────────────────────────────────────────
+.secondary-action {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--sn-text-muted);
+}
+
+.link {
+  color: var(--sn-blue);
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ── Spinner centering ─────────────────────────────────────────────────────────
+mat-spinner {
+  margin: 0 auto;
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 520px) {
+  .invite-card {
+    padding: 36px 24px;
+    border-radius: 16px;
+  }
+
+  .btn-row {
+    flex-direction: column;
+  }
+}
+
