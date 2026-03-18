@@ -68,6 +68,7 @@
             <mat-label>Email address</mat-label>
             <input matInput type="email" formControlName="email" placeholder="you@example.com" autocomplete="email" />
             <mat-icon matPrefix>email</mat-icon>
+            <mat-icon matSuffix *ngIf="inviteToken">lock</mat-icon>
             <mat-error *ngIf="signupForm.get('email')?.hasError('required') ?? false">Email is required</mat-error>
             <mat-error *ngIf="signupForm.get('email')?.hasError('email') ?? false">Please enter a valid email</mat-error>
           </mat-form-field>
@@ -89,7 +90,7 @@
             <mat-error *ngIf="signupForm.get('password')?.hasError('minlength') ?? false">Password must be at least 8 characters</mat-error>
           </mat-form-field>
 
-          <!-- Verification code — only shown in invite flow, after account creation email is sent -->
+          <!-- Verification code — only in invite flow, code already sent -->
           <mat-form-field appearance="outline" class="full-width" *ngIf="inviteToken">
             <mat-label>Verification code</mat-label>
             <input
@@ -101,7 +102,7 @@
               inputmode="numeric"
             />
             <mat-icon matPrefix>pin</mat-icon>
-            <mat-hint>Enter the 6-digit code sent to your email</mat-hint>
+            <mat-hint>Check your email for the 6-digit verification code</mat-hint>
             <mat-error *ngIf="signupForm.get('code')?.hasError('required') ?? false">Code is required</mat-error>
             <mat-error *ngIf="(signupForm.get('code')?.hasError('minlength') || signupForm.get('code')?.hasError('maxlength')) ?? false">
               Code must be exactly 6 digits
@@ -123,7 +124,7 @@
             <span *ngIf="!isLoading">{{ inviteToken ? 'Create account & verify' : 'Create account' }}</span>
             <span *ngIf="isLoading" class="loading-text">
               <mat-icon class="spinner">refresh</mat-icon>
-              {{ inviteToken ? 'Verifying...' : 'Creating account...' }}
+              {{ inviteToken ? 'Creating account...' : 'Creating account...' }}
             </span>
           </button>
         </form>

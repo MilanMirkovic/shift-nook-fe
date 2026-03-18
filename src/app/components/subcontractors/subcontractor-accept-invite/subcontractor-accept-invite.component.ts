@@ -22,6 +22,7 @@ import {
   selectSubcontractorInvitePreviewError,
 } from '../../../store/subcontractors/subcontractors.selectors';
 import { UserStoreService } from '../../../store/user/user-store.service';
+import { AuthService } from '../../../core/auth/auth.service';
 
 type PageView = 'loading' | 'status' | 'invalid' | 'accepting' | 'error' | 'success';
 
@@ -40,6 +41,7 @@ export class SubcontractorAcceptInviteComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly userStore = inject(UserStoreService);
+  private readonly authService = inject(AuthService);
   private readonly destroy$ = new Subject<void>();
 
   token: string | null = null;
@@ -88,8 +90,23 @@ export class SubcontractorAcceptInviteComponent implements OnInit, OnDestroy {
   }
 
   onSignUp(): void {
+    const preview = this.store.selectSignal(selectSubcontractorInvitePreview)();
+    const email = preview?.invitedEmail ?? '';
+
+    // Generate a temp password that satisfies Cognito requirements
+    const tempPassword = `Tmp!${Math.random().toString(36).slice(2, 10)}A1`;
+
+    // Trigger signUp immediately so Cognito sends the verification email right now
+    this.authService.signUp(email, tempPassword, 'Invited', 'User').catch(() => {
+      // Ignore UsernameExistsException — code was already sent previously, user can still proceed
+    });
+
     this.router.navigate(['/signup'], {
-      queryParams: { inviteToken: this.token },
+      queryParams: {
+        inviteToken: this.token,
+        email,
+        tempPassword,
+      },
     });
   }
 

@@ -31,6 +31,10 @@ export class SignupComponent implements OnInit {
 
   /** Token present when coming from the subcontractor invite flow */
   inviteToken: string | null = null;
+  /** Temp password generated at invite page — used for signIn after confirm */
+  private tempPassword: string | null = null;
+  /** True after signUp() succeeds — shows the code field */
+  codeSent = false;
   /** Generic returnUrl for other flows */
   private returnUrl: string | null = null;
 
@@ -52,9 +56,18 @@ export class SignupComponent implements OnInit {
   ngOnInit(): void {
     this.inviteToken = this.route.snapshot.queryParamMap.get('inviteToken');
     this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    this.tempPassword = this.route.snapshot.queryParamMap.get('tempPassword');
 
-    // Code is required only in the invite flow
-    if (this.inviteToken) {
+    // Pre-fill and lock the email when coming from invite
+    const inviteEmail = this.route.snapshot.queryParamMap.get('email');
+    if (inviteEmail) {
+      this.signupForm.get('email')!.setValue(inviteEmail);
+      this.signupForm.get('email')!.disable();
+    }
+
+    // If tempPassword is present, the account + code were already triggered — go straight to step 2
+    if (this.inviteToken && this.tempPassword) {
+      this.codeSent = true;
       this.signupForm.get('code')!.setValidators([
         Validators.required,
         Validators.minLength(6),
@@ -69,20 +82,22 @@ export class SignupComponent implements OnInit {
 
     this.isLoading = true;
     this.errorMessage = '';
-    const { firstName, lastName, email, password, code } = this.signupForm.value;
+    const { firstName, lastName, email, password, code } = this.signupForm.getRawValue();
 
     try {
-      await this.authService.signUp(email, password, firstName, lastName);
-
-      if (this.inviteToken) {
-        // Invite flow: confirm email + sign in right here, then go create company
+      if (this.inviteToken && this.tempPassword) {
+        // Invite flow: confirm → signIn with temp → update attributes + change password
         await this.authService.confirmSignUp(email, code);
-        await this.authService.signIn(email, password);
+        await this.authService.signIn(email, this.tempPassword);
+        // Update real name attributes and set the user's real password
+        await this.authService.updateUserAttributes(firstName, lastName);
+        await this.authService.changePassword(this.tempPassword, password);
         this.router.navigate(['/create-company'], {
           queryParams: { returnUrl: `/subcontractor-invite?token=${this.inviteToken}` },
         });
       } else {
-        // Normal flow: go to confirm-email page
+        // Normal flow: create account → go to confirm-email page
+        await this.authService.signUp(email, password, firstName, lastName);
         this.router.navigate(['/confirm'], {
           state: { email, returnUrl: this.returnUrl },
           queryParams: { ...(this.returnUrl ? { returnUrl: this.returnUrl } : {}) },

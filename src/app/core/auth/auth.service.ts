@@ -10,6 +10,8 @@ import {
   getCurrentUser,
   fetchAuthSession,
   resendSignUpCode,
+  updatePassword,
+  updateUserAttributes,
   SignInOutput,
 } from 'aws-amplify/auth';
 import { environment } from '../../../environments/environment';
@@ -109,5 +111,20 @@ export class AuthService {
    */
   async confirmSignIn(newPassword: string): Promise<SignInOutput> {
     return confirmSignIn({ challengeResponse: newPassword });
+  }
+
+  /** Change password for currently signed-in user */
+  async changePassword(oldPassword: string, newPassword: string): Promise<void> {
+    await updatePassword({ oldPassword, newPassword });
+  }
+
+  /** Update first/last name attributes for currently signed-in user */
+  async updateUserAttributes(firstName: string, lastName: string): Promise<void> {
+    await updateUserAttributes({
+      userAttributes: {
+        given_name: firstName,
+        family_name: lastName,
+      },
+    });
   }
 }
