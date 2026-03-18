@@ -62,7 +62,7 @@ export const acceptInvitation = createAction(
 );
 export const acceptInvitationSuccess = createAction(
   '[Invitations] Accept Success',
-  props<{ result: AcceptInviteResponse }>()
+  props<{ result: AcceptInviteResponse; companyId: string }>()
 );
 export const acceptInvitationFailure = createAction(
   '[Invitations] Accept Failure',

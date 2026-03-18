@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil, filter } from 'rxjs';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
 import { DataTableColumn, DataTableAction } from '../../layout/data-table/data-table.component';
@@ -32,6 +32,7 @@ export class TeamMembersComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly route = inject(ActivatedRoute);
   private readonly destroy$ = new Subject<void>();
 
   readonly selectedCompanyId$ = this.store.select(selectSelectedCompanyId);
@@ -46,6 +47,8 @@ export class TeamMembersComponent implements OnInit, OnDestroy {
   private currentQuery: string | null = null;
   private currentPage = 0;
   private pageSize = 20;
+
+  isOnboarding = false;
 
   protected readonly columns: DataTableColumn<CompanyMember>[] = [
     { id: 'firstName', header: 'First name', field: 'firstName', searchable: true },
@@ -118,6 +121,8 @@ export class TeamMembersComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit(): void {
+    this.isOnboarding = this.route.snapshot.queryParamMap.get('onboarding') === 'true';
+
     this.selectedCompanyId$
       .pipe(
         takeUntil(this.destroy$),
@@ -151,6 +156,15 @@ export class TeamMembersComponent implements OnInit, OnDestroy {
   }
 
   openInviteDialog(): void {
-    this.dialog.open(InviteWorkerDialogComponent, { width: '480px', disableClose: false });
+    this.dialog.open(InviteWorkerDialogComponent, {
+      width: '480px',
+      disableClose: false,
+      position: undefined,
+      panelClass: 'centered-dialog',
+    });
+  }
+
+  goToDashboard(): void {
+    this.router.navigate(['/dashboard']);
   }
 }

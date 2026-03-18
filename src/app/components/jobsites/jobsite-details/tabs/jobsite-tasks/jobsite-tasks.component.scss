@@ -1,4 +1,4 @@
-@import '../../jobsite-details-tabs.scss';
+@use '../../jobsite-details-tabs' as *;
 
 // Review Notes from Owner
 .activity-item__review-notes {

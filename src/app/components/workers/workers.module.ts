@@ -11,10 +11,12 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
+import { MatDialogModule } from '@angular/material/dialog';
 
 import { WorkersComponent } from './workers.component';
 import { WorkerDetailsComponent } from './worker-details/worker-details.component';
 import { ListPageComponent } from '../../layout/list-page/list-page.component';
+import { InviteWorkerDialogComponent } from '../../shared/components/invite-worker-dialog/invite-worker-dialog.component';
 
 const routes: Routes = [
   {
@@ -30,7 +32,7 @@ const routes: Routes = [
 @NgModule({
   declarations: [
     WorkersComponent,
-    WorkerDetailsComponent
+    WorkerDetailsComponent,
   ],
   imports: [
     CommonModule,
@@ -39,11 +41,13 @@ const routes: Routes = [
     MatIconModule,
     MatTabsModule,
     MatProgressSpinnerModule,
+    MatDialogModule,
     MatDatepickerModule,
     MatFormFieldModule,
     MatNativeDateModule,
     MatInputModule,
     ListPageComponent,
+    InviteWorkerDialogComponent,
     RouterModule.forChild(routes)
   ]
 })

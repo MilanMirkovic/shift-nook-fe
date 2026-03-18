@@ -170,8 +170,10 @@
         <mat-spinner diameter="18"></mat-spinner>
         <span>Creating…</span>
       } @else {
-        <mat-icon>check</mat-icon>
-        <span>Create Estimate</span>
+        <ng-container>
+          <mat-icon>check</mat-icon>
+          <span>Create Estimate</span>
+        </ng-container>
       }
     </button>
   </mat-dialog-actions>

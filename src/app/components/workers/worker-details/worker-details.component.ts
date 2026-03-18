@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { Store } from '@ngrx/store';
+import { MatDialog } from '@angular/material/dialog';
 
 import { CompanyMember } from '../../../store/company-members/company-members.models';
 import {
@@ -16,6 +17,8 @@ import { Activity, ActivityCategory } from '../../../shared/models/activity.mode
 import { TimesheetsStoreService } from '../../../store/timesheets/timesheets-store.service';
 import { Timesheet } from '../../../store/timesheets/timesheets.models';
 import { WorkerDetailsHelper } from './worker-details.helper';
+import { InviteWorkerDialogComponent } from '../../../shared/components/invite-worker-dialog/invite-worker-dialog.component';
+import { CompanyRole } from '../../../shared/models/company-role';
 
 @Component({
   selector: 'app-worker-details',
@@ -29,6 +32,7 @@ export class WorkerDetailsComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly activityService = inject(ActivityTimelineService);
   private readonly timesheetsStore = inject(TimesheetsStoreService);
+  private readonly dialog = inject(MatDialog);
   private readonly destroy$ = new Subject<void>();
 
   protected readonly worker$ = this.store.select(selectSelectedMember);
@@ -442,5 +446,14 @@ export class WorkerDetailsComponent implements OnInit, OnDestroy {
 
     const average = totalHours / completedTimesheets.length;
     return Math.round(average * 10) / 10;
+  }
+
+  openInviteDialog(): void {
+    this.dialog.open(InviteWorkerDialogComponent, {
+      width: '480px',
+      disableClose: false,
+      panelClass: 'centered-dialog',
+      data: { role: CompanyRole.WORKER },
+    });
   }
 }

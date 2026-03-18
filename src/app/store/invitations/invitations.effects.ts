@@ -95,10 +95,17 @@ export class InvitationsEffects {
       ofType(acceptInvitation),
       switchMap(({ companyId, token }) =>
         this.api.accept(companyId, token).pipe(
-          map(result => acceptInvitationSuccess({ result })),
+          map(result => acceptInvitationSuccess({ result, companyId })),
           catchError(err => of(acceptInvitationFailure({ error: this.toMessage(err) })))
         )
       )
+    )
+  );
+
+  acceptInvitationSuccess$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(acceptInvitationSuccess),
+      map(({ companyId }) => loadInvitations({ companyId }))
     )
   );
 
@@ -106,4 +113,3 @@ export class InvitationsEffects {
     return err?.error?.message ?? err?.message ?? 'An unexpected error occurred.';
   }
 }
-

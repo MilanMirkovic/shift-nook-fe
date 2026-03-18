@@ -2,7 +2,7 @@ import { Component, inject, ChangeDetectionStrategy, OnInit, OnDestroy } from '@
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -20,6 +20,10 @@ import {
 } from '../../../store/invitations/invitations.selectors';
 import { selectCurrentCompany } from '../../../store/user/user.selectors';
 import { NotificationService } from '../../services/notification.service';
+
+export interface InviteWorkerDialogData {
+  role?: CompanyRole;
+}
 
 @Component({
   selector: 'app-invite-worker-dialog',
@@ -44,6 +48,7 @@ export class InviteWorkerDialogComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly dialogRef = inject(MatDialogRef<InviteWorkerDialogComponent>);
   private readonly notifications = inject(NotificationService);
+  private readonly data: InviteWorkerDialogData = inject(MAT_DIALOG_DATA, { optional: true }) ?? {};
   private readonly destroy$ = new Subject<void>();
 
   readonly sending$ = this.store.select(selectInvitationsSending);
@@ -61,7 +66,7 @@ export class InviteWorkerDialogComponent implements OnInit, OnDestroy {
   constructor() {
     this.inviteForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      role: [CompanyRole.WORKER, Validators.required],
+      role: [this.data.role ?? CompanyRole.WORKER, Validators.required],
     });
   }
 

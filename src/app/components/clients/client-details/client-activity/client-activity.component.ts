@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 
-import { AsyncPipe, CurrencyPipe, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { CurrencyPipe, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -23,7 +23,6 @@ import { selectSelectedCompanyId } from '../../../../store/user/user.selectors';
   templateUrl: './client-activity.component.html',
   styleUrls: ['./client-activity.component.scss'],
   imports: [
-    AsyncPipe,
     CurrencyPipe,
     DatePipe,
     NgIf,
@@ -183,4 +182,3 @@ export class ClientActivityComponent implements OnInit, OnDestroy {
     return iconMap[type] || 'info';
   }
 }
-

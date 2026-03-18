@@ -1,3 +1,19 @@
+@if (isOnboarding) {
+  <div class="onboarding-banner">
+    <div class="onboarding-banner__steps">
+      <span class="step step--done"><mat-icon>check_circle</mat-icon> Company created</span>
+      <mat-icon class="step-arrow">chevron_right</mat-icon>
+      <span class="step step--active"><mat-icon>group_add</mat-icon> Invite your team</span>
+      <mat-icon class="step-arrow">chevron_right</mat-icon>
+      <span class="step step--upcoming">Start scheduling</span>
+    </div>
+    <button mat-stroked-button (click)="goToDashboard()">
+      Skip for now
+      <mat-icon iconSuffix>arrow_forward</mat-icon>
+    </button>
+  </div>
+}
+
 <app-list-page
   title="Team"
   subtitle="Manage staff profiles, roles, and availability."
@@ -16,12 +32,10 @@
   (rowClick)="onRowClick($event)"
 >
   <ng-container pageActions>
-    @if ((currentUserRole$ | async) === CompanyRole.OWNER) {
-      <button mat-flat-button color="primary" type="button" (click)="openInviteDialog()">
-        <mat-icon>person_add</mat-icon>
-        Invite Member
-      </button>
-    }
+    <button mat-flat-button color="primary" type="button" (click)="openInviteDialog()">
+      <mat-icon>person_add</mat-icon>
+      Invite Member
+    </button>
   </ng-container>
 </app-list-page>
 

@@ -86,7 +86,7 @@ export class CreateCompanyComponent {
     ).subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/team'], { queryParams: { onboarding: true } });
       },
       error: (err) => {
         this.isLoading    = false;

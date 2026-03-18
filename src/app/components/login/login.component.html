@@ -97,15 +97,13 @@
               Password is required
             </mat-error>
             <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')">
-              Password must be at least 6 characters
+              Password must be at least 8 characters
             </mat-error>
+            <mat-hint>Min. 8 characters · uppercase · lowercase · number · symbol</mat-hint>
           </mat-form-field>
 
-          <!-- Remember me & Forgot password -->
+          <!-- Forgot password -->
           <div class="form-options">
-            <mat-checkbox formControlName="rememberMe" color="primary">
-              Remember me
-            </mat-checkbox>
             <a [routerLink]="['/forgot-password']" class="forgot-link">Forgot password?</a>
           </div>
 
@@ -131,14 +129,6 @@
           </button>
         </form>
 
-        <!-- Sign up link -->
-        <div class="signup-section">
-          <p class="signup-text">
-            Don't have an account?
-            <a [routerLink]="['/signup']" class="signup-link">Sign up</a>
-          </p>
-        </div>
-      </div>
 
       <!-- Footer -->
       <div class="login-footer">

@@ -8,7 +8,7 @@ import { loadClientById } from '../../../store/clients/clients.actions';
 import { selectClientById } from '../../../store/clients/clients.selectors';
 import { selectSelectedCompanyId } from '../../../store/user/user.selectors';
 import { Client } from '../../../store/clients/clients.models';
-import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
+import { AsyncPipe, NgIf } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -24,7 +24,6 @@ import { ClientDetailsInfoComponent } from './client-details-info/client-details
   standalone: true,
   templateUrl: './client-details.component.html',
   imports: [
-    DatePipe,
     AsyncPipe,
     NgIf,
     MatTabsModule,

@@ -215,4 +215,20 @@ body {
   border-radius: 20px !important;
 }
 
+/* ─── Centered dialog (viewport center regardless of sidebar) ─────────────── */
+.centered-dialog {
+  .mat-mdc-dialog-container {
+    border-radius: 16px !important;
+    box-shadow: var(--sn-shadow-modal) !important;
+    .mdc-dialog__surface { border-radius: 16px !important; }
+  }
+}
+
+.cdk-overlay-pane.centered-dialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
 /* You can add global styles to this file, and also import other style files */
