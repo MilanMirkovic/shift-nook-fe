@@ -100,7 +100,7 @@ export class SubcontractorDetailComponent implements OnInit, OnDestroy {
   }
 
   onRemoveWorker(worker: SubcontractorWorker): void {
-    if (!this.companyId || !this.linkId) return;
+    if (!this.companyId) return;
     const ref = this.dialog.open(ConfirmationDialogComponent, {
       data: {
         title: 'Remove Worker',
@@ -113,11 +113,14 @@ export class SubcontractorDetailComponent implements OnInit, OnDestroy {
     });
     ref.afterClosed().pipe(take(1)).subscribe(confirmed => {
       if (confirmed) {
-        this.store.dispatch(removeWorkerFromLink({
-          ownerCompanyId: this.companyId!,
-          linkId: this.linkId!,
-          workerUserId: worker.userId,
-        }));
+        this.detail$.pipe(take(1)).subscribe(detail => {
+          if (!detail?.subcontractorCompanyId) return;
+          this.store.dispatch(removeWorkerFromLink({
+            ownerCompanyId: this.companyId!,
+            subcontractorCompanyId: detail.subcontractorCompanyId,
+            workerUserId: worker.userId,
+          }));
+        });
       }
     });
   }
@@ -131,4 +134,3 @@ export class SubcontractorDetailComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 }
-

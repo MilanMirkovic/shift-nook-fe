@@ -1,6 +1,6 @@
 <app-page-layout
-  [title]="'Manage Workers — ' + ((detail$ | async)?.subcontractorCompanyName ?? 'Principal Company')"
-  subtitle="Add or remove your workers from this principal company"
+  [title]="'Manage Workers'"
+  [subtitle]="'Assign or remove your workers for ' + principalCompanyName"
 >
   <ng-container pageActions>
     <button mat-stroked-button type="button" (click)="goBack()">
@@ -9,94 +9,174 @@
     </button>
   </ng-container>
 
-  @if (detailLoading$ | async) {
+  @if (workerStatusesLoading$ | async) {
     <div class="mw-loading">
-      <mat-spinner diameter="48"></mat-spinner>
+      <mat-spinner diameter="44"></mat-spinner>
+      <span>Loading workers…</span>
     </div>
-  } @else if (detailError$ | async; as err) {
-    <div class="mw-error">
-      <mat-icon>error_outline</mat-icon>
-      <p>{{ err }}</p>
+  } @else {
+
+    <!-- ── Stats banner ──────────────────────────────────────────────────── -->
+    <div class="stats-banner">
+      <div class="stat-pill">
+        <mat-icon>group</mat-icon>
+        <span class="stat-value">{{ enrolledWorkers.length }}</span>
+        <span class="stat-label">Enrolled</span>
+      </div>
+      <div class="stat-pill stat-pill--muted">
+        <mat-icon>person_search</mat-icon>
+        <span class="stat-value">{{ availableWorkers.length }}</span>
+        <span class="stat-label">Available</span>
+      </div>
+      <div class="stat-pill stat-pill--company">
+        <mat-icon>domain</mat-icon>
+        <span class="stat-label">{{ principalCompanyName }}</span>
+      </div>
     </div>
-  } @else if (detail$ | async; as detail) {
-    <!-- Add worker -->
-    <div class="sn-card add-worker-card">
-      <h2 class="section-title">Add a Worker</h2>
-      <div class="add-worker-row">
-        <mat-form-field appearance="outline" class="worker-select">
-          <mat-label>Select worker to add</mat-label>
+
+    <!-- ── Add worker panel ──────────────────────────────────────────────── -->
+    <div class="sn-card add-panel">
+      <div class="add-panel__header">
+        <div class="add-panel__icon-wrap">
+          <mat-icon>person_add</mat-icon>
+        </div>
+        <div>
+          <p class="add-panel__title">Add a Worker</p>
+          <p class="add-panel__subtitle">Select a worker from your team to assign to this principal company</p>
+        </div>
+      </div>
+      <div class="add-panel__body">
+        <mat-form-field appearance="outline" class="add-panel__select">
+          <mat-label>Choose worker</mat-label>
           <mat-select [formControl]="addWorkerCtrl">
+            <mat-select-trigger>
+              @if (getSelectedWorker(); as w) {
+                <div class="trigger-row">
+                  <span class="option-avatar">{{ w.firstName[0] }}{{ w.lastName[0] }}</span>
+                  <span class="trigger-info">
+                    <span class="trigger-name">{{ w.firstName }} {{ w.lastName }}</span>
+                    <span class="trigger-email">{{ w.email }}</span>
+                  </span>
+                </div>
+              }
+            </mat-select-trigger>
             @for (w of availableWorkers; track w.userId) {
-              <mat-option [value]="w.userId">{{ w.firstName }} {{ w.lastName }} — {{ w.email }}</mat-option>
+              <mat-option [value]="w.userId">
+                <div class="option-row">
+                  <span class="option-avatar">{{ w.firstName[0] }}{{ w.lastName[0] }}</span>
+                  <span class="option-info">
+                    <span class="option-name">{{ w.firstName }} {{ w.lastName }}</span>
+                    <span class="option-email">{{ w.email }}</span>
+                  </span>
+                  @if (getAssignmentsForAvailable(w.userId).length > 0) {
+                    <span
+                      class="option-badge"
+                      [matTooltip]="getAssignmentsForAvailable(w.userId) | assignmentTooltip"
+                    >
+                      <mat-icon>business</mat-icon>
+                      {{ getAssignmentsForAvailable(w.userId).length }}
+                    </span>
+                  }
+                </div>
+              </mat-option>
             }
             @if (availableWorkers.length === 0) {
-              <mat-option disabled>No available workers</mat-option>
+              <mat-option disabled>
+                <span class="option-empty">All workers already enrolled</span>
+              </mat-option>
             }
           </mat-select>
         </mat-form-field>
+
         <button
           mat-flat-button
-          color="primary"
+          class="add-btn"
           type="button"
           [disabled]="!addWorkerCtrl.value || ((addingWorker$ | async) ?? false)"
           (click)="onAddWorker()"
         >
           @if (addingWorker$ | async) {
-            <mat-spinner diameter="20" color="accent"></mat-spinner>
+            <mat-spinner diameter="18" color="accent"></mat-spinner>
+            <span>Adding…</span>
           } @else {
-            <ng-container>
-              <mat-icon>person_add</mat-icon>
-              Add Worker
-            </ng-container>
+            <mat-icon>add</mat-icon>
+            <span>Add Worker</span>
           }
         </button>
       </div>
     </div>
 
-    <!-- Enrolled workers -->
+    <!-- ── Enrolled workers ──────────────────────────────────────────────── -->
     <div class="sn-card workers-card">
-      <div class="workers-header">
-        <h2 class="section-title">Enrolled Workers</h2>
-        <span class="workers-count">{{ detail.workers.length }}</span>
+      <div class="workers-card__header">
+        <div class="workers-card__title-row">
+          <mat-icon class="workers-card__title-icon">people</mat-icon>
+          <h2 class="workers-card__title">Enrolled Workers</h2>
+          @if (enrolledWorkers.length > 0) {
+            <span class="count-badge">{{ enrolledWorkers.length }}</span>
+          }
+        </div>
       </div>
-      <mat-divider></mat-divider>
 
-      @if (detail.workers.length === 0) {
+      @if (enrolledWorkers.length === 0) {
         <div class="workers-empty">
-          <mat-icon>group_off</mat-icon>
-          <p>No workers enrolled yet. Add one above.</p>
+          <div class="workers-empty__icon-wrap">
+            <mat-icon>group_add</mat-icon>
+          </div>
+          <p class="workers-empty__title">No workers enrolled yet</p>
+          <p class="workers-empty__subtitle">Use the panel above to add your first worker.</p>
         </div>
       } @else {
-        <table class="workers-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (worker of detail.workers; track worker.userId) {
-              <tr>
-                <td>{{ worker.firstName }} {{ worker.lastName }}</td>
-                <td>{{ worker.email }}</td>
-                <td class="actions-cell">
-                  <button
-                    mat-icon-button
-                    color="warn"
-                    (click)="onRemoveWorker(worker)"
-                    [disabled]="(removingWorker$ | async) ?? false"
-                    aria-label="Remove worker"
-                  >
-                    <mat-icon>person_remove</mat-icon>
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+        <div class="worker-list">
+          @for (worker of enrolledWorkers; track worker.userId) {
+            @let otherAssignments = getOtherAssignments(worker.userId);
+            <div class="worker-row">
+              <div class="worker-avatar">
+                {{ worker.firstName[0] }}{{ worker.lastName[0] }}
+              </div>
+              <div class="worker-info">
+                <span class="worker-name">{{ worker.firstName }} {{ worker.lastName }}</span>
+                <span class="worker-email">{{ worker.email }}</span>
+              </div>
+              <div class="worker-assignments">
+                @if (otherAssignments.length === 0) {
+                  <span class="assignments-only">Only this company</span>
+                } @else {
+                  <div class="assignment-chips">
+                    @for (a of otherAssignments.slice(0, 2); track a.linkId) {
+                      <span class="chip" [matTooltip]="a.ownerCompanyName">
+                        <mat-icon>domain</mat-icon>
+                        {{ a.ownerCompanyName }}
+                      </span>
+                    }
+                    @if (otherAssignments.length > 2) {
+                      <span
+                        class="chip chip--more"
+                        [matTooltip]="otherAssignments.slice(2) | assignmentTooltip"
+                      >
+                        +{{ otherAssignments.length - 2 }}
+                      </span>
+                    }
+                  </div>
+                }
+              </div>
+              <div class="worker-actions">
+                <button
+                  mat-icon-button
+                  class="remove-btn"
+                  (click)="onRemoveWorker(worker)"
+                  [disabled]="(removingWorker$ | async) ?? false"
+                  matTooltip="Remove from this company"
+                  aria-label="Remove worker"
+                >
+                  <mat-icon>person_remove</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
       }
     </div>
-  }
 
+  }
 </app-page-layout>

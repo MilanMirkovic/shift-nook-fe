@@ -60,7 +60,6 @@ export class InviteWorkerDialogComponent implements OnInit, OnDestroy {
   readonly roleOptions: { value: CompanyRole; label: string }[] = [
     { value: CompanyRole.WORKER, label: 'Worker' },
     { value: CompanyRole.ACCOUNTANT, label: 'Accountant' },
-    { value: CompanyRole.ADMIN, label: 'Admin' },
   ];
 
   constructor() {

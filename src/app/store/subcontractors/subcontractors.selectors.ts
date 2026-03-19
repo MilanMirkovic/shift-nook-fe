@@ -47,3 +47,7 @@ export const selectSubcontractorAccepting = createSelector(selectSubcontractorsS
 export const selectSubcontractorAcceptError = createSelector(selectSubcontractorsState, s => s.acceptError);
 export const selectSubcontractorAcceptSuccess = createSelector(selectSubcontractorsState, s => s.acceptSuccess);
 
+// Worker statuses (subcontractor view)
+export const selectWorkerStatuses = createSelector(selectSubcontractorsState, s => s.workerStatuses);
+export const selectWorkerStatusesLoading = createSelector(selectSubcontractorsState, s => s.workerStatusesLoading);
+export const selectWorkerStatusesError = createSelector(selectSubcontractorsState, s => s.workerStatusesError);

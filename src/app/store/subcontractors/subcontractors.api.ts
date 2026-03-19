@@ -7,6 +7,7 @@ import {
   SubcontractorDetailResponse,
   SubcontractorInvitePreviewResponse,
   SubcontractorInviteRequest,
+  SubcontractorWorkerStatus,
 } from './subcontractors.models';
 
 @Injectable({ providedIn: 'root' })
@@ -40,16 +41,16 @@ export class SubcontractorsApi {
     );
   }
 
-  addWorker(ownerCompanyId: string, linkId: string, workerUserId: string): Observable<void> {
+  addWorker(ownerCompanyId: string, subcontractorCompanyId: string, workerUserId: string): Observable<void> {
     return this.http.post<void>(
-      `${this.base}/companies/${ownerCompanyId}/subcontractors/${linkId}/workers/${workerUserId}`,
+      `${this.base}/companies/${ownerCompanyId}/subcontractor-company/${subcontractorCompanyId}/workers/${workerUserId}`,
       null
     );
   }
 
-  removeWorker(ownerCompanyId: string, linkId: string, workerUserId: string): Observable<void> {
+  removeWorker(ownerCompanyId: string, subcontractorCompanyId: string, workerUserId: string): Observable<void> {
     return this.http.delete<void>(
-      `${this.base}/companies/${ownerCompanyId}/subcontractors/${linkId}/workers/${workerUserId}`
+      `${this.base}/companies/${ownerCompanyId}/subcontractor-company/${subcontractorCompanyId}/workers/${workerUserId}`
     );
   }
 
@@ -74,5 +75,10 @@ export class SubcontractorsApi {
       { params: { token } }
     );
   }
-}
 
+  listMyWorkersWithAssignmentStatus(subcontractorCompanyId: string): Observable<SubcontractorWorkerStatus[]> {
+    return this.http.get<SubcontractorWorkerStatus[]>(
+      `${this.base}/companies/${subcontractorCompanyId}/subcontractor-workers`
+    );
+  }
+}

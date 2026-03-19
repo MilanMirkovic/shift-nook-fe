@@ -4,7 +4,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Subject, takeUntil, filter, take, combineLatest } from 'rxjs';
+import { Subject, takeUntil, filter, take } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -12,33 +12,31 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 
+import { AssignmentTooltipPipe } from '../../../shared/pipes/assignment-tooltip.pipe';
 import { selectSelectedCompanyId } from '../../../store/user/user.selectors';
 import {
-  loadSubcontractorDetail,
   addWorkerToLink,
   removeWorkerFromLink,
+  loadWorkerStatuses,
+  loadPrincipalCompanies,
 } from '../../../store/subcontractors/subcontractors.actions';
 import {
-  selectSubcontractorDetail,
-  selectSubcontractorDetailLoading,
-  selectSubcontractorDetailError,
   selectAddingWorker,
   selectRemovingWorker,
+  selectWorkerStatuses,
+  selectWorkerStatusesLoading,
+  selectPrincipalLinks,
 } from '../../../store/subcontractors/subcontractors.selectors';
-import {
-  loadMembers,
-} from '../../../store/company-members/company-members.actions';
-import {
-  selectMembers,
-  selectLoading as selectMembersLoading,
-} from '../../../store/company-members/company-members.selectors';
-import { CompanyRole } from '../../../shared/models/company-role';
 import { ConfirmationDialogComponent } from '../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { PageLayoutComponent } from '../../../layout/page-layout/page-layout.component';
-import { SubcontractorWorker } from '../../../store/subcontractors/subcontractors.models';
-import { CompanyMember } from '../../../store/company-members/company-members.models';
+import {
+  SubcontractorWorkerStatus,
+  WorkerAssignment,
+} from '../../../store/subcontractors/subcontractors.models';
 
 @Component({
   selector: 'app-manage-workers',
@@ -53,7 +51,10 @@ import { CompanyMember } from '../../../store/company-members/company-members.mo
     MatDividerModule,
     MatSelectModule,
     MatFormFieldModule,
+    MatChipsModule,
+    MatTooltipModule,
     PageLayoutComponent,
+    AssignmentTooltipPipe,
   ],
   templateUrl: './manage-workers.component.html',
   styleUrls: ['./manage-workers.component.scss'],
@@ -66,22 +67,25 @@ export class ManageWorkersComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly destroy$ = new Subject<void>();
 
-  /** The subcontractor's own companyId (selected in store) */
   private subCompanyId: string | null = null;
-  /** The ownerCompanyId comes from the detail response (ownerCompanyId) */
-  private ownerCompanyId: string | null = null;
-  private linkId: string | null = null;
+  ownerCompanyId: string | null = null;
+  linkId: string | null = null;
 
-  readonly detail$ = this.store.select(selectSubcontractorDetail);
-  readonly detailLoading$ = this.store.select(selectSubcontractorDetailLoading);
-  readonly detailError$ = this.store.select(selectSubcontractorDetailError);
+  /** Display name of the principal (owner) company, resolved from principalLinks */
+  principalCompanyName = 'Principal Company';
+
   readonly addingWorker$ = this.store.select(selectAddingWorker);
   readonly removingWorker$ = this.store.select(selectRemovingWorker);
-  readonly ownWorkers$ = this.store.select(selectMembers);
-  readonly ownWorkersLoading$ = this.store.select(selectMembersLoading);
+  readonly workerStatuses$ = this.store.select(selectWorkerStatuses);
+  readonly workerStatusesLoading$ = this.store.select(selectWorkerStatusesLoading);
 
-  /** Workers from own company not yet enrolled */
-  availableWorkers: CompanyMember[] = [];
+  /** Workers already enrolled in this specific link */
+  enrolledWorkers: SubcontractorWorkerStatus[] = [];
+  /** Workers not yet enrolled in this link */
+  availableWorkers: SubcontractorWorkerStatus[] = [];
+  /** O(1) lookup: userId → status */
+  workerStatusesMap = new Map<string, SubcontractorWorkerStatus>();
+
   addWorkerCtrl = new FormControl<string | null>(null);
 
   ngOnInit(): void {
@@ -92,52 +96,72 @@ export class ManageWorkersComponent implements OnInit, OnDestroy {
       .pipe(filter((id): id is string => !!id), take(1), takeUntil(this.destroy$))
       .subscribe(id => {
         this.subCompanyId = id;
-        this.loadDetail();
-        this.loadOwnWorkers();
+        this.store.dispatch(loadWorkerStatuses({ subcontractorCompanyId: id }));
+        this.store.dispatch(loadPrincipalCompanies({ companyId: id }));
       });
 
-    // Compute available (not yet enrolled) workers
-    combineLatest([this.ownWorkers$, this.detail$])
+    // Resolve principal company display name from the principalLinks list
+    this.store.select(selectPrincipalLinks)
       .pipe(takeUntil(this.destroy$))
-      .subscribe(([ownWorkers, detail]) => {
-        const enrolledIds = new Set((detail?.workers ?? []).map(w => w.userId));
-        this.availableWorkers = ownWorkers.filter(w => !enrolledIds.has(w.userId));
+      .subscribe(links => {
+        const match = links.find(l => l.id === this.linkId);
+        if (match) {
+          this.principalCompanyName = match.ownerCompanyName;
+        }
+      });
+
+    // Split all workers into enrolled / available for this link
+    this.workerStatuses$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(allWorkers => {
+        this.workerStatusesMap = new Map(allWorkers.map(w => [w.userId, w]));
+        this.enrolledWorkers = allWorkers.filter(w =>
+          w.assignments.some(a => a.linkId === this.linkId)
+        );
+        this.availableWorkers = allWorkers.filter(w =>
+          !w.assignments.some(a => a.linkId === this.linkId)
+        );
       });
   }
 
-  private loadDetail(): void {
-    if (this.ownerCompanyId && this.linkId) {
-      this.store.dispatch(loadSubcontractorDetail({
-        companyId: this.ownerCompanyId,
-        linkId: this.linkId,
-      }));
-    }
+  /**
+   * Returns all assignments for an available worker —
+   * shown as a badge in the dropdown hinting it's already active elsewhere.
+   */
+  getAssignmentsForAvailable(userId: string): WorkerAssignment[] {
+    return this.workerStatusesMap.get(userId)?.assignments ?? [];
   }
 
-  private loadOwnWorkers(): void {
-    if (!this.subCompanyId) return;
-    this.store.dispatch(loadMembers({
-      companyId: this.subCompanyId,
-      page: 0,
-      size: 200,
-      role: CompanyRole.WORKER,
-      q: null,
-    }));
+  /**
+   * Returns assignments for an enrolled worker, excluding the current link —
+   * shown as chips in the "Also assigned to" column.
+   */
+  getOtherAssignments(userId: string): WorkerAssignment[] {
+    return (this.workerStatusesMap.get(userId)?.assignments ?? [])
+      .filter(a => a.linkId !== this.linkId);
+  }
+
+  getSelectedWorker(): SubcontractorWorkerStatus | undefined {
+    const id = this.addWorkerCtrl.value;
+    if (!id) return undefined;
+    return this.workerStatusesMap.get(id)
+      ?? this.availableWorkers.find(w => w.userId === id);
   }
 
   onAddWorker(): void {
     const workerUserId = this.addWorkerCtrl.value;
-    if (!workerUserId || !this.ownerCompanyId || !this.linkId) return;
+    if (!workerUserId || !this.ownerCompanyId || !this.linkId || !this.subCompanyId) return;
     this.store.dispatch(addWorkerToLink({
       ownerCompanyId: this.ownerCompanyId,
-      linkId: this.linkId,
+      subcontractorCompanyId: this.subCompanyId,
       workerUserId,
+      linkId: this.linkId,
     }));
     this.addWorkerCtrl.reset();
   }
 
-  onRemoveWorker(worker: SubcontractorWorker): void {
-    if (!this.ownerCompanyId || !this.linkId) return;
+  onRemoveWorker(worker: SubcontractorWorkerStatus): void {
+    if (!this.ownerCompanyId || !this.subCompanyId) return;
     const ref = this.dialog.open(ConfirmationDialogComponent, {
       data: {
         title: 'Remove Worker',
@@ -152,7 +176,7 @@ export class ManageWorkersComponent implements OnInit, OnDestroy {
       if (confirmed) {
         this.store.dispatch(removeWorkerFromLink({
           ownerCompanyId: this.ownerCompanyId!,
-          linkId: this.linkId!,
+          subcontractorCompanyId: this.subCompanyId!,
           workerUserId: worker.userId,
         }));
       }
@@ -168,4 +192,3 @@ export class ManageWorkersComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 }
-

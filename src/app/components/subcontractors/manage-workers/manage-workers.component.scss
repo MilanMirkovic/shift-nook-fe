@@ -1,88 +1,475 @@
-.mw-loading, .mw-error {
+// ── Loading ──────────────────────────────────────────────────────────────────
+.mw-loading {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 14px;
   justify-content: center;
-  gap: 16px;
   padding: 80px 24px;
-  color: #666;
-  mat-icon { font-size: 48px; width: 48px; height: 48px; }
+  color: var(--sn-text-muted);
+  font-size: 14px;
 }
 
-.add-worker-card {
-  padding: 20px 24px;
-  margin-bottom: 24px;
-}
-
-.add-worker-row {
+// ── Stats banner ─────────────────────────────────────────────────────────────
+.stats-banner {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-top: 12px;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
 }
 
-.worker-select { flex: 1; }
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--sn-surface);
+  border: 1px solid var(--sn-surface-border);
+  border-radius: 50px;
+  padding: 8px 16px;
+  box-shadow: var(--sn-shadow);
 
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0;
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--sn-blue);
+  }
+
+  .stat-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--sn-text);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--sn-text-secondary);
+    font-weight: 500;
+  }
+
+  &--muted {
+    mat-icon { color: var(--sn-text-muted); }
+    .stat-value { color: var(--sn-text-secondary); }
+  }
+
+  &--company {
+    background: var(--sn-primary-light);
+    border-color: rgba(37, 99, 235, 0.18);
+    mat-icon { color: var(--sn-blue); }
+    .stat-label {
+      color: var(--sn-blue);
+      font-weight: 600;
+      max-width: 260px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
 }
 
-.workers-card {
-  padding: 0;
+// ── Add worker panel ─────────────────────────────────────────────────────────
+.add-panel {
+  border-radius: 16px;
+  margin-bottom: 24px;
   overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--sn-surface-border);
+  }
+
+  &__icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--sn-primary-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: var(--sn-shadow-btn);
+
+    mat-icon {
+      color: #fff;
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--sn-text);
+    line-height: 1.3;
+  }
+
+  &__subtitle {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: var(--sn-text-secondary);
+  }
+
+  &__body {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    padding: 20px 24px;
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  &__select {
+    flex: 1;
+    margin-bottom: 0;
+  }
 }
 
-.workers-header {
+// ── Add button ───────────────────────────────────────────────────────────────
+.add-btn {
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 12px !important;
+  background: var(--sn-primary-gradient) !important;
+  color: #fff !important;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: var(--sn-shadow-btn) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: opacity 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+  &:disabled {
+    opacity: 0.5;
+    box-shadow: none !important;
+  }
+
+  &:not(:disabled):hover {
+    opacity: 0.9;
+  }
+}
+
+// ── Mat option override ───────────────────────────────────────────────────────
+.option-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 16px 24px;
+  width: 100%;
 }
 
-.workers-count {
-  background: #e8f0fe;
-  color: #1967d2;
-  border-radius: 12px;
-  padding: 2px 10px;
+.option-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--sn-primary-gradient);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.option-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.option-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sn-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.option-email {
   font-size: 12px;
-  font-weight: 600;
+  color: var(--sn-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+.option-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--sn-primary-light);
+  color: var(--sn-blue);
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+
+  mat-icon { font-size: 11px; width: 11px; height: 11px; }
+}
+
+.option-empty {
+  color: var(--sn-text-muted);
+  font-style: italic;
+  font-size: 13px;
+}
+
+// ── Workers card ─────────────────────────────────────────────────────────────
+.workers-card {
+  border-radius: 16px;
+  overflow: hidden;
+
+  &__header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--sn-surface-border);
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__title-icon {
+    color: var(--sn-text-secondary);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--sn-text);
+  }
+}
+
+.count-badge {
+  background: var(--sn-primary-light);
+  color: var(--sn-blue);
+  border-radius: 10px;
+  padding: 1px 9px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
 .workers-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 48px 24px;
-  color: #999;
-  mat-icon { font-size: 36px; width: 36px; height: 36px; }
-  p { margin: 0; font-size: 14px; }
-}
+  gap: 10px;
+  padding: 56px 24px;
 
-.workers-table {
-  width: 100%;
-  border-collapse: collapse;
+  &__icon-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--sn-primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
 
-  th, td {
-    padding: 12px 24px;
-    text-align: left;
-    font-size: 14px;
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+      color: var(--sn-blue);
+    }
   }
 
-  th {
-    font-size: 12px;
+  &__title {
+    margin: 0;
+    font-size: 15px;
     font-weight: 600;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    background: #fafafa;
+    color: var(--sn-text);
   }
 
-  tr:not(:last-child) td { border-bottom: 1px solid #f0f0f0; }
-  tr:hover td { background: #fafafe; }
+  &__subtitle {
+    margin: 0;
+    font-size: 13px;
+    color: var(--sn-text-muted);
+    text-align: center;
+  }
 }
 
-.actions-cell { text-align: right; width: 56px; }
+// ── Worker list rows ─────────────────────────────────────────────────────────
+.worker-list {
+  display: flex;
+  flex-direction: column;
+}
 
+.worker-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--sn-surface-border);
+  transition: background 0.15s;
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: #f8f9ff; }
+}
+
+.worker-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--sn-primary-gradient);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.22);
+}
+
+.worker-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.worker-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sn-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.worker-email {
+  font-size: 12px;
+  color: var(--sn-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ── Assignments column ────────────────────────────────────────────────────────
+.worker-assignments {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 160px;
+  flex-shrink: 0;
+
+  @media (max-width: 768px) { display: none; }
+}
+
+.assignments-only {
+  font-size: 12px;
+  color: var(--sn-text-muted);
+  font-style: italic;
+}
+
+.assignment-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f0f4ff;
+  color: #3c5acd;
+  border: 1px solid #c5cef5;
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+
+  mat-icon {
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
+
+  &--more {
+    background: #f5f5f5;
+    color: var(--sn-text-secondary);
+    border-color: var(--sn-surface-border);
+    font-weight: 600;
+  }
+}
+
+// ── Actions column ────────────────────────────────────────────────────────────
+.worker-actions {
+  flex-shrink: 0;
+}
+
+.remove-btn {
+  color: var(--sn-text-muted) !important;
+  border-radius: 10px !important;
+  transition: color 0.2s, background 0.2s !important;
+
+  &:not(:disabled):hover {
+    color: var(--sn-red) !important;
+    background: rgba(220, 38, 38, 0.08) !important;
+  }
+}
+
+// ── Select trigger (closed state) ────────────────────────────────────────────
+.trigger-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trigger-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.trigger-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sn-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.trigger-email {
+  font-size: 11px;
+  color: var(--sn-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}

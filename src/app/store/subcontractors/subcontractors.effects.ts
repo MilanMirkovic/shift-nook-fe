@@ -1,11 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap, filter, withLatestFrom } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { SubcontractorsApi } from './subcontractors.api';
 import { NotificationService } from '../../shared/services/notification.service';
+import { selectSelectedCompanyId } from '../user/user.selectors';
 import {
   loadSubcontractors, loadSubcontractorsSuccess, loadSubcontractorsFailure,
   loadSubcontractorDetail, loadSubcontractorDetailSuccess, loadSubcontractorDetailFailure,
@@ -16,6 +18,7 @@ import {
   loadPrincipalCompanies, loadPrincipalCompaniesSuccess, loadPrincipalCompaniesFailure,
   previewSubcontractorInvite, previewSubcontractorInviteSuccess, previewSubcontractorInviteFailure,
   acceptSubcontractorInvite, acceptSubcontractorInviteSuccess, acceptSubcontractorInviteFailure,
+  loadWorkerStatuses, loadWorkerStatusesSuccess, loadWorkerStatusesFailure,
 } from './subcontractors.actions';
 
 @Injectable()
@@ -23,6 +26,7 @@ export class SubcontractorsEffects {
   private readonly actions$ = inject(Actions);
   private readonly api = inject(SubcontractorsApi);
   private readonly notifications = inject(NotificationService);
+  private readonly store = inject(Store);
 
   loadSubcontractors$ = createEffect(() =>
     this.actions$.pipe(
@@ -97,8 +101,8 @@ export class SubcontractorsEffects {
   addWorker$ = createEffect(() =>
     this.actions$.pipe(
       ofType(addWorkerToLink),
-      switchMap(({ ownerCompanyId, linkId, workerUserId }) =>
-        this.api.addWorker(ownerCompanyId, linkId, workerUserId).pipe(
+      switchMap(({ ownerCompanyId, subcontractorCompanyId, workerUserId, linkId }) =>
+        this.api.addWorker(ownerCompanyId, subcontractorCompanyId, workerUserId).pipe(
           map(() => addWorkerToLinkSuccess({ ownerCompanyId, linkId })),
           catchError((err: HttpErrorResponse) => {
             const error = err.status === 400
@@ -119,11 +123,31 @@ export class SubcontractorsEffects {
     )
   );
 
+  /** After adding a worker, refresh the worker-statuses list so the available dropdown updates */
+  addWorkerSuccessRefreshStatuses$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(addWorkerToLinkSuccess),
+      withLatestFrom(this.store.select(selectSelectedCompanyId)),
+      filter(([, companyId]) => !!companyId),
+      map(([, companyId]) => loadWorkerStatuses({ subcontractorCompanyId: companyId! }))
+    )
+  );
+
+  /** After removing a worker, refresh the worker-statuses list */
+  removeWorkerSuccessRefreshStatuses$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(removeWorkerFromLinkSuccess),
+      withLatestFrom(this.store.select(selectSelectedCompanyId)),
+      filter(([, companyId]) => !!companyId),
+      map(([, companyId]) => loadWorkerStatuses({ subcontractorCompanyId: companyId! }))
+    )
+  );
+
   removeWorker$ = createEffect(() =>
     this.actions$.pipe(
       ofType(removeWorkerFromLink),
-      switchMap(({ ownerCompanyId, linkId, workerUserId }) =>
-        this.api.removeWorker(ownerCompanyId, linkId, workerUserId).pipe(
+      switchMap(({ ownerCompanyId, subcontractorCompanyId, workerUserId }) =>
+        this.api.removeWorker(ownerCompanyId, subcontractorCompanyId, workerUserId).pipe(
           map(() => removeWorkerFromLinkSuccess({ workerUserId })),
           catchError(err => of(removeWorkerFromLinkFailure({ error: this.toMessage(err) })))
         )
@@ -188,8 +212,19 @@ export class SubcontractorsEffects {
     ), { dispatch: false }
   );
 
+  loadWorkerStatuses$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(loadWorkerStatuses),
+      switchMap(({ subcontractorCompanyId }) =>
+        this.api.listMyWorkersWithAssignmentStatus(subcontractorCompanyId).pipe(
+          map(workers => loadWorkerStatusesSuccess({ workers })),
+          catchError(err => of(loadWorkerStatusesFailure({ error: this.toMessage(err) })))
+        )
+      )
+    )
+  );
+
   private toMessage(err: HttpErrorResponse | any): string {
     return err?.error?.message ?? err?.message ?? 'An unexpected error occurred.';
   }
 }
-

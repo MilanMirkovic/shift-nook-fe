@@ -20,7 +20,7 @@ export const PRINCIPAL_COMPANIES_ROUTES: Routes = [
           ),
       },
       {
-        path: ':linkId/workers',
+        path: ':ownerCompanyId/:linkId/workers',
         loadComponent: () =>
           import('./manage-workers/manage-workers.component').then(
             m => m.ManageWorkersComponent
@@ -29,4 +29,3 @@ export const PRINCIPAL_COMPANIES_ROUTES: Routes = [
     ],
   },
 ];
-

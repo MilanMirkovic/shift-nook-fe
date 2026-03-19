@@ -4,6 +4,7 @@ import {
   SubcontractorDetailResponse,
   SubcontractorInvitePreviewResponse,
   SubcontractorInviteRequest,
+  SubcontractorWorkerStatus,
 } from './subcontractors.models';
 
 // ── Load subcontractor links (owner view) ─────────────────────────────────────
@@ -66,7 +67,7 @@ export const revokeSubcontractorFailure = createAction(
 // ── Add worker to link ────────────────────────────────────────────────────────
 export const addWorkerToLink = createAction(
   '[Subcontractors] Add Worker',
-  props<{ ownerCompanyId: string; linkId: string; workerUserId: string }>()
+  props<{ ownerCompanyId: string; subcontractorCompanyId: string; workerUserId: string; linkId: string }>()
 );
 export const addWorkerToLinkSuccess = createAction(
   '[Subcontractors] Add Worker Success',
@@ -80,7 +81,7 @@ export const addWorkerToLinkFailure = createAction(
 // ── Remove worker from link ───────────────────────────────────────────────────
 export const removeWorkerFromLink = createAction(
   '[Subcontractors] Remove Worker',
-  props<{ ownerCompanyId: string; linkId: string; workerUserId: string }>()
+  props<{ ownerCompanyId: string; subcontractorCompanyId: string; workerUserId: string }>()
 );
 export const removeWorkerFromLinkSuccess = createAction(
   '[Subcontractors] Remove Worker Success',
@@ -133,3 +134,16 @@ export const acceptSubcontractorInviteFailure = createAction(
 );
 export const resetAcceptInviteState = createAction('[Subcontractors] Reset Accept Invite State');
 
+// ── Load own workers with assignment status (subcontractor view) ───────────────
+export const loadWorkerStatuses = createAction(
+  '[Subcontractors] Load Worker Statuses',
+  props<{ subcontractorCompanyId: string }>()
+);
+export const loadWorkerStatusesSuccess = createAction(
+  '[Subcontractors] Load Worker Statuses Success',
+  props<{ workers: SubcontractorWorkerStatus[] }>()
+);
+export const loadWorkerStatusesFailure = createAction(
+  '[Subcontractors] Load Worker Statuses Failure',
+  props<{ error: string }>()
+);

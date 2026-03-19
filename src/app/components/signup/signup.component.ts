@@ -86,12 +86,13 @@ export class SignupComponent implements OnInit {
 
     try {
       if (this.inviteToken && this.tempPassword) {
-        // Invite flow: confirm → signIn with temp → update attributes + change password
+        // Invite flow: confirm → signIn with temp → change password → update attributes
         await this.authService.confirmSignUp(email, code);
         await this.authService.signIn(email, this.tempPassword);
-        // Update real name attributes and set the user's real password
-        await this.authService.updateUserAttributes(firstName, lastName);
+        // Change password first so the session is stable before updating attributes
         await this.authService.changePassword(this.tempPassword, password);
+        // Now update name attributes on the fresh, post-password-change session
+        await this.authService.updateUserAttributes(firstName, lastName);
         this.router.navigate(['/create-company'], {
           queryParams: { returnUrl: `/subcontractor-invite?token=${this.inviteToken}` },
         });

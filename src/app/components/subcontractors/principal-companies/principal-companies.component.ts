@@ -40,7 +40,7 @@ export class PrincipalCompaniesComponent implements OnInit, OnDestroy {
     {
       id: 'ownerName',
       header: 'Principal Company',
-      field: 'subcontractorCompanyName',
+      field: 'ownerCompanyName',
       format: (v) => (v as string) ?? '—',
     },
     { id: 'status', header: 'Status', field: 'status' },
@@ -78,8 +78,7 @@ export class PrincipalCompaniesComponent implements OnInit, OnDestroy {
   }
 
   onManageWorkers(row: SubcontractorLinkResponse): void {
-    if (!this.companyId) return;
-    this.router.navigate(['/principal-companies', row.id, 'workers']);
+    this.router.navigate(['/principal-companies', row.ownerCompanyId, row.id, 'workers']);
   }
 
   fmtDate(iso: string): string {
@@ -92,4 +91,3 @@ export class PrincipalCompaniesComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 }
-

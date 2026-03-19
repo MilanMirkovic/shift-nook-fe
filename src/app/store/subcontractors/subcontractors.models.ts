@@ -3,6 +3,7 @@ export type SubcontractorLinkStatus = 'PENDING' | 'ACTIVE' | 'REVOKED';
 export interface SubcontractorLinkResponse {
   id: string;
   ownerCompanyId: string;
+  ownerCompanyName: string;
   subcontractorCompanyId: string | null;
   subcontractorCompanyName: string | null;
   invitedEmail: string;
@@ -40,6 +41,20 @@ export interface SubcontractorInvitePreviewResponse {
 export interface SubcontractorInviteRequest {
   email: string;
   subcontractorCompanyName?: string;
+}
+
+export interface WorkerAssignment {
+  linkId: string;
+  ownerCompanyId: string;
+  ownerCompanyName: string;
+}
+
+export interface SubcontractorWorkerStatus {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  assignments: WorkerAssignment[];
 }
 
 export interface SubcontractorsState {
@@ -84,4 +99,9 @@ export interface SubcontractorsState {
   accepting: boolean;
   acceptError: string | null;
   acceptSuccess: boolean;
+
+  /** Subcontractor view — own workers with assignment status */
+  workerStatuses: SubcontractorWorkerStatus[];
+  workerStatusesLoading: boolean;
+  workerStatusesError: string | null;
 }

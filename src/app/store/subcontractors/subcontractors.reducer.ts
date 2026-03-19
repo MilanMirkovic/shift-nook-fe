@@ -10,6 +10,7 @@ import {
   loadPrincipalCompanies, loadPrincipalCompaniesSuccess, loadPrincipalCompaniesFailure,
   previewSubcontractorInvite, previewSubcontractorInviteSuccess, previewSubcontractorInviteFailure,
   acceptSubcontractorInvite, acceptSubcontractorInviteSuccess, acceptSubcontractorInviteFailure, resetAcceptInviteState,
+  loadWorkerStatuses, loadWorkerStatusesSuccess, loadWorkerStatusesFailure,
 } from './subcontractors.actions';
 
 export const SUBCONTRACTORS_FEATURE_KEY = 'subcontractors';
@@ -47,6 +48,10 @@ export const initialState: SubcontractorsState = {
   accepting: false,
   acceptError: null,
   acceptSuccess: false,
+
+  workerStatuses: [],
+  workerStatusesLoading: false,
+  workerStatusesError: null,
 };
 
 export const subcontractorsReducer = createReducer(
@@ -108,5 +113,9 @@ export const subcontractorsReducer = createReducer(
   on(acceptSubcontractorInviteSuccess, state => ({ ...state, accepting: false, acceptSuccess: true })),
   on(acceptSubcontractorInviteFailure, (state, { error }) => ({ ...state, accepting: false, acceptError: error })),
   on(resetAcceptInviteState, state => ({ ...state, accepting: false, acceptError: null, acceptSuccess: false })),
-);
 
+  // Worker statuses
+  on(loadWorkerStatuses, state => ({ ...state, workerStatusesLoading: true, workerStatusesError: null })),
+  on(loadWorkerStatusesSuccess, (state, { workers }) => ({ ...state, workerStatusesLoading: false, workerStatuses: workers })),
+  on(loadWorkerStatusesFailure, (state, { error }) => ({ ...state, workerStatusesLoading: false, workerStatusesError: error })),
+);
