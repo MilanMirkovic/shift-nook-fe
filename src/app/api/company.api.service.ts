@@ -51,7 +51,7 @@ export class CompanyApiService {
     const fd = new FormData();
     fd.append('file', file, file.name);
     return this.http.post<CompanyLogoResponse>(
-      `${this.apiUrl}/companies/${companyId}/files/logo`,
+      `${this.apiUrl}/companies/${companyId}/logo`,
       fd
     );
   }
