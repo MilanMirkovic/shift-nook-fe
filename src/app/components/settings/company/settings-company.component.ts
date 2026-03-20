@@ -73,12 +73,15 @@ export class SettingsCompanyComponent implements OnInit, OnDestroy {
     this.isEditing = false;
     combineLatest([
       this.store.select(selectSelectedCompanyId).pipe(filter((id): id is string => !!id), take(1)),
-      this.store.select(selectCurrentCompany),
+      this.store.select(selectCurrentCompany).pipe(filter((c) => !!c), take(1)),
     ]).pipe(take(1), takeUntil(this.destroy$))
       .subscribe(([companyId, company]) => {
         this.companyId = companyId;
         this.company   = company;
         this.canEdit   = company?.role === CompanyRole.OWNER || company?.role === CompanyRole.ADMIN;
+
+        // Seed the name immediately from the store so the banner is never blank
+        this.details = { companyName: company?.companyName ?? '' };
 
         this.companyApi.getCompany(companyId)
           .pipe(takeUntil(this.destroy$))
