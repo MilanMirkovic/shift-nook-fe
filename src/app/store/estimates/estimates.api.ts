@@ -84,15 +84,24 @@ export class EstimatesApiService {
 
   async openPdf(companyId: string, estimateId: string): Promise<void> {
     const win = window.open('', '_blank');
-    const token = await this.authService.getAccessToken();
-    const res = await fetch(`/api/companies/${companyId}/estimates/${estimateId}/pdf/url`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const { url } = await res.json();
-    if (win) {
-      win.location.href = url;
-    } else {
-      window.open(url, '_blank');
+    try {
+      const token = await this.authService.getAccessToken();
+      const res = await fetch(`/api/companies/${companyId}/estimates/${estimateId}/pdf/url`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const body = await res.json();
+      console.log('[openPdf] response body:', body);
+      const url = body?.url;
+      if (!url) throw new Error('No url in response: ' + JSON.stringify(body));
+      if (win) {
+        win.location.href = url;
+      } else {
+        window.open(url, '_blank');
+      }
+    } catch (err) {
+      console.error('[openPdf] error:', err);
+      win?.close();
+      throw err;
     }
   }
 }
