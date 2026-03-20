@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Subject, takeUntil, filter, combineLatest, Observable, map, switchMap, startWith, take, shareReplay, distinctUntilChanged } from 'rxjs';
+import { Subject, takeUntil, filter, combineLatest, Observable, map, switchMap, take, shareReplay, distinctUntilChanged } from 'rxjs';
 
 import { UserStoreService } from '../../../store/user/user-store.service';
 import { TimesheetsStoreService } from '../../../store/timesheets/timesheets-store.service';

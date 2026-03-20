@@ -28,10 +28,11 @@ export class CompanySelectionComponent implements OnInit, OnDestroy {
     this.userStore.getUserCompanies()
       .pipe(takeUntil(this.destroy$))
       .subscribe(companies => {
-        this.companies = companies;
+        // Hide principal companies where the user is only a subcontractor worker
+        this.companies = companies.filter(c => c.role !== CompanyRole.SUBCONTRACTOR);
         this.loading = false;
 
-        if (companies.length === 0) {
+        if (this.companies.length === 0) {
           // Check if user can create a company
           this.userStore.user$.pipe(take(1)).subscribe(user => {
             if (user?.canCreateCompany) {
@@ -40,6 +41,9 @@ export class CompanySelectionComponent implements OnInit, OnDestroy {
               this.router.navigate(['/dashboard']);
             }
           });
+        } else if (this.companies.length === 1) {
+          // Auto-select if only one company is available
+          this.selectCompany(this.companies[0]);
         }
       });
   }
@@ -72,10 +76,10 @@ export class CompanySelectionComponent implements OnInit, OnDestroy {
             this.startNewCompanySession(company);
           }
         });
-    } else if (company.role === CompanyRole.WORKER) {
-      // For WORKER role, select company and navigate to jobsites
+    } else if (company.role === CompanyRole.WORKER || company.role === CompanyRole.OWNER) {
+      // For WORKER and OWNER roles, select company and navigate to jobsites
       this.userStore.selectCompany(company.companyId);
-      console.log('Switched company (worker):', company);
+      console.log('Switched company (worker/owner):', company);
       this.router.navigate(['/jobsites']);
     } else {
       // For other roles, just select the company without time tracking
