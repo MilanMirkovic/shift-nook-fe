@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../core/auth/auth.service';
 import {
   EstimatesPageResponse,
   Estimate,
@@ -12,8 +13,9 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class EstimatesApiService {
-  private readonly http = inject(HttpClient);
-  private readonly apiUrl = environment.apiBaseUrl;
+  private readonly http       = inject(HttpClient);
+  private readonly authService = inject(AuthService);
+  private readonly apiUrl     = environment.apiBaseUrl;
 
   loadEstimates(
     companyId: string,
@@ -80,7 +82,20 @@ export class EstimatesApiService {
     );
   }
 
-  getPdfUrl(companyId: string, estimateId: string): string {
-    return `${this.apiUrl}/companies/${companyId}/estimates/${estimateId}/pdf/url`;
+  async openPdf(companyId: string, estimateId: string): Promise<void> {
+    const token = await this.authService.getAccessToken();
+    const url   = `${this.apiUrl}/companies/${companyId}/estimates/${estimateId}/pdf/url`;
+
+    const res = await fetch(url, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      redirect: 'manual',
+    });
+
+    const presignedUrl = res.headers.get('Location');
+    if (presignedUrl) {
+      window.open(presignedUrl, '_blank');
+    } else {
+      throw new Error('No Location header in response');
+    }
   }
 }

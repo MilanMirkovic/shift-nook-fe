@@ -167,8 +167,12 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
     });
   }
 
-  protected onDownloadEstimatePdf(estimate: Estimate): void {
-    window.open(this.estimatesApi.getPdfUrl(this.companyId, estimate.id));
+  protected async onDownloadEstimatePdf(estimate: Estimate): Promise<void> {
+    try {
+      await this.estimatesApi.openPdf(this.companyId, estimate.id);
+    } catch {
+      this.notificationService.error('Failed to open PDF. Please try again.');
+    }
   }
 
   protected getEstimateStatusClass(status: EstimateStatus): string {
