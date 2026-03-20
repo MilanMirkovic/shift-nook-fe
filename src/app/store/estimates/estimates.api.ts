@@ -88,14 +88,18 @@ export class EstimatesApiService {
 
     const res = await fetch(url, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
-      redirect: 'manual',
+      redirect: 'follow',
     });
 
-    const presignedUrl = res.headers.get('Location');
-    if (presignedUrl) {
-      window.open(presignedUrl, '_blank');
+    if (!res.ok && res.status !== 0) {
+      throw new Error(`Failed to get PDF URL: ${res.status}`);
+    }
+
+    const finalUrl = res.url;
+    if (finalUrl) {
+      window.open(finalUrl, '_blank');
     } else {
-      throw new Error('No Location header in response');
+      throw new Error('Could not resolve PDF URL');
     }
   }
 }
