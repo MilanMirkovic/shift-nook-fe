@@ -212,16 +212,22 @@ export class SettingsCompanyComponent implements OnInit, OnDestroy {
     this.isSaving = true;
     const payload = this.form.getRawValue();
 
-    this.companyApi.updateCompany(this.companyId, payload)
+    this.companyApi.updateCompany(this.companyId, {
+      name:    payload.companyName,
+      email:   payload.email,
+      phone:   payload.phone,
+      address: payload.address,
+      website: payload.website,
+    })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
           this.details = {
             companyName: payload.companyName ?? '',
-            email:   payload.email   ?? '',
-            phone:   payload.phone   ?? '',
-            address: payload.address ?? '',
-            website: payload.website ?? '',
+            email:       payload.email       ?? '',
+            phone:       payload.phone       ?? '',
+            address:     payload.address     ?? '',
+            website:     payload.website     ?? '',
           };
           this.store.dispatch(loadUser());
           this.form.markAsPristine();
