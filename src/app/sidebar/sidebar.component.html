@@ -14,8 +14,8 @@
   <!-- Body: nav scrolls, footer pinned -->
   <div class="sidenav-content">
     <mat-nav-list class="nav-list">
-      <!-- Current Company Display (if multiple companies) -->
-      @if (hasMultipleCompanies && currentCompany) {
+      <!-- Current Company Display -->
+      @if (currentCompany) {
         <div class="company-section">
           <mat-divider></mat-divider>
           <div class="company-info" [class.is-collapsed]="!isHandset && isCollapsed">
@@ -25,10 +25,12 @@
               <div class="company-role">{{ currentCompany.role }}</div>
             </div>
           </div>
-          <a mat-list-item (click)="onSwitchCompany()" class="switch-company-btn">
-            <mat-icon matListItemIcon>swap_horiz</mat-icon>
-            <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Switch Company</span>
-          </a>
+          @if (hasMultipleCompanies) {
+            <a mat-list-item (click)="onSwitchCompany()" class="switch-company-btn">
+              <mat-icon matListItemIcon>swap_horiz</mat-icon>
+              <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Switch Company</span>
+            </a>
+          }
           <mat-divider></mat-divider>
         </div>
       }

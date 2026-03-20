@@ -1,0 +1,63 @@
+<app-page-layout title="Settings" subtitle="Choose a section to manage." maxWidth="md">
+
+  @if (isLoading) {
+    <div class="skeleton-wrap">
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton-card">
+          <div class="sk-icon"></div>
+          <div class="sk-lines">
+            <div class="sk-row sk-title"></div>
+            <div class="sk-row sk-sub"></div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!isLoading) {
+    <!-- user pill -->
+    <div class="user-pill">
+      <div class="user-pill__avatar">{{ userInitials || '?' }}</div>
+      <div class="user-pill__info">
+        <span class="user-pill__name">{{ userName }}</span>
+        <span class="role-badge" [ngClass]="roleBadgeClass">{{ roleLabel }}</span>
+      </div>
+    </div>
+
+    <div class="cards-grid">
+      @for (card of cards; track card.route) {
+        <div
+          class="setting-card"
+          [class.setting-card--disabled]="card.disabled"
+          matRipple
+          [matRippleDisabled]="!!card.disabled"
+          (click)="navigate(card)"
+          role="button"
+          [attr.aria-label]="card.title"
+          tabindex="0"
+          (keydown.enter)="navigate(card)"
+        >
+          <div class="setting-card__icon" [ngClass]="card.iconClass">
+            <mat-icon>{{ card.icon }}</mat-icon>
+          </div>
+
+          <div class="setting-card__body">
+            <div class="setting-card__top">
+              <span class="setting-card__title">{{ card.title }}</span>
+              @if (card.badge) {
+                <span class="card-badge">{{ card.badge }}</span>
+              }
+            </div>
+            <p class="setting-card__desc">{{ card.description }}</p>
+            @if (card.meta) {
+              <span class="setting-card__meta">{{ card.meta }}</span>
+            }
+          </div>
+
+          <mat-icon class="setting-card__chevron">chevron_right</mat-icon>
+        </div>
+      }
+    </div>
+  }
+
+</app-page-layout>

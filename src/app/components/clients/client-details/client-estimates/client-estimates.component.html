@@ -73,9 +73,8 @@
                 <mat-icon>edit</mat-icon>
               </button>
               <button mat-icon-button class="action-btn action-btn--pdf" matTooltip="Download PDF"
-                [disabled]="pdfDownloading.has(estimate.id)" (click)="onDownloadEstimatePdf(estimate)">
-                <mat-spinner *ngIf="pdfDownloading.has(estimate.id)" diameter="18"></mat-spinner>
-                <mat-icon *ngIf="!pdfDownloading.has(estimate.id)">picture_as_pdf</mat-icon>
+                (click)="onDownloadEstimatePdf(estimate)">
+                <mat-icon>picture_as_pdf</mat-icon>
               </button>
               <button mat-icon-button class="action-btn action-btn--delete" matTooltip="Delete estimate" (click)="onDeleteEstimate(estimate)">
                 <mat-icon>delete_outline</mat-icon>
@@ -91,4 +90,3 @@
   </div>
 
 </ng-container>
-

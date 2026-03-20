@@ -1,0 +1,137 @@
+// Shared styles for all settings sub-pages
+:host { display: block; }
+
+// ─── Back button ──────────────────────────────────────────────────────────────
+.back-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-bottom: 20px !important;
+  color: var(--sn-text-secondary) !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+
+// ─── Card shell ───────────────────────────────────────────────────────────────
+.settings-card {
+  background: var(--sn-surface);
+  border: 1px solid var(--sn-surface-border);
+  border-radius: 14px;
+  box-shadow: var(--sn-shadow);
+  overflow: hidden;
+  animation: fadeUp 0.3s ease both;
+}
+
+// ─── Card header ─────────────────────────────────────────────────────────────
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 24px;
+  flex-wrap: wrap;
+}
+
+.card-header__icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+  mat-icon { font-size: 22px; width: 22px; height: 22px; }
+  &.icon--blue   { background: rgba(37,99,235,.10);  mat-icon { color: var(--sn-blue); } }
+  &.icon--violet { background: rgba(124,58,237,.10); mat-icon { color: var(--sn-violet); } }
+  &.icon--green  { background: rgba(5,150,105,.10);  mat-icon { color: var(--sn-green); } }
+}
+
+.card-header__text { flex: 1; min-width: 0; }
+
+.card-header__title {
+  margin: 0 0 3px;
+  font-size: 1rem; font-weight: 600;
+  color: var(--sn-text); letter-spacing: -0.2px;
+}
+
+.card-header__sub {
+  margin: 0; font-size: 0.8125rem; color: var(--sn-text-muted);
+}
+
+.card-header__meta {
+  font-size: 0.75rem; color: var(--sn-text-muted); white-space: nowrap; margin-left: auto;
+}
+
+// ─── Card body / footer ───────────────────────────────────────────────────────
+.card-body { padding: 24px; }
+
+.card-footer {
+  display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+  padding: 14px 24px; background: #fafbfd;
+}
+
+// ─── Read-only banner ─────────────────────────────────────────────────────────
+.readonly-banner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px; margin-bottom: 20px;
+  background: rgba(217,119,6,.08); border: 1px solid rgba(217,119,6,.25);
+  border-radius: 10px; color: #92400e; font-size: 0.875rem; line-height: 1.5;
+  mat-icon { font-size: 20px; width: 20px; height: 20px; flex-shrink: 0; color: var(--sn-amber); }
+}
+
+// ─── Fields grid ─────────────────────────────────────────────────────────────
+.fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+}
+.field { width: 100%; }
+.field--full { grid-column: 1 / -1; }
+.req { color: var(--sn-red); margin-left: 2px; }
+
+// ─── Buttons ─────────────────────────────────────────────────────────────────
+.btn-save {
+  background: var(--sn-primary-gradient) !important;
+  color: #fff !important; border-radius: 8px !important;
+  font-weight: 600 !important; padding: 0 22px !important;
+  height: 40px !important; box-shadow: var(--sn-shadow-btn) !important;
+  display: inline-flex !important; align-items: center !important; gap: 7px !important;
+  &:disabled { opacity: 0.5 !important; box-shadow: none !important; }
+  mat-icon    { font-size: 18px; width: 18px; height: 18px; }
+  mat-spinner { --mdc-circular-progress-active-indicator-color: #fff; }
+}
+
+.btn-discard {
+  border-radius: 8px !important; height: 40px !important;
+  display: inline-flex !important; align-items: center !important; gap: 7px !important;
+  color: var(--sn-text-secondary) !important;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+.skeleton-card {
+  background: var(--sn-surface); border: 1px solid var(--sn-surface-border);
+  border-radius: 14px; padding: 24px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.sk-row {
+  height: 48px; border-radius: 8px;
+  background: linear-gradient(90deg,#f0f4f8 25%,#e2e8f0 50%,#f0f4f8 75%);
+  background-size: 200% 100%; animation: shimmer 1.4s infinite;
+}
+.sk-title { height: 22px; width: 40%; }
+.sk-short { width: 55%; }
+
+// ─── Animations ───────────────────────────────────────────────────────────────
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (max-width: 600px) {
+  .fields { grid-template-columns: 1fr; }
+  .field--full { grid-column: 1; }
+  .card-footer { flex-direction: column-reverse; align-items: stretch; }
+  .btn-save, .btn-discard { justify-content: center; }
+  .card-header__meta { display: none; }
+}
+

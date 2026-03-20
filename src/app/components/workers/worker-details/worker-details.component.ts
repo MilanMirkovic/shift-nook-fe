@@ -448,7 +448,7 @@ export class WorkerDetailsComponent implements OnInit, OnDestroy {
     return Math.round(average * 10) / 10;
   }
 
-  openInviteDialog(): void {
+  protected openInviteDialog(): void {
     this.dialog.open(InviteWorkerDialogComponent, {
       width: '480px',
       disableClose: false,

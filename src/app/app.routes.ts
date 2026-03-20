@@ -73,6 +73,34 @@ export const routes: Routes = [
     path: 'settings',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/settings.page').then((m) => m.SettingsPage),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./components/settings/settings.component').then((m) => m.SettingsComponent),
+      },
+      {
+        path: 'company',
+        loadComponent: () =>
+          import('./components/settings/company/settings-company.component').then(
+            (m) => m.SettingsCompanyComponent,
+          ),
+      },
+      {
+        path: 'logo',
+        loadComponent: () =>
+          import('./components/settings/logo/settings-logo.component').then(
+            (m) => m.SettingsLogoComponent,
+          ),
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./components/settings/profile/settings-profile.component').then(
+            (m) => m.SettingsProfileComponent,
+          ),
+      },
+    ],
   },
   {
     path: 'work-time',

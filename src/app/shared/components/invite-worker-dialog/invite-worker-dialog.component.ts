@@ -62,6 +62,8 @@ export class InviteWorkerDialogComponent implements OnInit, OnDestroy {
     { value: CompanyRole.ACCOUNTANT, label: 'Accountant' },
   ];
 
+  readonly presetRole: CompanyRole | null = this.data.role ?? null;
+
   constructor() {
     this.inviteForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],

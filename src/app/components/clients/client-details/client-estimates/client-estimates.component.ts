@@ -62,8 +62,6 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
   protected estimatesLoading$!: Observable<boolean>;
   protected estimatesError$!: Observable<string | null>;
 
-  protected pdfDownloading = new Set<string>();
-
   ngOnInit(): void {
     this.estimates$ = this.store.select(selectEstimatesByClientId(this.clientId));
     this.estimatesLoading$ = this.store.select(selectEstimatesLoading);
@@ -170,27 +168,7 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
   }
 
   protected onDownloadEstimatePdf(estimate: Estimate): void {
-    if (this.pdfDownloading.has(estimate.id)) return;
-
-    this.pdfDownloading.add(estimate.id);
-
-    this.estimatesApi.downloadPdf(this.companyId, estimate.id).pipe(
-      takeUntil(this.destroy$),
-    ).subscribe({
-      next: (blob) => {
-        const url = URL.createObjectURL(blob);
-        const anchor = document.createElement('a');
-        anchor.href = url;
-        anchor.download = `estimate-${estimate.estimateNumber}.pdf`;
-        anchor.click();
-        URL.revokeObjectURL(url);
-        this.pdfDownloading.delete(estimate.id);
-      },
-      error: () => {
-        this.notificationService.error('Failed to download PDF. Please try again.');
-        this.pdfDownloading.delete(estimate.id);
-      },
-    });
+    window.open(this.estimatesApi.getPdfUrl(this.companyId, estimate.id));
   }
 
   protected getEstimateStatusClass(status: EstimateStatus): string {
@@ -213,4 +191,3 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
     }));
   }
 }
-

@@ -1,0 +1,183 @@
+<button mat-button class="back-btn" (click)="goBack()">
+  <mat-icon>arrow_back</mat-icon> Settings
+</button>
+
+@if (isLoading) {
+  <div class="skeleton-card">
+    <div class="sk-avatar-row">
+      <div class="sk-circle"></div>
+      <div class="sk-lines">
+        <div class="sk-row sk-title"></div>
+        <div class="sk-row sk-short"></div>
+      </div>
+    </div>
+    <div class="sk-divider"></div>
+    <div class="sk-row"></div>
+    <div class="sk-row sk-short"></div>
+    <div class="sk-row"></div>
+    <div class="sk-row sk-short"></div>
+  </div>
+}
+
+@if (!isLoading) {
+  <div class="settings-card">
+
+    <!-- ── Header / identity banner ───────────────────────────────────────── -->
+    <div class="company-banner">
+      <div class="logo-avatar" [class.logo-avatar--empty]="!logoPreviewUrl">
+        @if (logoPreviewUrl) {
+          <img [src]="logoPreviewUrl" alt="Company logo" class="logo-avatar__img" />
+        } @else {
+          <mat-icon class="logo-avatar__placeholder">domain</mat-icon>
+        }
+        @if (canEdit) {
+          <label class="logo-avatar__camera"
+                 [class.logo-avatar__camera--busy]="isUploadingLogo"
+                 matTooltip="Change logo">
+            @if (isUploadingLogo) {
+              <mat-spinner diameter="16" />
+            } @else {
+              <mat-icon>photo_camera</mat-icon>
+            }
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                   (change)="onLogoSelected($event)" hidden />
+          </label>
+        }
+      </div>
+
+      <div class="company-banner__text">
+        <h2 class="company-banner__name">{{ details.companyName || '—' }}</h2>
+        @if (pendingLogoFile) {
+          <span class="logo-pending-inline">
+            <mat-icon>attach_file</mat-icon>{{ pendingLogoFile.name }}
+          </span>
+        } @else {
+          <span class="company-banner__sub">JPEG, PNG, WebP or SVG · max 20 MB</span>
+        }
+      </div>
+
+      <div class="company-banner__actions">
+        @if (pendingLogoFile) {
+          <button mat-flat-button class="btn-save" (click)="uploadLogo()" [disabled]="isUploadingLogo">
+            @if (isUploadingLogo) { <mat-spinner diameter="16" /> } @else { <mat-icon>cloud_upload</mat-icon> }
+            Upload logo
+          </button>
+          <button mat-button class="btn-discard" (click)="discardLogo()" [disabled]="isUploadingLogo">
+            Discard
+          </button>
+        } @else if (canEdit && !isEditing) {
+          <button mat-stroked-button class="btn-header-edit" (click)="startEdit()">
+            <mat-icon>edit</mat-icon> Edit
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="sn-divider"></div>
+
+    <!-- ── View mode ──────────────────────────────────────────────────────── -->
+    @if (!isEditing) {
+      <div class="card-body">
+        <div class="detail-grid">
+
+          <div class="detail-item">
+            <span class="detail-label">Company name</span>
+            <span class="detail-value">{{ details.companyName || '—' }}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Email</span>
+            <span class="detail-value">{{ details.email || '—' }}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Phone</span>
+            <span class="detail-value">{{ details.phone || '—' }}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Address</span>
+            <span class="detail-value">{{ details.address || '—' }}</span>
+          </div>
+
+          <div class="detail-item detail-item--full">
+            <span class="detail-label">Website</span>
+            @if (details.website) {
+              <a [href]="details.website" target="_blank" rel="noopener" class="detail-link">
+                {{ details.website }}
+              </a>
+            } @else {
+              <span class="detail-value">—</span>
+            }
+          </div>
+
+        </div>
+
+        @if (!canEdit) {
+          <div class="readonly-banner">
+            <mat-icon>lock_outline</mat-icon>
+            Read-only — only Owners and Admins can edit company details.
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ── Edit mode ──────────────────────────────────────────────────────── -->
+    @if (isEditing) {
+      <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <div class="card-body">
+          <div class="fields">
+
+            <mat-form-field appearance="outline" class="field field--full">
+              <mat-label>Company name</mat-label>
+              <input matInput formControlName="companyName" autocomplete="organization" />
+              @if (form.get('companyName')!.hasError('required') && form.get('companyName')!.touched) {
+                <mat-error>Company name is required.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" type="email" autocomplete="email" />
+              @if (form.get('email')!.hasError('email') && form.get('email')!.touched) {
+                <mat-error>Enter a valid email address.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field">
+              <mat-label>Phone</mat-label>
+              <input matInput formControlName="phone" type="tel" autocomplete="tel" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field field--full">
+              <mat-label>Address</mat-label>
+              <input matInput formControlName="address" autocomplete="street-address" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field field--full">
+              <mat-label>Website</mat-label>
+              <input matInput formControlName="website" type="url" autocomplete="url" placeholder="https://" />
+              @if (form.get('website')!.hasError('pattern') && form.get('website')!.touched) {
+                <mat-error>Enter a valid URL (e.g. https://example.com).</mat-error>
+              }
+            </mat-form-field>
+
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <button mat-button type="button" class="btn-discard"
+                  [disabled]="isSaving" (click)="cancelEdit()">
+            <mat-icon>close</mat-icon> Cancel
+          </button>
+          <button mat-flat-button type="submit" class="btn-save"
+                  [disabled]="form.invalid || form.pristine || isSaving">
+            @if (isSaving) { <mat-spinner diameter="18" /> } @else { <mat-icon>check</mat-icon> }
+            Save changes
+          </button>
+        </div>
+      </form>
+    }
+
+  </div>
+}

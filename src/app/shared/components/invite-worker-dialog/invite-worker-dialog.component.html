@@ -21,20 +21,22 @@
         </mat-form-field>
       </div>
 
-      <div class="form-field">
-        <label class="field-label">Role</label>
-        <mat-form-field appearance="outline">
-          <mat-icon matPrefix>badge</mat-icon>
-          <mat-select formControlName="role">
-            @for (opt of roleOptions; track opt.value) {
-              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+      @if (!presetRole) {
+        <div class="form-field">
+          <label class="field-label">Role</label>
+          <mat-form-field appearance="outline">
+            <mat-icon matPrefix>badge</mat-icon>
+            <mat-select formControlName="role">
+              @for (opt of roleOptions; track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              }
+            </mat-select>
+            @if (getErrorMessage('role')) {
+              <mat-error>{{ getErrorMessage('role') }}</mat-error>
             }
-          </mat-select>
-          @if (getErrorMessage('role')) {
-            <mat-error>{{ getErrorMessage('role') }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
+          </mat-form-field>
+        </div>
+      }
 
       @if (sendError$ | async; as err) {
         <div class="send-error">
@@ -61,4 +63,3 @@
     </button>
   </mat-dialog-actions>
 </div>
-

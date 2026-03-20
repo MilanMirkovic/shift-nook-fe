@@ -80,11 +80,7 @@ export class EstimatesApiService {
     );
   }
 
-  downloadPdf(companyId: string, estimateId: string): Observable<Blob> {
-    return this.http.get(
-      `${this.apiUrl}/companies/${companyId}/estimates/${estimateId}/pdf`,
-      { responseType: 'blob' }
-    );
+  getPdfUrl(companyId: string, estimateId: string): string {
+    return `${this.apiUrl}/companies/${companyId}/estimates/${estimateId}/pdf/url`;
   }
 }
-
