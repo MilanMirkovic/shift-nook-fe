@@ -86,7 +86,7 @@ export class EstimatesApiService {
     const win = window.open('', '_blank');
     try {
       const token = await this.authService.getAccessToken();
-      const res = await fetch(`/api/companies/${companyId}/estimates/${estimateId}/pdf/url`, {
+      const res = await fetch(`${this.apiUrl}/companies/${companyId}/estimates/${estimateId}/pdf/url`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const body = await res.json();
