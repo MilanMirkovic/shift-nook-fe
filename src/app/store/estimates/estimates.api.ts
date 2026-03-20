@@ -84,18 +84,10 @@ export class EstimatesApiService {
 
   async openPdf(companyId: string, estimateId: string): Promise<void> {
     const token = await this.authService.getAccessToken();
-    const url   = `${this.apiUrl}/companies/${companyId}/estimates/${estimateId}/pdf/url`;
-
-    const res = await fetch(url, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      redirect: 'manual',
+    const res = await fetch(`/api/companies/${companyId}/estimates/${estimateId}/pdf/url`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
-
-    const presignedUrl = res.headers.get('Location');
-    if (presignedUrl) {
-      window.open(presignedUrl, '_blank');
-    } else {
-      throw new Error('No Location header in response');
-    }
+    const { url } = await res.json();
+    window.open(url, '_blank');
   }
 }
