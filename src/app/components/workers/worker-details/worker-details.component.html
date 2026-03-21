@@ -238,18 +238,30 @@
           Timesheets
         </ng-template>
         <div class="tab-content">
+
+          <!-- ── Tab header ── -->
           <div class="activity-header">
             <div>
               <h2>Timesheets</h2>
               <p class="activity-subtitle">View timesheet records for this worker</p>
             </div>
-            <button mat-stroked-button (click)="toggleTimesheetFilters()">
-              <mat-icon>{{ showTimesheetFilters ? 'filter_list_off' : 'filter_list' }}</mat-icon>
-              {{ showTimesheetFilters ? 'Hide Filters' : 'Show Filters' }}
-            </button>
+            <div class="timesheets-header-actions">
+              <button mat-stroked-button (click)="toggleTimesheetFilters()">
+                <mat-icon>{{ showTimesheetFilters ? 'filter_list_off' : 'filter_list' }}</mat-icon>
+                {{ showTimesheetFilters ? 'Hide Filters' : 'Filter Records' }}
+              </button>
+              <button mat-flat-button color="primary" [disabled]="exportingPdf" (click)="openExportDialog()">
+                @if (exportingPdf) {
+                  <mat-spinner diameter="16" class="export-spinner-inline"></mat-spinner>
+                } @else {
+                  <mat-icon>picture_as_pdf</mat-icon>
+                }
+                Export PDF
+              </button>
+            </div>
           </div>
 
-          <!-- Date Range Filters -->
+          <!-- ── Filter Records Panel ── -->
           @if (showTimesheetFilters) {
             <div class="activity-filters">
               <mat-form-field appearance="outline">
@@ -279,10 +291,11 @@
             </div>
           }
 
+          <!-- ── List ── -->
           @if (timesheetsLoading) {
             <div class="loading-state">
               <mat-spinner diameter="48"></mat-spinner>
-              <p>Loading timesheets...</p>
+              <p>Loading timesheets…</p>
             </div>
           } @else if (timesheetsError) {
             <div class="empty-state">
@@ -294,9 +307,7 @@
             <div class="empty-state">
               <mat-icon class="empty-state__icon">schedule</mat-icon>
               <h3 class="empty-state__title">No Timesheets Yet</h3>
-              <p class="empty-state__description">
-                Timesheet records for this worker will appear here.
-              </p>
+              <p class="empty-state__description">Timesheet records for this worker will appear here.</p>
             </div>
           } @else {
             <div class="timesheets-list">
@@ -304,8 +315,8 @@
                 <div class="timesheet-card">
                   <div class="timesheet-card__header">
                     <div class="timesheet-card__title">
-                      <mat-icon>schedule</mat-icon>
-                      <span>{{ timesheet.checkInTime | date:'MMM d, yyyy' }}</span>
+                      <mat-icon>event</mat-icon>
+                      <span>{{ timesheet.checkInTime | date:'EEEE, MMM d, yyyy' }}</span>
                     </div>
                     <span class="timesheet-status" [ngClass]="getTimesheetStatusClass(timesheet)">
                       {{ getTimesheetStatusLabel(timesheet) }}
@@ -325,14 +336,14 @@
                       <mat-icon class="detail-icon">logout</mat-icon>
                       <div class="detail-info">
                         <label>Check-out</label>
-                        <p>{{ timesheet.checkOutTime ? (timesheet.checkOutTime | date:'h:mm a') : 'Still active' }}</p>
+                        <p>{{ timesheet.checkOutTime ? (timesheet.checkOutTime | date:'h:mm a') : '—' }}</p>
                       </div>
                     </div>
 
                     <div class="timesheet-detail">
                       <mat-icon class="detail-icon">timer</mat-icon>
                       <div class="detail-info">
-                        <label>Duration</label>
+                        <label>Total Hours</label>
                         <p>{{ formatDuration(timesheet) }}</p>
                       </div>
                     </div>
@@ -358,7 +369,6 @@
                 </div>
               }
 
-              <!-- Load More Button -->
               @if (hasMoreTimesheets) {
                 <div class="load-more-container">
                   <button mat-stroked-button (click)="loadMoreTimesheets()" [disabled]="loadingMoreTimesheets">

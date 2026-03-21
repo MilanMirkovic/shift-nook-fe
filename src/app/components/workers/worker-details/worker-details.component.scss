@@ -1105,6 +1105,9 @@ p {
   }
 }
 
+// ─── PDF Export Panel ─────────────────────────────────────────────────────────
+// (removed — export is now a dialog)
+
 // Responsive design
 @media (max-width: 768px) {
   .worker-header {
@@ -1224,4 +1227,16 @@ p {
       }
     }
   }
+}
+.timesheets-header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.export-spinner-inline {
+  display: inline-block;
+  margin-right: 4px;
+  ::ng-deep circle { stroke: #ffffff !important; }
 }

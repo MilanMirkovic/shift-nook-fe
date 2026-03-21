@@ -121,4 +121,19 @@ export class TimesheetsApi {
       `${this.baseUrl}/${companyId}/timesheets/${timesheetId}`
     );
   }
+
+  /**
+   * Export worker timesheets as PDF for the authenticated user (self-export).
+   * from / to must be ISO-8601 Instant strings, e.g. "2026-01-01T00:00:00Z"
+   */
+  exportTimesheetPdf(companyId: string, from: string, to: string): Observable<Blob> {
+    const params = new HttpParams()
+      .set('from', from)
+      .set('to', to);
+
+    return this.http.get(
+      `${this.baseUrl}/${companyId}/timesheets/export/pdf`,
+      { params, responseType: 'blob' }
+    );
+  }
 }

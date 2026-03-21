@@ -18,7 +18,9 @@ import { TimesheetsStoreService } from '../../../store/timesheets/timesheets-sto
 import { Timesheet } from '../../../store/timesheets/timesheets.models';
 import { WorkerDetailsHelper } from './worker-details.helper';
 import { InviteWorkerDialogComponent } from '../../../shared/components/invite-worker-dialog/invite-worker-dialog.component';
+import { ExportTimesheetDialogComponent, ExportTimesheetDialogResult } from '../../../shared/components/export-timesheet-dialog/export-timesheet-dialog.component';
 import { CompanyRole } from '../../../shared/models/company-role';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-worker-details',
@@ -33,6 +35,7 @@ export class WorkerDetailsComponent implements OnInit, OnDestroy {
   private readonly activityService = inject(ActivityTimelineService);
   private readonly timesheetsStore = inject(TimesheetsStoreService);
   private readonly dialog = inject(MatDialog);
+  private readonly notificationService = inject(NotificationService);
   private readonly destroy$ = new Subject<void>();
 
   protected readonly worker$ = this.store.select(selectSelectedMember);
@@ -72,6 +75,9 @@ export class WorkerDetailsComponent implements OnInit, OnDestroy {
   protected totalTimesheets = 0;
   protected hasMoreTimesheets = false;
   protected loadingMoreTimesheets = false;
+
+  // PDF export
+  protected exportingPdf = false;
 
   private currentWorkerId: string | null = null;
   private currentCompanyId: string | null = null;
@@ -276,6 +282,50 @@ export class WorkerDetailsComponent implements OnInit, OnDestroy {
     if (this.currentWorkerId) {
       this.loadTimesheets(this.currentWorkerId, true);
     }
+  }
+
+  protected openExportDialog(): void {
+    const ref = this.dialog.open(ExportTimesheetDialogComponent, {
+      width: '480px',
+      disableClose: false,
+      panelClass: 'centered-dialog',
+    });
+
+    ref.afterClosed().subscribe((result: ExportTimesheetDialogResult | null) => {
+      if (!result || !this.currentCompanyId) return;
+
+      this.exportingPdf = true;
+
+      const from = new Date(result.from);
+      from.setHours(0, 0, 0, 0);
+
+      const to = new Date(result.to);
+      to.setHours(23, 59, 59, 999);
+
+      this.timesheetsStore.exportTimesheetPdf(
+        this.currentCompanyId,
+        from.toISOString(),
+        to.toISOString()
+      ).subscribe({
+        next: (blob: Blob) => {
+          const fromStr = from.toISOString().substring(0, 10);
+          const toStr = to.toISOString().substring(0, 10);
+          const filename = `timesheet-${fromStr}-to-${toStr}.pdf`;
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(url);
+          this.exportingPdf = false;
+          this.notificationService.success('PDF exported successfully!');
+        },
+        error: () => {
+          this.exportingPdf = false;
+          this.notificationService.error('Failed to export PDF. Please try again.');
+        }
+      });
+    });
   }
 
   // Delegate to helper methods

@@ -28,10 +28,12 @@ import {
   clearTimesheets
 } from './timesheets.actions';
 import { Timesheet, CreateTimesheetRequest, UpdateTimesheetRequest } from './timesheets.models';
+import { TimesheetsApi } from './timesheets.api';
 
 @Injectable({ providedIn: 'root' })
 export class TimesheetsStoreService {
   private readonly store = inject(Store);
+  private readonly timesheetsApi = inject(TimesheetsApi);
 
   // Observables
   readonly timesheets$ = this.store.select(selectTimesheets);
@@ -136,5 +138,13 @@ export class TimesheetsStoreService {
    */
   activeTimesheetsForWorker$(workerUserId: string): Observable<Timesheet[]> {
     return this.store.select(selectActiveTimesheetsForWorker(workerUserId));
+  }
+
+  /**
+   * Export worker timesheets as a PDF blob.
+   * from / to are ISO-8601 Instant strings, e.g. "2026-01-01T00:00:00Z"
+   */
+  exportTimesheetPdf(companyId: string, from: string, to: string): Observable<Blob> {
+    return this.timesheetsApi.exportTimesheetPdf(companyId, from, to);
   }
 }

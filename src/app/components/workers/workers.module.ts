@@ -17,6 +17,7 @@ import { WorkersComponent } from './workers.component';
 import { WorkerDetailsComponent } from './worker-details/worker-details.component';
 import { ListPageComponent } from '../../layout/list-page/list-page.component';
 import { InviteWorkerDialogComponent } from '../../shared/components/invite-worker-dialog/invite-worker-dialog.component';
+import { ExportTimesheetDialogComponent } from '../../shared/components/export-timesheet-dialog/export-timesheet-dialog.component';
 
 const routes: Routes = [
   {
@@ -48,6 +49,7 @@ const routes: Routes = [
     MatInputModule,
     ListPageComponent,
     InviteWorkerDialogComponent,
+    ExportTimesheetDialogComponent,
     RouterModule.forChild(routes)
   ]
 })
