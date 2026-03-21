@@ -40,6 +40,7 @@ export interface UpdateTimesheetRequest {
   checkOutLng: number;
   checkOutAccuracy: number;
   workDescription?: string;
+  lunchtimeDurationMinutes?: number;
   markTaskAsComplete?: boolean;
 }
 

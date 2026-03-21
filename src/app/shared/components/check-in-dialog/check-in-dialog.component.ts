@@ -88,6 +88,7 @@ export class CheckInDialogComponent implements OnInit, OnDestroy, AfterViewInit 
 
     this.checkOutForm = this.fb.group({
       workDescription: [''],
+      lunchtimeDurationMinutes: [null, [Validators.min(0)]],
       markTaskAsComplete: [false]
     });
   }
@@ -319,6 +320,7 @@ export class CheckInDialogComponent implements OnInit, OnDestroy, AfterViewInit 
       .pipe(takeUntil(this.destroy$), filter(company => !!company?.companyId))
       .subscribe(company => {
         const checkOutFormValue = this.checkOutForm.value;
+        const lunchMinutes = checkOutFormValue.lunchtimeDurationMinutes;
         const checkOutData = {
           status: 'CLOSED' as const,
           checkOutTime: new Date().toISOString(),
@@ -326,6 +328,7 @@ export class CheckInDialogComponent implements OnInit, OnDestroy, AfterViewInit 
           checkOutLng: this.currentLocation!.lng,
           checkOutAccuracy: this.currentLocation!.accuracy,
           workDescription: checkOutFormValue.workDescription || undefined,
+          lunchtimeDurationMinutes: lunchMinutes != null && lunchMinutes !== '' ? Number(lunchMinutes) : undefined,
           markTaskAsComplete: checkOutFormValue.markTaskAsComplete || false
         };
 
@@ -357,5 +360,9 @@ export class CheckInDialogComponent implements OnInit, OnDestroy, AfterViewInit 
 
   onCancel(): void {
     this.dialogRef.close(false);
+  }
+
+  get lunchDurationHasMinError(): boolean {
+    return !!this.checkOutForm.get('lunchtimeDurationMinutes')?.hasError('min');
   }
 }

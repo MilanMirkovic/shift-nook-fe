@@ -116,6 +116,22 @@
           <mat-hint>Summarize what you accomplished today</mat-hint>
         </mat-form-field>
 
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Lunch Break Duration (minutes)</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="lunchtimeDurationMinutes"
+            placeholder="e.g. 30"
+            min="0"
+          />
+          <mat-icon matPrefix>lunch_dining</mat-icon>
+          <mat-hint>Optional – enter lunch break duration in minutes</mat-hint>
+          <mat-error *ngIf="lunchDurationHasMinError">
+            Duration cannot be negative
+          </mat-error>
+        </mat-form-field>
+
         <mat-checkbox formControlName="markTaskAsComplete" color="primary" class="task-complete-checkbox">
           Mark task as complete
         </mat-checkbox>
