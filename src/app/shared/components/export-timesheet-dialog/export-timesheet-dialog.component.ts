@@ -39,6 +39,24 @@ export class ExportTimesheetDialogComponent {
   fromDate: Date | null = null;
   toDate: Date | null = null;
 
+  constructor() {
+    // Default to current week: Monday → Sunday
+    const today = new Date();
+    const day = today.getDay(); // 0=Sun, 1=Mon, …
+    const diffToMonday = (day === 0 ? -6 : 1 - day);
+
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + diffToMonday);
+    monday.setHours(0, 0, 0, 0);
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+
+    this.fromDate = monday;
+    this.toDate = sunday;
+  }
+
   get isValid(): boolean {
     return !!this.fromDate && !!this.toDate && this.toDate >= this.fromDate;
   }
@@ -52,4 +70,3 @@ export class ExportTimesheetDialogComponent {
     this.dialogRef.close(null);
   }
 }
-

@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { CompanyMember } from '../../../store/company-members/company-members.models';
 import {
@@ -292,18 +293,19 @@ export class WorkerDetailsComponent implements OnInit, OnDestroy {
     });
 
     ref.afterClosed().subscribe((result: ExportTimesheetDialogResult | null) => {
-      if (!result || !this.currentCompanyId) return;
+      if (!result || !this.currentCompanyId || !this.worker) return;
 
       this.exportingPdf = true;
 
       const from = new Date(result.from);
-      from.setHours(0, 0, 0, 0);
+      from.setUTCHours(0, 0, 0, 0);
 
       const to = new Date(result.to);
-      to.setHours(23, 59, 59, 999);
+      to.setUTCHours(23, 59, 59, 999);
 
       this.timesheetsStore.exportTimesheetPdf(
         this.currentCompanyId,
+        this.worker.userId,
         from.toISOString(),
         to.toISOString()
       ).subscribe({
@@ -320,9 +322,15 @@ export class WorkerDetailsComponent implements OnInit, OnDestroy {
           this.exportingPdf = false;
           this.notificationService.success('PDF exported successfully!');
         },
-        error: () => {
+        error: (err: HttpErrorResponse) => {
           this.exportingPdf = false;
-          this.notificationService.error('Failed to export PDF. Please try again.');
+          if (err.status === 403) {
+            this.notificationService.error("You don't have permission to export this timesheet.");
+          } else if (err.status === 404) {
+            this.notificationService.error('Worker not found.');
+          } else {
+            this.notificationService.error('Failed to generate PDF. Please try again.');
+          }
         }
       });
     });

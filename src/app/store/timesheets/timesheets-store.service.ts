@@ -142,9 +142,10 @@ export class TimesheetsStoreService {
 
   /**
    * Export worker timesheets as a PDF blob.
+   * workerUserId must always be provided so the backend returns the correct worker's data.
    * from / to are ISO-8601 Instant strings, e.g. "2026-01-01T00:00:00Z"
    */
-  exportTimesheetPdf(companyId: string, from: string, to: string): Observable<Blob> {
-    return this.timesheetsApi.exportTimesheetPdf(companyId, from, to);
+  exportTimesheetPdf(companyId: string, workerUserId: string, from: string, to: string): Observable<Blob> {
+    return this.timesheetsApi.exportTimesheetPdf(companyId, workerUserId, from, to);
   }
 }
