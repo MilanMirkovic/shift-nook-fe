@@ -5,23 +5,21 @@
 
 <!-- Authenticated pages - with sidebar layout -->
 <ng-container *ngIf="showLayout()">
-  <!-- Floating navigation handle -->
-  <button
-    class="nav-edge-handle"
-    mat-icon-button
-    type="button"
-    aria-label="Toggle navigation"
-    [attr.aria-expanded]="navOpen()"
-    (click)="toggleNavigation()"
-  >
-    <mat-icon aria-hidden="true">
-      {{
-        navOpen()
-          ? (isHandset() ? 'close' : 'chevron_left')
-          : (isHandset() ? 'menu' : 'chevron_right')
-      }}
-    </mat-icon>
-  </button>
+  <!-- Floating navigation handle (desktop only) -->
+  @if (!isHandset()) {
+    <button
+      class="nav-edge-handle"
+      mat-icon-button
+      type="button"
+      aria-label="Toggle navigation"
+      [attr.aria-expanded]="navOpen()"
+      (click)="toggleNavigation()"
+    >
+      <mat-icon aria-hidden="true">
+        {{ navOpen() ? 'chevron_left' : 'chevron_right' }}
+      </mat-icon>
+    </button>
+  }
 
   <mat-sidenav-container class="app-shell" autosize>
 
@@ -32,7 +30,7 @@
       [mode]="sidenavMode()"
       [opened]="navOpen()"
       [fixedInViewport]="isHandset()"
-      [fixedTopGap]="64"
+      [fixedTopGap]="0"
     >
       <app-sidebar
         [appName]="appName"
@@ -45,11 +43,29 @@
     <!-- Main content -->
     <mat-sidenav-content class="app-content">
       <mat-toolbar class="app-toolbar" color="primary">
+        <!-- Mobile hamburger button -->
+        @if (isHandset()) {
+          <button
+            mat-icon-button
+            type="button"
+            class="app-toolbar__menu-btn"
+            aria-label="Open navigation"
+            (click)="toggleNavigation()"
+          >
+            <mat-icon>menu</mat-icon>
+          </button>
+        }
+
+        <div class="app-toolbar__brand" *ngIf="isHandset()">
+          <span class="app-toolbar__brand-mark">SN</span>
+          <span class="app-toolbar__brand-name">Shift Nook</span>
+        </div>
+
         <span class="spacer"></span>
         <app-notification-bell />
       </mat-toolbar>
 
-      <div class="page">
+      <div class="page" [class.has-bottom-nav]="isHandset()">
         <router-outlet></router-outlet>
       </div>
 

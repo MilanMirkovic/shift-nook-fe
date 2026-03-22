@@ -60,7 +60,66 @@ body {
   margin: 0;
   height: 100%;
   overflow-x: hidden;
+  /* Smooth scrolling across the app */
+  scroll-behavior: smooth;
+  /* Remove tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
+  /* Improve text rendering on mobile */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* ─── Global touch & interaction improvements ─────────────────────────────── */
+
+/* All interactive elements get touch-manipulation to remove 300ms tap delay */
+a, button, [role="button"], input, select, textarea, label {
+  touch-action: manipulation;
+}
+
+/* Minimum 44×44px touch targets for all buttons and links */
+button:not(.mdc-list-item):not(.mat-mdc-tab):not(.mat-calendar-body-cell),
+a[mat-button], a[mat-icon-button], a[mat-flat-button], a[mat-stroked-button] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Prevent text-size adjustment on orientation change */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* ─── Mobile-specific scrolling ──────────────────────────────────────────── */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Responsive mat-form-field: prevent iOS zoom on focus ───────────────── */
+@media (max-width: 599px) {
+  .mat-mdc-input-element,
+  .mat-mdc-select-trigger,
+  input.mat-mdc-input-element,
+  textarea.mat-mdc-input-element {
+    font-size: 16px !important; /* Prevents iOS zoom on input focus */
+  }
+
+  /* Tighter Material dialog on mobile */
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+  }
+
+  /* Snackbar always at the bottom on mobile, full-width */
+  .cdk-overlay-container .cdk-global-overlay-wrapper {
+    align-items: flex-end !important;
+    padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+  }
+}
+
+/* ─── Safe-area utility classes ───────────────────────────────────────────── */
+.sn-safe-top    { padding-top:    env(safe-area-inset-top); }
+.sn-safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.sn-safe-left   { padding-left:   env(safe-area-inset-left); }
+.sn-safe-right  { padding-right:  env(safe-area-inset-right); }
 
 /* ─── Surface card utility ────────────────────────────────────────────────── */
 .sn-card {
@@ -229,6 +288,59 @@ body {
   top: 50% !important;
   left: 50% !important;
   transform: translate(-50%, -50%) !important;
+}
+
+/* ─── Check-in / Check-out bottom sheet panel ─────────────────────────────── */
+.cdk-overlay-pane.sn-checkin-panel {
+  @media (max-width: 599px) {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    transform: none !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    max-height: 92dvh !important;
+  }
+
+  @media (min-width: 600px) {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+    box-shadow: var(--sn-shadow-modal) !important;
+
+    @media (max-width: 599px) {
+      border-radius: 20px 20px 0 0 !important;
+    }
+
+    @media (min-width: 600px) {
+      border-radius: 20px !important;
+    }
+
+    .mdc-dialog__surface {
+      overflow: hidden !important;
+
+      @media (max-width: 599px) {
+        border-radius: 20px 20px 0 0 !important;
+      }
+
+      @media (min-width: 600px) {
+        border-radius: 20px !important;
+      }
+    }
+  }
+}
+
+/* ─── Backdrop for check-in panel ──────────────────────────────────────��─── */
+.sn-checkin-backdrop {
+  background: rgba(15, 23, 42, 0.45) !important;
+  backdrop-filter: blur(4px);
 }
 
 /* You can add global styles to this file, and also import other style files */

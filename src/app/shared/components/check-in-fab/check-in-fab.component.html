@@ -3,6 +3,7 @@
   mat-fab
   [color]="(isCheckedIn$ | async) ? 'accent' : 'primary'"
   class="check-in-fab"
+  [class.is-checked-in]="isCheckedIn$ | async"
   (click)="openCheckInDialog()"
   [matTooltip]="(isCheckedIn$ | async) ? 'Check Out' : 'Check In'"
   matTooltipPosition="left"

@@ -418,6 +418,32 @@
   }
 }
 
+@media (max-width: 599px) {
+  .login-form-container {
+    padding: 24px 16px;
+    /* Fill entire screen height so card is vertically centered */
+    min-height: 100dvh;
+    align-items: flex-start;
+    padding-top: max(32px, env(safe-area-inset-top));
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+
+  .login-card {
+    padding: 24px 20px;
+    border-radius: 16px;
+  }
+
+  .login-title { font-size: 1.375rem; }
+
+  .mobile-brand { margin-bottom: 24px; }
+
+  .form-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
 @media (max-width: 480px) {
   .login-card {
     padding: 24px 20px;

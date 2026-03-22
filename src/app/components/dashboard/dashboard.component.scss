@@ -1,16 +1,16 @@
 // ─── Stats grid ───────────────────────────────────────────────────────────────
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .stat-card {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 20px 24px;
+  padding: 16px 20px;
   background: #ffffff;
   border: 1px solid #e8eaf0;
   border-radius: 18px;
@@ -67,7 +67,7 @@
 }
 
 .stat-value {
-  font-size: 1.875rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: #0f172a;
   line-height: 1;
@@ -379,6 +379,7 @@
 // ─── Timesheets table ─────────────────────────────────────────────────────────
 .timesheets-table {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: 10px;
   border: 1px solid #f1f5f9;
 }
@@ -452,4 +453,56 @@
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+// ─── Responsive ──────────────────────────────────────────────────────────────
+@media (max-width: 599px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    padding: 14px 14px;
+    gap: 10px;
+    border-radius: 14px;
+  }
+
+  .stat-value { font-size: 1.375rem; }
+
+  .stat-label { font-size: 0.75rem; }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .stat-link { display: none; } /* hide arrow on mobile to save space */
+
+  .dashboard-grid { gap: 12px; }
+
+  .dashboard-card { border-radius: 14px; }
+
+  .card-header {
+    padding: 14px 16px;
+
+    h3 { font-size: 0.9375rem; }
+  }
+
+  .card-body {
+    padding: 16px;
+    min-height: 120px;
+  }
+
+  .worker-item { padding: 8px 10px; }
+
+  .summary-value { font-size: 1.5rem; }
 }

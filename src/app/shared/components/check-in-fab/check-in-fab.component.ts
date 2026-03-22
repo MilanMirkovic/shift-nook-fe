@@ -124,10 +124,13 @@ export class CheckInFabComponent implements OnInit, OnDestroy {
             console.log('Opening dialog with:', { isCheckedIn, activeTimesheet });
 
             this.dialog.open(CheckInDialogComponent, {
-              width: '500px',
-              maxWidth: '90vw',
+              width: '480px',
+              maxWidth: '100vw',
+              maxHeight: '92dvh',
+              position: undefined,
               disableClose: false,
-              panelClass: 'check-in-dialog-container',
+              panelClass: 'sn-checkin-panel',
+              backdropClass: 'sn-checkin-backdrop',
               data: {
                 isCheckedIn,
                 activeTimesheet: activeTimesheet || undefined

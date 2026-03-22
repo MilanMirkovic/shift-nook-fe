@@ -1,5 +1,4 @@
-/* Sidebar-specific styles only.
-   Sidenav layout sizing/scrolling remains owned by app.scss (shell). */
+/* Sidebar-specific styles only. */
 
 :host {
   display: block;
@@ -20,6 +19,8 @@
   padding: 20px 16px 16px;
   flex-shrink: 0;
   border-bottom: 1px solid #e8eaf0;
+  /* safe area for notched phones */
+  padding-top: max(20px, calc(env(safe-area-inset-top) + 12px));
 }
 
 .brand {
@@ -151,7 +152,7 @@
 :host ::ng-deep .nav-list .mdc-list-item {
   border-radius: 10px;
   margin: 2px 0;
-  height: 44px;
+  height: 48px; /* Slightly taller for better touch target */
   color: #64748b;
   transition: background 0.2s ease, color 0.2s ease;
 
@@ -203,6 +204,7 @@
   flex-shrink: 0;
   margin-top: auto;
   padding: 12px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
   border-top: 1px solid #e8eaf0;
 }
 

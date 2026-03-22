@@ -1,10 +1,11 @@
 /* ─── Layout shell ────────────────────────────────────────────────────────── */
 .app-shell {
   height: 100vh;
+  height: 100dvh; /* dynamic viewport height for mobile browsers */
   position: relative;
 }
 
-/* ─── Floating navigation handle ─────────────────────────────────────────── */
+/* ─── Floating navigation handle (desktop only) ───────────────────────────── */
 .nav-edge-handle {
   position: fixed;
   top: 50vh;
@@ -51,7 +52,6 @@
   transform: translateY(-50%) scale(0.96);
 }
 
-/* Closed state */
 .nav-edge-handle[aria-expanded="false"] {
   background: #ffffff;
   border-color: #e8eaf0;
@@ -72,12 +72,49 @@
 .app-toolbar {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 100;
   background: #ffffff !important;
   border-bottom: 1px solid #e8eaf0;
   box-shadow: none !important;
-  height: 64px;
+  height: 56px;
   color: #0f172a !important;
+  padding: 0 8px 0 4px;
+  /* Safe area for notched phones */
+  padding-left: max(8px, env(safe-area-inset-left));
+  padding-right: max(8px, env(safe-area-inset-right));
+}
+
+.app-toolbar__menu-btn {
+  color: #0f172a !important;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.app-toolbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-toolbar__brand-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.app-toolbar__brand-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.25px;
 }
 
 .spacer {
@@ -89,6 +126,7 @@
   width: 260px;
   max-width: 85vw;
   height: 100vh;
+  height: 100dvh;
 
   display: flex;
   flex-direction: column;
@@ -114,11 +152,25 @@
 /* ─── Main content ────────────────────────────────────────────────────────── */
 .app-content {
   min-height: 100vh;
+  min-height: 100dvh;
   background: #f8f9fc;
+}
+
+/* Add bottom padding on mobile so content is not hidden behind browser chrome */
+.page {
+  /* safe-area-inset-bottom accounts for iOS home indicator */
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 /* ─── Gradient utility ────────────────────────────────────────────────────── */
 .app-header, .main-header, .sn-primary-bg {
   background: var(--sn-primary-gradient);
   color: #fff;
+}
+
+/* ─── Mobile responsive ───────────────────────────────────────────────────── */
+@media (max-width: 599px) {
+  .app-toolbar {
+    height: 56px;
+  }
 }

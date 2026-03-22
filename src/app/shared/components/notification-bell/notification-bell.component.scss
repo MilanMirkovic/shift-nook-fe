@@ -26,6 +26,13 @@
   overflow: hidden !important;
 
   .mat-mdc-menu-content { padding: 0 !important; }
+
+  /* Full-width on small screens */
+  @media (max-width: 480px) {
+    min-width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    border-radius: 12px !important;
+  }
 }
 
 // ─── Header ──────────────────────────────────────────────────────────────────
@@ -63,12 +70,17 @@
 .notification-list {
   max-height: 380px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: #e2e8f0 transparent;
 
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 99px; }
+
+  @media (max-width: 480px) {
+    max-height: 60vh;
+  }
 }
 
 // ─── Loading / empty ─────────────────────────────────────────────────────────
