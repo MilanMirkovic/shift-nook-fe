@@ -19,7 +19,11 @@
         <div class="company-section">
           <mat-divider></mat-divider>
           <div class="company-info" [class.is-collapsed]="!isHandset && isCollapsed">
-            <div class="company-avatar">{{ getCompanyInitials(currentCompany.companyName) }}</div>
+            @if (currentCompany.logoUrl) {
+              <img class="company-avatar company-avatar--logo" [src]="currentCompany.logoUrl" [alt]="currentCompany.companyName" />
+            } @else {
+              <div class="company-avatar">{{ getCompanyInitials(currentCompany.companyName) }}</div>
+            }
             <div class="company-details" [class.is-hidden]="!isHandset && isCollapsed">
               <div class="company-name">{{ currentCompany.companyName }}</div>
               <div class="company-role">{{ currentCompany.role }}</div>

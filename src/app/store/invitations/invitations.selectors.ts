@@ -5,7 +5,9 @@ import { INVITATIONS_FEATURE_KEY } from './invitations.reducer';
 export const selectInvitationsState =
   createFeatureSelector<InvitationsState>(INVITATIONS_FEATURE_KEY);
 
-export const selectInvitations = createSelector(selectInvitationsState, s => s.items);
+export const selectInvitations = createSelector(selectInvitationsState, s =>
+  s.items.filter(i => i.status === 'PENDING')
+);
 export const selectInvitationsListLoading = createSelector(selectInvitationsState, s => s.listLoading);
 export const selectInvitationsListError = createSelector(selectInvitationsState, s => s.listError);
 

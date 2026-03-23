@@ -121,6 +121,11 @@
   background: linear-gradient(135deg, #2563eb, #7c3aed);
   color: #ffffff;
   flex-shrink: 0;
+
+  &--logo {
+    object-fit: cover;
+    background: none;
+  }
 }
 
 .company-details {
