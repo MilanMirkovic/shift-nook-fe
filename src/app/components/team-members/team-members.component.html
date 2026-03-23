@@ -15,6 +15,7 @@
 }
 
 <app-list-page
+  [loading]="(loading$ | async) ?? false"
   title="Team"
   subtitle="Manage staff profiles, roles, and availability."
   [rows]="(members$ | async) ?? []"

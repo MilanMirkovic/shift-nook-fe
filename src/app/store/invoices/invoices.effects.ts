@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
 import * as InvoicesActions from './invoices.actions';
 import { InvoicesApiService } from './invoices.api';
 
@@ -16,7 +17,12 @@ export class InvoicesEffects {
       switchMap(({ companyId, page = 0, size = 20, sort, clientId }) =>
         this.invoicesApi.loadInvoices(companyId, page, size, sort, clientId).pipe(
           map((response) => InvoicesActions.loadInvoicesSuccess({ invoices: response.content, total: response.totalElements })),
-          catchError((error) => of(InvoicesActions.loadInvoicesFailure({ error: error?.message || 'Failed to load invoices' })))
+          catchError((error: HttpErrorResponse) => {
+            if (error?.status === 404) {
+              return of(InvoicesActions.loadInvoicesSuccess({ invoices: [], total: 0 }));
+            }
+            return of(InvoicesActions.loadInvoicesFailure({ error: error?.message || 'Failed to load invoices' }));
+          })
         )
       )
     )
@@ -82,4 +88,3 @@ export class InvoicesEffects {
     )
   );
 }
-

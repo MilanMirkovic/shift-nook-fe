@@ -11,13 +11,14 @@ import {
   selectTotal,
   selectLoading
 } from '../../store/jobsites/jobsites.selectors';
-import { loadJobsites, updatePage, createJobsite, createJobsiteSuccess } from '../../store/jobsites/jobsites.actions';
+import { loadJobsites, updatePage, createJobsite, createJobsiteSuccess, deleteJobsite } from '../../store/jobsites/jobsites.actions';
 import { Jobsite } from '../../store/jobsites/jobsites.models';
 import { selectSelectedCompanyId, selectCurrentCompany } from '../../store/user/user.selectors';
 import { loadUser } from '../../store/user/user.actions';
 import { CompanyRole } from '../../shared/models/company-role';
 import { JobsiteDialogComponent } from '../../shared/components/jobsite-dialog/jobsite-dialog.component';
 import { NotificationService } from '../../shared/services/notification.service';
+import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-jobsites',
@@ -54,8 +55,7 @@ export class JobsitesComponent implements OnInit, OnDestroy {
       header: 'Client',
       field: 'clientName',
       searchable: true,
-      width: '150px',
-      format: (value) => (value as string) || '(No client)'
+      format: (value) => (value as string) || '—'
     },
     { id: 'address', header: 'Address', field: 'address', searchable: true },
   ];
@@ -75,7 +75,7 @@ export class JobsitesComponent implements OnInit, OnDestroy {
       visible: () => this.isOwner
     },
     {
-      icon: 'delete',
+      icon: 'delete_outline',
       label: 'Delete',
       color: 'warn',
       handler: (jobsite) => this.onDelete(jobsite),
@@ -145,8 +145,25 @@ export class JobsitesComponent implements OnInit, OnDestroy {
   }
 
   private onDelete(jobsite: Jobsite): void {
-    console.log('Delete jobsite:', jobsite);
-    // TODO: Implement delete functionality (with confirmation dialog)
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '420px',
+      maxWidth: '95vw',
+      panelClass: 'confirmation-dialog-panel',
+      data: {
+        title: 'Delete Jobsite',
+        message: `Are you sure you want to delete <strong>${jobsite.name}</strong>? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        type: 'danger'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed && this.companyId) {
+        this._store.dispatch(deleteJobsite({ companyId: this.companyId, jobsiteId: jobsite.id }));
+        this.notificationService.success('Jobsite deleted successfully!');
+      }
+    });
   }
 
   onAddJobsite(): void {

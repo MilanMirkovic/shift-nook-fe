@@ -15,10 +15,17 @@ export const initialState: JobsitesState = {
 
 export const reducer = createReducer(
   initialState,
-  on(JobsitesActions.loadJobsites, (state) => ({
+  on(JobsitesActions.loadJobsites, (state, { page, size, sort, search }) => ({
     ...state,
     loading: true,
-    error: null
+    error: null,
+    filters: {
+      ...state.filters,
+      ...(page !== undefined && { page }),
+      ...(size !== undefined && { size }),
+      ...(sort !== undefined && { sort }),
+      ...(search !== undefined && { search }),
+    }
   })),
   on(JobsitesActions.loadJobsitesSuccess, (state, { jobsites, total }) => ({
     ...state,

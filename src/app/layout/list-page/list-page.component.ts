@@ -47,4 +47,5 @@ export class ListPageComponent<T extends object> {
 
   @ContentChild('pageActions') pageActionsTemplate?: TemplateRef<any>;
 
+  readonly loading = input<boolean>(false);
 }

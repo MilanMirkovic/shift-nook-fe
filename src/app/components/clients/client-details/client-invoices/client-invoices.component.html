@@ -8,10 +8,6 @@
         {{ (vm.invoices?.length || 0) }} invoice{{ (vm.invoices?.length || 0) !== 1 ? 's' : '' }} for {{ clientName }}
       </p>
     </div>
-    <button mat-flat-button color="primary" (click)="onAddInvoice()">
-      <mat-icon>add</mat-icon>
-      New Invoice
-    </button>
   </div>
 
   <div *ngIf="vm.loading" class="loading-state">

@@ -47,5 +47,6 @@ export interface JobsitesState {
     page: number;
     size: number;
     sort?: string;
+    search?: string;
   };
 }

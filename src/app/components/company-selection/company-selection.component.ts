@@ -1,12 +1,14 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subject, takeUntil, take } from 'rxjs';
+import { Subject, takeUntil, take, forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { UserStoreService } from '../../store/user/user-store.service';
 import { CompanyMembership } from '../../store/user/user.models';
 import { CompanyWorkSessionsStoreService } from '../../store/company-work-sessions/company-work-sessions-store.service';
 import { Actions, ofType } from '@ngrx/effects';
 import * as WorkSessionActions from '../../store/company-work-sessions/company-work-sessions.actions';
 import { CompanyRole } from '../../shared/models/company-role';
+import { CompanyApiService } from '../../api/company.api.service';
 
 @Component({
   selector: 'app-company-selection',
@@ -18,6 +20,7 @@ export class CompanySelectionComponent implements OnInit, OnDestroy {
   private readonly userStore = inject(UserStoreService);
   private readonly workSessionStore = inject(CompanyWorkSessionsStoreService);
   private readonly actions$ = inject(Actions);
+  private readonly companyApi = inject(CompanyApiService);
   protected readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
 
@@ -28,12 +31,11 @@ export class CompanySelectionComponent implements OnInit, OnDestroy {
     this.userStore.getUserCompanies()
       .pipe(takeUntil(this.destroy$))
       .subscribe(companies => {
-        // Hide principal companies where the user is only a subcontractor worker
-        this.companies = companies.filter(c => c.role !== CompanyRole.SUBCONTRACTOR);
-        this.loading = false;
+        const filtered = companies.filter(c => c.role !== CompanyRole.SUBCONTRACTOR);
 
-        if (this.companies.length === 0) {
-          // Check if user can create a company
+        if (filtered.length === 0) {
+          this.companies = filtered;
+          this.loading = false;
           this.userStore.user$.pipe(take(1)).subscribe(user => {
             if (user?.canCreateCompany) {
               this.router.navigate(['/create-company']);
@@ -41,10 +43,27 @@ export class CompanySelectionComponent implements OnInit, OnDestroy {
               this.router.navigate(['/dashboard']);
             }
           });
-        } else if (this.companies.length === 1) {
-          // Auto-select if only one company is available
-          this.selectCompany(this.companies[0]);
+          return;
         }
+
+        // Fetch logos for all companies in parallel
+        forkJoin(
+          filtered.map(c =>
+            this.companyApi.getLogo(c.companyId).pipe(
+              catchError(() => of({ logoUrl: undefined }))
+            )
+          )
+        ).pipe(take(1)).subscribe(logoResponses => {
+          this.companies = filtered.map((c, i) => ({
+            ...c,
+            logoUrl: logoResponses[i]?.logoUrl || undefined
+          }));
+          this.loading = false;
+
+          if (this.companies.length === 1) {
+            this.selectCompany(this.companies[0]);
+          }
+        });
       });
   }
 

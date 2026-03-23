@@ -1,5 +1,11 @@
 <div class="table">
   <div class="sn-card table__card">
+    @if (loading()) {
+      <div class="table__loadingOverlay">
+        <mat-spinner diameter="40" />
+      </div>
+    }
+
     @if (searchable()) {
       <div class="table__cardHeader">
         <div class="table__searchWrap">
@@ -53,7 +59,9 @@
                     mat-icon-button
                     [color]="action.color"
                     [attr.aria-label]="action.label"
-                    (click)="action.handler(row)"
+                    [matTooltip]="action.label"
+                    matTooltipPosition="above"
+                    (click)="$event.stopPropagation(); action.handler(row)"
                     type="button"
                   >
                     <mat-icon>{{ action.icon }}</mat-icon>
@@ -64,14 +72,17 @@
           </ng-container>
         }
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumnIds()" ></tr>
-        <tr mat-row  *matRowDef="let row; columns: displayedColumnIds()"  (click)="onRowClick(row)"
+        <tr mat-header-row *matHeaderRowDef="displayedColumnIds()"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnIds()" (click)="onRowClick(row)"
             class="clickable-row"></tr>
 
         @if (pagedRows().length === 0) {
           <tr class="table__empty">
             <td [attr.colspan]="displayedColumnIds().length">
-              <div class="table__emptyInner">No results</div>
+              <div class="table__emptyInner">
+                <mat-icon class="table__emptyIcon">inbox</mat-icon>
+                <span>No results found</span>
+              </div>
             </td>
           </tr>
         }
@@ -80,23 +91,6 @@
 
     @if (pageSize() > 0 && (totalPages() > 1 || pageSizeOptions().length > 0)) {
       <div class="table__pager">
-        @if (totalPages() > 1) {
-          <button mat-stroked-button type="button" (click)="prevPage()" [disabled]="!canGoPrev()">
-            Previous
-          </button>
-
-          <div class="table__pagerText">Page {{ currentPageDisplay() }} of {{ totalPages() }}</div>
-
-          <button
-            mat-stroked-button
-            type="button"
-            (click)="nextPage()"
-            [disabled]="!canGoNext()"
-          >
-            Next
-          </button>
-        }
-
         @if (pageSizeOptions().length > 0) {
           <div class="table__pageSizeSelect">
             <label class="table__pageSizeLabel">Per page:</label>
@@ -109,6 +103,20 @@
                 <option [value]="option">{{ option }}</option>
               }
             </select>
+          </div>
+        }
+
+        @if (totalPages() > 1) {
+          <div class="table__pagerControls">
+            <button mat-icon-button type="button" (click)="prevPage()" [disabled]="!canGoPrev()" aria-label="Previous page">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+
+            <div class="table__pagerText">{{ currentPageDisplay() }} / {{ totalPages() }}</div>
+
+            <button mat-icon-button type="button" (click)="nextPage()" [disabled]="!canGoNext()" aria-label="Next page">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
           </div>
         }
       </div>

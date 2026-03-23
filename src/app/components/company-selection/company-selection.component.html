@@ -60,7 +60,13 @@
 
           <div class="cs-card__top">
             <div class="cs-card__avatar">
-              {{ getCompanyInitials(company.companyName) }}
+              <img
+                *ngIf="company.logoUrl"
+                [src]="company.logoUrl"
+                [alt]="company.companyName"
+                class="cs-card__avatar-img"
+              />
+              <span *ngIf="!company.logoUrl">{{ getCompanyInitials(company.companyName) }}</span>
             </div>
             <div class="cs-card__role" [class.cs-card__role--owner]="company.role === 'OWNER'">
               <mat-icon>
@@ -96,4 +102,3 @@
     </ng-container>
   </main>
 </div>
-

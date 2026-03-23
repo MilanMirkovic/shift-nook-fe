@@ -15,6 +15,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 export type DataTableAlign = 'start' | 'center' | 'end';
 
@@ -60,7 +61,8 @@ export interface DataTableAction<T extends object> {
     MatSelectModule,
     MatIconModule,
     MatButtonModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
@@ -70,6 +72,7 @@ export class DataTableComponent<T extends object> {
   readonly rows = input.required<T[]>();
   readonly columns = input.required<DataTableColumn<T>[]>();
   readonly actions = input<DataTableAction<T>[]>([]);
+  readonly loading = input<boolean>(false);
   @Output() rowClick = new EventEmitter<any>();
   /** Enable/disable the search input UI. */
   readonly searchable = input<boolean>(true);

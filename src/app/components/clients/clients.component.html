@@ -10,6 +10,7 @@
   [serverSidePagination]="true"
   [totalItems]="(total$ | async) ?? 0"
   [pageSizeOptions]="[5, 10, 20]"
+  [loading]="(loading$ | async) ?? false"
 >
   <ng-template #pageActions>
     <button mat-flat-button color="primary" type="button" (click)="onAddClient()">

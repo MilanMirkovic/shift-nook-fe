@@ -5,6 +5,7 @@ export interface CompanyMembership {
   companyName: string;
   role: CompanyRole;
   memberSince: string; // ISO 8601 date string
+  logoUrl?: string;
 }
 
 export interface User {

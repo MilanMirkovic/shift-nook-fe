@@ -9,6 +9,7 @@
   [queryChange]="onQueryChange"
   searchPlaceholder="Search workers"
   [pageSize]="10"
+  [loading]="(loading$ | async) ?? false"
 >
   <ng-template #pageActions>
     <button mat-flat-button color="primary" type="button" (click)="openInviteDialog()">Invite worker</button>

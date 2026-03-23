@@ -106,7 +106,8 @@ export class JobsitesEffects {
           companyId,
           page: filters.page,
           size: filters.size,
-          sort: filters.sort
+          sort: filters.sort,
+          search: (filters as any).search,
         })
       )
     )

@@ -5,7 +5,7 @@
   </div>
 
   <mat-dialog-content class="dialog-content">
-    <p class="dialog-message">{{ data.message }}</p>
+    <p class="dialog-message" [innerHTML]="data.message"></p>
   </mat-dialog-content>
 
   <mat-dialog-actions class="dialog-actions">
@@ -23,4 +23,3 @@
     </button>
   </mat-dialog-actions>
 </div>
-
