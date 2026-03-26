@@ -1,10 +1,21 @@
+<!-- Loading screen while checking authentication -->
+@if (appInitializing()) {
+  <div class="app-loading-screen">
+    <div class="app-loading-content">
+      <div class="app-loading-brand-mark">SN</div>
+      <div class="app-loading-brand-name">Shift Nook</div>
+      <mat-spinner diameter="36" class="app-loading-spinner"></mat-spinner>
+    </div>
+  </div>
+}
+
 <!-- Public pages (login, etc.) - no layout -->
-<ng-container *ngIf="!showLayout()">
+<ng-container *ngIf="!appInitializing() && !showLayout()">
   <router-outlet></router-outlet>
 </ng-container>
 
 <!-- Authenticated pages - with sidebar layout -->
-<ng-container *ngIf="showLayout()">
+<ng-container *ngIf="!appInitializing() && showLayout()">
   <!-- Floating navigation handle (desktop only) -->
   @if (!isHandset()) {
     <button

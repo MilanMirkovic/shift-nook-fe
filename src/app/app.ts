@@ -1,7 +1,7 @@
 import { Component, ViewChild, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { filter, map, takeUntil } from 'rxjs/operators';
+import { filter, map, takeUntil, take } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
 import { MatSidenavModule, MatSidenav } from '@angular/material/sidenav';
@@ -9,6 +9,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { CheckInFabComponent } from './shared/components/check-in-fab/check-in-fab.component';
 import { WorkSessionTimerComponent } from './shared/components/work-session-timer/work-session-timer.component';
@@ -29,6 +30,7 @@ import { CompanyRole } from './shared/models/company-role';
     MatIconModule,
     MatButtonModule,
     MatListModule,
+    MatProgressSpinnerModule,
     SidebarComponent,
     CheckInFabComponent,
     WorkSessionTimerComponent,
@@ -53,6 +55,9 @@ export class App implements OnInit, OnDestroy {
 
   // Determines whether to show the sidebar layout or not, based on the current route
   protected readonly showLayout = signal(true);
+
+  // True while we check authentication and load initial user data
+  protected readonly appInitializing = signal(true);
 
   private readonly breakpointObserver = inject(BreakpointObserver);
   private readonly router = inject(Router);
@@ -107,7 +112,21 @@ export class App implements OnInit, OnDestroy {
         if (!currentUrl.startsWith('/subcontractor-invite')) {
           this.userStore.loadUser();
           this.workSessionStore.loadCurrentSession();
+          // Wait until user data has actually loaded before hiding the loading screen
+          this.userStore.user$
+            .pipe(
+              filter(user => user !== null),
+              take(1),
+              takeUntil(this.destroy$)
+            )
+            .subscribe(() => {
+              this.appInitializing.set(false);
+            });
+        } else {
+          this.appInitializing.set(false);
         }
+      } else {
+        this.appInitializing.set(false);
       }
     });
   }
