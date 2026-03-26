@@ -88,7 +88,12 @@
       <tbody>
         <tr *ngFor="let estimate of vm.filtered" class="estimate-row">
           <td class="col-num">
-            <span class="est-number">#{{ estimate.estimateNumber }}</span>
+            <div class="est-num-cell">
+              <span class="est-number">#{{ estimate.estimateNumber }}</span>
+              <span *ngIf="+estimate.revisionNumber > 0" class="est-revision-badge">
+                Rev {{ estimate.revisionNumber }}
+              </span>
+            </div>
           </td>
           <td class="col-title">
             <div class="est-title-cell">
@@ -117,7 +122,10 @@
               <button mat-icon-button class="action-btn action-btn--status" matTooltip="Change status" (click)="onChangeEstimateStatus(estimate)">
                 <mat-icon>swap_horiz</mat-icon>
               </button>
-              <button mat-icon-button class="action-btn action-btn--pdf" matTooltip="Download PDF"
+              <button mat-icon-button class="action-btn action-btn--pdf"
+                [matTooltip]="+estimate.revisionNumber > 0
+                  ? 'Download PDF · Revised ' + estimate.revisionNumber + ' time' + (+estimate.revisionNumber !== 1 ? 's' : '') + ' · Last updated ' + (estimate.updatedAt | date:'MMM d, yyyy')
+                  : 'Download PDF'"
                 (click)="onDownloadEstimatePdf(estimate)">
                 <mat-icon>picture_as_pdf</mat-icon>
               </button>

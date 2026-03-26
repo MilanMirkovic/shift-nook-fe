@@ -20,6 +20,7 @@ export interface Estimate {
   total: number;
   createdAt: string;
   updatedAt: string;
+  revisionNumber: string;
 }
 
 export interface CreateEstimateInput {

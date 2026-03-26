@@ -9,6 +9,7 @@ export interface EstimateStatusDialogData {
   estimateTitle: string;
   estimateNumber: number;
   currentStatus: EstimateStatus;
+  revisionNumber: number;
 }
 
 interface StatusOption {
@@ -63,4 +64,3 @@ export class EstimateStatusDialogComponent {
     return this.selectedStatus !== this.data.currentStatus;
   }
 }
-

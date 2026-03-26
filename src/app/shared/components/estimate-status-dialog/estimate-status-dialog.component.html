@@ -11,6 +11,12 @@
   </div>
 
   <mat-dialog-content>
+    <!-- Revision warning when selecting SENT on a revised estimate -->
+    <div *ngIf="data.revisionNumber > 0 && selectedStatus === 'SENT' && hasChanged" class="revision-warning">
+      <mat-icon class="revision-warning__icon">info</mat-icon>
+      <span>This estimate has been revised {{ data.revisionNumber }} time{{ data.revisionNumber !== 1 ? 's' : '' }}. Send revision {{ data.revisionNumber }} to client?</span>
+    </div>
+
     <div class="status-options">
       <button
         *ngFor="let option of statusOptions"
@@ -47,4 +53,3 @@
     </button>
   </mat-dialog-actions>
 </div>
-

@@ -202,6 +202,7 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
         estimateTitle: estimate.title,
         estimateNumber: estimate.estimateNumber,
         currentStatus: estimate.status,
+        revisionNumber: estimate.revisionNumber ?? 0,
       },
     });
 

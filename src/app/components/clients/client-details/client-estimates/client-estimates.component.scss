@@ -155,12 +155,19 @@
   }
 }
 
-.col-num    { width: 60px; }
+.col-num    { width: 80px; }
 .col-date   { width: 130px; white-space: nowrap; color: #94a3b8 !important; font-size: 0.825rem !important; }
 .col-items  { width: 90px; color: #94a3b8 !important; font-size: 0.825rem !important; }
 .col-total  { width: 110px; }
 .col-status { width: 110px; }
 .col-actions { width: 170px; }
+
+.est-num-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
 
 .est-number {
   font-size: 0.78rem;
@@ -168,6 +175,21 @@
   color: #94a3b8;
   font-family: monospace;
   letter-spacing: 0.02em;
+}
+
+.est-revision-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 4px;
+  padding: 1px 5px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  white-space: nowrap;
 }
 
 .est-title-cell {

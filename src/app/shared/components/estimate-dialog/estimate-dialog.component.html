@@ -10,6 +10,9 @@
       <p class="subtitle">
         <mat-icon class="subtitle-icon">person_outline</mat-icon>
         {{ data.clientName }}
+        <span *ngIf="isEditMode && +data.estimate?.revisionNumber! > 0" class="subtitle-revision">
+          · Rev {{ data.estimate!.revisionNumber }}
+        </span>
       </p>
     </div>
     <button mat-icon-button class="close-btn" (click)="onCancel()" matTooltip="Close">

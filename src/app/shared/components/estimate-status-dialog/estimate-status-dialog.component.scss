@@ -129,3 +129,26 @@
   }
 }
 
+// ─── Revision warning banner ──────────────────────────────────────────────────
+.revision-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  font-size: 0.8125rem;
+  color: #92400e;
+  line-height: 1.5;
+
+  &__icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #f59e0b;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
