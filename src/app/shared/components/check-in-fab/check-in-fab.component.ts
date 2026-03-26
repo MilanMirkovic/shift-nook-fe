@@ -84,45 +84,21 @@ export class CheckInFabComponent implements OnInit, OnDestroy {
         filter(([user, company]) => !!user && !!company && !!user.id && !!company.companyId)
       )
       .subscribe(([user, company]) => {
-        console.log('User and Company:', { userId: user!.id, companyId: company!.companyId });
-
-        // Reload timesheets to ensure we have the latest data
         this.timesheetsStore.loadWorkerTimesheets(company!.companyId, user!.id);
 
-        // Wait for loading to complete, then get the latest data
         this.timesheetsStore.loading$
           .pipe(
             filter(loading => !loading), // Wait until loading is false
             take(1), // Take only the first emission after loading completes
-            switchMap(() => {
-              // First check all timesheets in the store
-              return this.timesheetsStore.timesheets$.pipe(
-                take(1),
-                switchMap(allTimesheets => {
-                  console.log('All timesheets from store:', allTimesheets);
-                  console.log('Filtering for userId:', user!.id);
-
-                  // Ensure allTimesheets is an array
-                  const timesheetsArray = Array.isArray(allTimesheets) ? allTimesheets : [];
-
-                  const userTimesheets = timesheetsArray.filter(t => t.userId === user!.id || t.workerUserId === user!.id);
-                  console.log('User timesheets:', userTimesheets);
-
-                  const activeTimesheets = userTimesheets.filter(t => !t.checkOutTime && t.status !== 'CLOSED');
-                  console.log('Active timesheets:', activeTimesheets);
-
-                  return combineLatest([
-                    this.isCheckedIn$,
-                    this.activeTimesheet$
-                  ]);
-                })
-              );
-            }),
-            take(1)
+            takeUntil(this.destroy$),
+            switchMap(() =>
+              combineLatest([
+                this.isCheckedIn$,
+                this.activeTimesheet$
+              ]).pipe(take(1))
+            )
           )
           .subscribe(([isCheckedIn, activeTimesheet]) => {
-            console.log('Opening dialog with:', { isCheckedIn, activeTimesheet });
-
             this.dialog.open(CheckInDialogComponent, {
               width: '480px',
               maxWidth: '100vw',

@@ -1,10 +1,11 @@
 import { Component, inject, Input, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subject } from 'rxjs';
-import { filter, take, takeUntil } from 'rxjs/operators';
+import { Observable, Subject, combineLatest, BehaviorSubject } from 'rxjs';
+import { filter, map, take, takeUntil } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 
 import { AsyncPipe, CurrencyPipe, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -27,6 +28,7 @@ import { EstimateDialogComponent } from '../../../../shared/components/estimate-
 import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { EstimatesApiService } from '../../../../store/estimates/estimates.api';
+import { EstimateStatusDialogComponent } from '../../../../shared/components/estimate-status-dialog/estimate-status-dialog.component';
 
 @Component({
   selector: 'app-client-estimates',
@@ -40,6 +42,7 @@ import { EstimatesApiService } from '../../../../store/estimates/estimates.api';
     NgIf,
     NgFor,
     NgClass,
+    FormsModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
@@ -59,13 +62,34 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   protected estimates$!: Observable<Estimate[]>;
+  protected filteredEstimates$!: Observable<Estimate[]>;
   protected estimatesLoading$!: Observable<boolean>;
   protected estimatesError$!: Observable<string | null>;
+
+  protected searchQuery = '';
+  private readonly searchQuery$ = new BehaviorSubject<string>('');
 
   ngOnInit(): void {
     this.estimates$ = this.store.select(selectEstimatesByClientId(this.clientId));
     this.estimatesLoading$ = this.store.select(selectEstimatesLoading);
     this.estimatesError$ = this.store.select(selectEstimatesError);
+
+    this.filteredEstimates$ = combineLatest([
+      this.estimates$,
+      this.searchQuery$,
+    ]).pipe(
+      map(([estimates, query]) => {
+        if (!query.trim()) return estimates;
+        const q = query.toLowerCase().trim();
+        return estimates.filter(e =>
+          e.title.toLowerCase().includes(q) ||
+          (e.notes && e.notes.toLowerCase().includes(q)) ||
+          String(e.estimateNumber).includes(q) ||
+          e.status.toLowerCase().includes(q) ||
+          String(e.total).includes(q)
+        );
+      }),
+    );
 
     this.store.dispatch(loadEstimates({
       companyId: this.companyId,
@@ -78,6 +102,16 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  protected onSearchChange(query: string): void {
+    this.searchQuery = query;
+    this.searchQuery$.next(query);
+  }
+
+  protected clearSearch(): void {
+    this.searchQuery = '';
+    this.searchQuery$.next('');
   }
 
   protected onAddEstimate(): void {
@@ -112,7 +146,42 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
   }
 
   protected onEditEstimate(estimate: Estimate): void {
-    this.notificationService.success(`Editing estimate #${estimate.estimateNumber} coming soon!`);
+    const dialogRef = this.dialog.open(EstimateStatusDialogComponent, {
+      width: '480px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      disableClose: false,
+      autoFocus: false,
+      panelClass: 'centered-dialog',
+      data: {
+        estimateTitle: estimate.title,
+        estimateNumber: estimate.estimateNumber,
+        currentStatus: estimate.status,
+      },
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((newStatus: EstimateStatus | null) => {
+      if (!newStatus) return;
+
+      this.store.dispatch(updateEstimateStatus({
+        companyId: this.companyId,
+        estimateId: estimate.id,
+        statusUpdate: { status: newStatus },
+      }));
+
+      this.actions$.pipe(
+        ofType(updateEstimateStatusSuccess, updateEstimateStatusFailure),
+        take(1),
+        takeUntil(this.destroy$),
+      ).subscribe(action => {
+        if (action.type === updateEstimateStatusSuccess.type) {
+          this.notificationService.success(`Estimate marked as ${newStatus.toLowerCase()}.`);
+          this.reloadEstimates();
+        } else {
+          this.notificationService.error('Failed to update estimate status. Please try again.');
+        }
+      });
+    });
   }
 
   protected onDeleteEstimate(estimate: Estimate): void {

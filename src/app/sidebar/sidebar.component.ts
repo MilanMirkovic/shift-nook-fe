@@ -47,6 +47,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   protected isAuthenticated = false;
   protected canSeeSubcontractors = false;   // OWNER or ADMIN of a company
   protected canSeePrincipalCompanies = false; // OWNER whose company is a sub (any company)
+  protected canSeeWorkTime = false; // Only show Work Time for ACCOUNTANT
 
   ngOnInit(): void {
     // Check if user is authenticated
@@ -130,6 +131,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
       )
       .subscribe(canSee => {
         this.canSeePrincipalCompanies = canSee;
+      });
+
+    // Work Time tab — only for ACCOUNTANT
+    this.userStore.currentCompany$
+      .pipe(
+        map(company => company?.role === CompanyRole.ACCOUNTANT),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(canSee => {
+        this.canSeeWorkTime = canSee;
       });
 
     // Determine if user is a WORKER (to show Check In button)

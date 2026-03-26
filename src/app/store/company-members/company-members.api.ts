@@ -59,4 +59,11 @@ export class CompanyMembersApi {
   getMemberById(companyId: string, userId: string): Observable<CompanyMember> {
     return this.http.get<CompanyMember>(`${this.baseUrl}/companies/${companyId}/members/${userId}`);
   }
+
+  /**
+   * Remove a member from the company
+   */
+  removeMember(companyId: string, userId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/companies/${companyId}/members/${userId}`);
+  }
 }

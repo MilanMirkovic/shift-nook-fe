@@ -62,7 +62,7 @@
         <mat-icon matListItemIcon>location_on</mat-icon>
         <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Jobsites</span>
       </a>
-      @if (canSeeClients) {
+      @if (canSeeWorkTime) {
         <a mat-list-item routerLink="/work-time" routerLinkActive="active" (click)="onLinkClicked()">
           <mat-icon matListItemIcon>schedule</mat-icon>
           <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Work Time</span>

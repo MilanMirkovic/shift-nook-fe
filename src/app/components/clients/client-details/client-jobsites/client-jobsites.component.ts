@@ -4,7 +4,8 @@ import { take, takeUntil } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 
-import { DatePipe, NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -29,7 +30,7 @@ import { NotificationService } from '../../../../shared/services/notification.se
   templateUrl: './client-jobsites.component.html',
   styleUrls: ['./client-jobsites.component.scss'],
   imports: [
-    DatePipe,
+    FormsModule,
     NgIf,
     NgFor,
     MatButtonModule,
@@ -52,9 +53,11 @@ export class ClientJobsitesComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   protected jobsites: Jobsite[] = [];
+  protected filteredJobsites: Jobsite[] = [];
   protected jobsitesLoading = false;
   protected jobsitesError: string | null = null;
   protected totalJobsites = 0;
+  protected searchQuery = '';
 
   ngOnInit(): void {
     this.loadJobsites();
@@ -64,6 +67,31 @@ export class ClientJobsitesComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  protected onSearchChange(query: string): void {
+    this.searchQuery = query;
+    this.filterJobsites();
+  }
+
+  protected clearSearch(): void {
+    this.searchQuery = '';
+    this.filterJobsites();
+  }
+
+  protected onViewOnMap(jobsite:Jobsite): void {
+      let url: string;
+      if (jobsite.latitude && jobsite.longitude) {
+        url = `https://www.google.com/maps/search/?api=1&query=${jobsite.latitude},${jobsite.longitude}`;
+      } else if (jobsite.address) {
+        url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(jobsite.address)}`;
+      } else {
+        this.notificationService.warning('No location data available for this jobsite.');
+        return;
+      }
+      window.open(url, '_blank');
+
+  }
+
 
   protected onAddJobsite(): void {
     const dialogRef = this.dialog.open(JobsiteDialogComponent, {
@@ -185,11 +213,23 @@ export class ClientJobsitesComponent implements OnInit, OnDestroy {
           this.jobsites = response.content;
           this.totalJobsites = response.totalElements;
           this.jobsitesLoading = false;
+          this.filterJobsites();
         },
         error: () => {
           this.jobsitesError = 'Failed to load jobsites';
           this.jobsitesLoading = false;
         },
       });
+  }
+
+  private filterJobsites(): void {
+    const q = this.searchQuery.trim().toLowerCase();
+    if (!q) {
+      this.filteredJobsites = this.jobsites;
+      return;
+    }
+    this.filteredJobsites = this.jobsites.filter(j =>
+      j.name.toLowerCase().includes(q) || j.address.toLowerCase().includes(q)
+    );
   }
 }

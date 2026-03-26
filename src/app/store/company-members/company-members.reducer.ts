@@ -8,7 +8,10 @@ import {
   updatePage,
   loadMemberById,
   loadMemberByIdSuccess,
-  loadMemberByIdFailure
+  loadMemberByIdFailure,
+  removeMember,
+  removeMemberSuccess,
+  removeMemberFailure
 } from './company-members.actions';
 
 export const initialState: CompanyMembersState = {
@@ -87,5 +90,26 @@ export const reducer = createReducer(
     ...state,
     selectedMemberLoading: false,
     selectedMemberError: error
+  })),
+
+  // Remove member
+  on(removeMember, state => ({
+    ...state,
+    loading: true,
+    error: null
+  })),
+
+  on(removeMemberSuccess, (state, { userId }) => ({
+    ...state,
+    items: state.items.filter(m => m.userId !== userId),
+    total: state.total - 1,
+    loading: false,
+    error: null
+  })),
+
+  on(removeMemberFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error
   }))
 );

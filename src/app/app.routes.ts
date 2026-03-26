@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { provideState } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { authGuard, publicGuard } from './core/auth/auth.guard';
+import { roleGuard } from './core/auth/role.guard';
+import { CompanyRole } from './shared/models/company-role';
 import { SUBCONTRACTORS_FEATURE_KEY, subcontractorsReducer } from './store/subcontractors/subcontractors.reducer';
 import { SubcontractorsEffects } from './store/subcontractors/subcontractors.effects';
 
@@ -104,7 +106,7 @@ export const routes: Routes = [
   },
   {
     path: 'work-time',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard(CompanyRole.ACCOUNTANT)],
     loadChildren: () =>
       import('./components/work-time/work-time.module').then((m) => m.WorkTimeModule),
   },

@@ -298,7 +298,8 @@ export class CheckInDialogComponent implements OnInit, OnDestroy, AfterViewInit 
         ])
           .pipe(
             takeUntil(this.destroy$),
-            filter(([creating]) => !creating)
+            filter(([creating]) => !creating),
+            take(1)
           )
           .subscribe(([, error]) => {
             if (error) {
@@ -317,7 +318,7 @@ export class CheckInDialogComponent implements OnInit, OnDestroy, AfterViewInit 
     }
 
     this.userStore.currentCompany$
-      .pipe(takeUntil(this.destroy$), filter(company => !!company?.companyId))
+      .pipe(filter(company => !!company?.companyId), take(1))
       .subscribe(company => {
         const checkOutFormValue = this.checkOutForm.value;
         const lunchMinutes = checkOutFormValue.lunchtimeDurationMinutes;
@@ -345,7 +346,8 @@ export class CheckInDialogComponent implements OnInit, OnDestroy, AfterViewInit 
         ])
           .pipe(
             takeUntil(this.destroy$),
-            filter(([updating]) => !updating)
+            filter(([updating]) => !updating),
+            take(1)
           )
           .subscribe(([, error]) => {
             if (error) {

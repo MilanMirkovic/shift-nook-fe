@@ -11,7 +11,7 @@ import {
   selectTotal,
   selectLoading
 } from '../../store/jobsites/jobsites.selectors';
-import { loadJobsites, updatePage, createJobsite, createJobsiteSuccess, deleteJobsite } from '../../store/jobsites/jobsites.actions';
+import { loadJobsites, updatePage, createJobsite, createJobsiteSuccess, deleteJobsite, updateJobsite, updateJobsiteSuccess, updateJobsiteFailure } from '../../store/jobsites/jobsites.actions';
 import { Jobsite } from '../../store/jobsites/jobsites.models';
 import { selectSelectedCompanyId, selectCurrentCompany } from '../../store/user/user.selectors';
 import { loadUser } from '../../store/user/user.actions';
@@ -75,7 +75,7 @@ export class JobsitesComponent implements OnInit, OnDestroy {
       visible: () => this.isOwner
     },
     {
-      icon: 'delete_outline',
+      icon: 'delete',
       label: 'Delete',
       color: 'warn',
       handler: (jobsite) => this.onDelete(jobsite),
@@ -140,8 +140,57 @@ export class JobsitesComponent implements OnInit, OnDestroy {
   }
 
   private onEdit(jobsite: Jobsite): void {
-    console.log('Edit jobsite:', jobsite);
-    // TODO: Implement edit functionality
+    const dialogRef = this.dialog.open(JobsiteDialogComponent, {
+      width: '500px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      disableClose: false,
+      autoFocus: true,
+      panelClass: 'jobsite-dialog-container',
+      position: { top: '15%' },
+      data: {
+        jobsite: {
+          id: jobsite.id,
+          name: jobsite.name,
+          address: jobsite.address,
+          clientId: jobsite.clientId,
+          latitude: jobsite.latitude,
+          longitude: jobsite.longitude,
+        },
+        clientName: jobsite.clientName,
+        mode: 'edit'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && this.companyId) {
+        this._store.dispatch(
+          updateJobsite({
+            companyId: this.companyId,
+            jobsiteId: result.id,
+            jobsite: {
+              name: result.name,
+              address: result.address,
+              clientId: result.clientId,
+              latitude: result.latitude,
+              longitude: result.longitude,
+            }
+          })
+        );
+
+        this.actions$.pipe(
+          ofType(updateJobsiteSuccess, updateJobsiteFailure),
+          takeUntil(this.destroy$)
+        ).subscribe(action => {
+          if (action.type === updateJobsiteSuccess.type) {
+            this.notificationService.success('Jobsite updated successfully!');
+            this.loadJobsitesList();
+          } else {
+            this.notificationService.error('Failed to update jobsite. Please try again.');
+          }
+        });
+      }
+    });
   }
 
   private onDelete(jobsite: Jobsite): void {

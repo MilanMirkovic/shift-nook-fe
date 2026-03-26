@@ -12,7 +12,10 @@ import {
   updatePage,
   loadMemberById,
   loadMemberByIdSuccess,
-  loadMemberByIdFailure
+  loadMemberByIdFailure,
+  removeMember,
+  removeMemberSuccess,
+  removeMemberFailure
 } from './company-members.actions';
 
 import { CompanyMembersApi } from './company-members.api';
@@ -78,6 +81,21 @@ export class CompanyMembersEffects {
         this.api.getMemberById(companyId, userId).pipe(
           map((member) => loadMemberByIdSuccess({ member })),
           catchError((err) => of(loadMemberByIdFailure({ error: this.toErrorMessage(err) })))
+        )
+      )
+    )
+  );
+
+  /**
+   * Remove member effect
+   */
+  removeMember$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(removeMember),
+      switchMap(({ companyId, userId }) =>
+        this.api.removeMember(companyId, userId).pipe(
+          map(() => removeMemberSuccess({ userId })),
+          catchError((err) => of(removeMemberFailure({ error: this.toErrorMessage(err) })))
         )
       )
     )

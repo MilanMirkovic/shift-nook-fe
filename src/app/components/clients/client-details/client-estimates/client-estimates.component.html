@@ -1,4 +1,4 @@
-<ng-container *ngIf="{ estimates: estimates$ | async, loading: estimatesLoading$ | async, error: estimatesError$ | async } as vm">
+<ng-container *ngIf="{ estimates: estimates$ | async, filtered: filteredEstimates$ | async, loading: estimatesLoading$ | async, error: estimatesError$ | async } as vm">
 
   <!-- Header -->
   <div class="estimates-header">
@@ -12,6 +12,33 @@
       <mat-icon>add</mat-icon>
       New Estimate
     </button>
+  </div>
+
+  <!-- Search Bar -->
+  <div *ngIf="!vm.loading && !vm.error && vm.estimates && vm.estimates.length > 0" class="estimates-search">
+    <div class="estimates-search__wrap">
+      <mat-icon class="estimates-search__icon" aria-hidden="true">search</mat-icon>
+      <input
+        class="estimates-search__input"
+        type="text"
+        placeholder="Search estimates by title, notes, number, or status…"
+        [ngModel]="searchQuery"
+        (ngModelChange)="onSearchChange($event)"
+      />
+      <button
+        *ngIf="searchQuery"
+        mat-icon-button
+        type="button"
+        class="estimates-search__clear"
+        aria-label="Clear search"
+        (click)="clearSearch()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="estimates-search__count">
+      {{ vm.filtered?.length }} of {{ vm.estimates?.length }} result{{ vm.estimates?.length !== 1 ? 's' : '' }}
+    </div>
   </div>
 
   <div *ngIf="vm.loading" class="loading-state">
@@ -35,7 +62,17 @@
     </button>
   </div>
 
-  <div *ngIf="!vm.loading && !vm.error && vm.estimates && vm.estimates.length > 0" class="estimates-table-wrap">
+  <!-- No search results -->
+  <div *ngIf="!vm.loading && !vm.error && vm.estimates && vm.estimates.length > 0 && vm.filtered?.length === 0" class="empty-state">
+    <div class="empty-state__icon"><mat-icon>search_off</mat-icon></div>
+    <h3 class="empty-state__title">No matching estimates</h3>
+    <p class="empty-state__description">Try adjusting your search query</p>
+    <button mat-flat-button (click)="clearSearch()">
+      Clear Search
+    </button>
+  </div>
+
+  <div *ngIf="!vm.loading && !vm.error && vm.filtered && vm.filtered.length > 0" class="estimates-table-wrap">
     <table class="estimates-table">
       <thead>
         <tr>
@@ -49,7 +86,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let estimate of vm.estimates" class="estimate-row">
+        <tr *ngFor="let estimate of vm.filtered" class="estimate-row">
           <td class="col-num">
             <span class="est-number">#{{ estimate.estimateNumber }}</span>
           </td>
@@ -85,7 +122,7 @@
       </tbody>
     </table>
     <div class="estimates-table-footer">
-      <span>{{ vm.estimates.length }} estimate{{ vm.estimates.length !== 1 ? 's' : '' }}</span>
+      <span>{{ vm.filtered.length }} estimate{{ vm.filtered.length !== 1 ? 's' : '' }}</span>
     </div>
   </div>
 

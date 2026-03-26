@@ -9,6 +9,32 @@
   </button>
 </div>
 
+<div *ngIf="!jobsitesLoading && !jobsitesError && jobsites.length > 0" class="jobsites-search">
+  <div class="jobsites-search__wrap">
+    <mat-icon class="jobsites-search__icon">search</mat-icon>
+    <input
+      class="jobsites-search__input"
+      type="text"
+      placeholder="Search by name or address…"
+      [ngModel]="searchQuery"
+      (ngModelChange)="onSearchChange($event)"
+    />
+    <button
+      *ngIf="searchQuery"
+      mat-icon-button
+      type="button"
+      class="jobsites-search__clear"
+      aria-label="Clear search"
+      (click)="clearSearch()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div class="jobsites-search__count">
+    {{ filteredJobsites.length }} of {{ jobsites.length }} result{{ jobsites.length !== 1 ? 's' : '' }}
+  </div>
+</div>
+
 <div *ngIf="jobsitesLoading" class="loading-state">
   <mat-spinner diameter="48"></mat-spinner>
   <p>Loading jobsites...</p>
@@ -30,44 +56,40 @@
   </button>
 </div>
 
-<div *ngIf="!jobsitesLoading && !jobsitesError && jobsites.length > 0" class="jobsites-grid">
-  <div *ngFor="let jobsite of jobsites" class="jobsite-card" [routerLink]="['/jobsites', jobsite.id]">
-    <div class="jobsite-card__header">
-      <div class="jobsite-card__icon">
-        <mat-icon>location_on</mat-icon>
-      </div>
-      <div class="jobsite-card__title">
-        <h3>{{ jobsite.name }}</h3>
-        <p class="jobsite-card__date">Added {{ jobsite.createdAt | date:'MMM d, yyyy' }}</p>
-      </div>
-    </div>
+<div *ngIf="!jobsitesLoading && !jobsitesError && jobsites.length > 0 && filteredJobsites.length === 0" class="empty-state">
+  <div class="empty-state__icon"><mat-icon>search_off</mat-icon></div>
+  <h3 class="empty-state__title">No matching jobsites</h3>
+  <p class="empty-state__description">Try adjusting your search query</p>
+  <button mat-flat-button (click)="clearSearch()">Clear Search</button>
+</div>
 
-    <div class="jobsite-card__content">
-      <div class="jobsite-card__info">
-        <mat-icon class="info-icon">place</mat-icon>
-        <span>{{ jobsite.address }}</span>
-      </div>
-      <div class="jobsite-card__coordinates" *ngIf="jobsite.latitude && jobsite.longitude">
-        <mat-icon class="info-icon">my_location</mat-icon>
-        <span>{{ jobsite.latitude }}, {{ jobsite.longitude }}</span>
-      </div>
+<div *ngIf="!jobsitesLoading && !jobsitesError && filteredJobsites.length > 0" class="jobsites-grid">
+  <div *ngFor="let jobsite of filteredJobsites" class="jobsite-card" [routerLink]="['/jobsites', jobsite.id]">
+    <div class="jobsite-card__icon">
+      <mat-icon>location_on</mat-icon>
     </div>
-
-    <div class="jobsite-card__actions" (click)="$event.stopPropagation()">
-      <button mat-icon-button color="primary" matTooltip="View on map">
+    <h3 class="jobsite-card__name">{{ jobsite.name }}</h3>
+    <p class="jobsite-card__address">{{ jobsite.address }}</p>
+    <div class="jobsite-card__footer" (click)="$event.stopPropagation()">
+      <button *ngIf="jobsite.latitude != null && jobsite.longitude != null"
+              class="card-btn card-btn--map" matTooltip="View on Google Maps"
+              (click)="onViewOnMap(jobsite)">
         <mat-icon>map</mat-icon>
+        Map
       </button>
-      <button mat-icon-button color="primary" matTooltip="Edit jobsite" (click)="onEditJobsite(jobsite)">
+      <button class="card-btn card-btn--edit" matTooltip="Edit jobsite"
+              (click)="onEditJobsite(jobsite)">
         <mat-icon>edit</mat-icon>
+        Edit
       </button>
-      <button mat-icon-button color="warn" matTooltip="Delete jobsite" (click)="onDeleteJobsite(jobsite)">
-        <mat-icon>delete</mat-icon>
+      <button class="card-btn card-btn--delete" matTooltip="Delete jobsite"
+              (click)="onDeleteJobsite(jobsite)">
+        <mat-icon>delete_outline</mat-icon>
       </button>
     </div>
   </div>
 </div>
 
-<div *ngIf="jobsites.length > 0" class="jobsites-footer">
-  <p>Showing {{ jobsites.length }} of {{ totalJobsites }} jobsite{{ totalJobsites !== 1 ? 's' : '' }}</p>
+<div *ngIf="filteredJobsites.length > 0" class="jobsites-count">
+  {{ filteredJobsites.length }} of {{ totalJobsites }} jobsite{{ totalJobsites !== 1 ? 's' : '' }}
 </div>
-

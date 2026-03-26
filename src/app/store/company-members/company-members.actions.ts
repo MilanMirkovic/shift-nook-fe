@@ -83,3 +83,21 @@ export const loadMemberByIdFailure = createAction(
   '[Company Members] Load Member By ID Failure',
   props<{ error: string }>()
 );
+
+/**
+ * Remove a member from the company
+ */
+export const removeMember = createAction(
+  '[Company Members] Remove Member',
+  props<{ companyId: string; userId: string }>()
+);
+
+export const removeMemberSuccess = createAction(
+  '[Company Members] Remove Member Success',
+  props<{ userId: string }>()
+);
+
+export const removeMemberFailure = createAction(
+  '[Company Members] Remove Member Failure',
+  props<{ error: string }>()
+);

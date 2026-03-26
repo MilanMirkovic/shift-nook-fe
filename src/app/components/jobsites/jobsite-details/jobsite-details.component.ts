@@ -18,6 +18,8 @@ import { NotificationService } from '../../../shared/services/notification.servi
 import { JobsiteDetailsStateService } from './jobsite-details-state.service';
 import { selectCanManageJobsites } from '../../../store/user/user.selectors';
 import { ConfirmationDialogComponent } from '../../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { JobsiteDialogComponent } from '../../../shared/components/jobsite-dialog/jobsite-dialog.component';
+import { updateJobsite, updateJobsiteSuccess, updateJobsiteFailure } from '../../../store/jobsites/jobsites.actions';
 import { ActivityFilters } from './tabs/jobsite-activity/jobsite-activity.component';
 
 @Component({
@@ -276,15 +278,81 @@ export class JobsiteDetailsComponent implements OnInit, OnDestroy {
   }
 
   protected onEditJobsite(): void {
-    // TODO: Implement jobsite edit dialog
+    this.jobsite$.pipe(
+      filter(jobsite => jobsite !== null),
+      take(1),
+      switchMap(jobsite => {
+        if (!jobsite || !this.currentCompanyId) return [];
+
+        const dialogRef = this.dialog.open(JobsiteDialogComponent, {
+          width: '500px',
+          maxWidth: '95vw',
+          maxHeight: '90vh',
+          disableClose: false,
+          autoFocus: true,
+          panelClass: 'jobsite-dialog-container',
+          position: { top: '15%' },
+          data: {
+            jobsite: {
+              id: jobsite.id,
+              name: jobsite.name,
+              address: jobsite.address,
+              clientId: jobsite.clientId,
+              latitude: jobsite.latitude,
+              longitude: jobsite.longitude,
+            },
+            clientName: jobsite.clientName,
+            mode: 'edit'
+          }
+        });
+
+        return dialogRef.afterClosed();
+      }),
+      filter(result => !!result && !!this.currentCompanyId),
+      tap(result => {
+        this.store.dispatch(
+          updateJobsite({
+            companyId: this.currentCompanyId!,
+            jobsiteId: result.id,
+            jobsite: {
+              name: result.name,
+              address: result.address,
+              clientId: result.clientId,
+              latitude: result.latitude,
+              longitude: result.longitude,
+            }
+          })
+        );
+      }),
+      switchMap(() =>
+        this.actions$.pipe(
+          ofType(updateJobsiteSuccess, updateJobsiteFailure),
+          take(1)
+        )
+      )
+    ).subscribe(action => {
+      if (action.type === updateJobsiteSuccess.type) {
+        this.notificationService.success('Jobsite updated successfully!');
+      } else {
+        this.notificationService.error('Failed to update jobsite. Please try again.');
+      }
+    });
   }
 
   protected onViewOnMap(): void {
     this.jobsite$.pipe(take(1)).subscribe(jobsite => {
-      if (jobsite?.latitude && jobsite?.longitude) {
-        const url = `https://www.google.com/maps/search/?api=1&query=${jobsite.latitude},${jobsite.longitude}`;
-        window.open(url, '_blank');
+      if (!jobsite) return;
+
+      let url: string;
+      if (jobsite.latitude && jobsite.longitude) {
+        url = `https://www.google.com/maps/search/?api=1&query=${jobsite.latitude},${jobsite.longitude}`;
+      } else if (jobsite.address) {
+        url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(jobsite.address)}`;
+      } else {
+        this.notificationService.warning('No location data available for this jobsite.');
+        return;
       }
+      window.open(url, '_blank');
     });
   }
 

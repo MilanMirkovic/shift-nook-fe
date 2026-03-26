@@ -1,7 +1,8 @@
-import { Component, ViewChild, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, ViewChild, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 import { MatSidenavModule, MatSidenav } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -36,8 +37,10 @@ import { CompanyRole } from './shared/models/company-role';
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App implements OnInit {
+export class App implements OnInit, OnDestroy {
   @ViewChild(MatSidenav) private sidenav?: MatSidenav;
+
+  private readonly destroy$ = new Subject<void>();
 
   protected readonly appName = 'Shift Nook';
   protected readonly isHandset = signal(false);
@@ -65,7 +68,9 @@ export class App implements OnInit {
   );
 
   constructor() {
-    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe((state) => {
+    this.breakpointObserver.observe([Breakpoints.Handset])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((state) => {
       this.isHandset.set(state.matches);
 
       if (state.matches) {
@@ -82,7 +87,8 @@ export class App implements OnInit {
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
-        map((event) => event as NavigationEnd)
+        map((event) => event as NavigationEnd),
+        takeUntil(this.destroy$)
       )
       .subscribe((event) => {
         const publicRoutes = ['/login', '/signup', '/confirm', '/forgot-password', '/select-company', '/create-company', '/accept-invite', '/auth/set-password', '/subcontractor-invite'];
@@ -104,6 +110,11 @@ export class App implements OnInit {
         }
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   protected toggleNavigation(): void {

@@ -7,6 +7,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { DataTableColumn, DataTableAction } from '../../layout/data-table/data-table.component';
 import { CompanyRole } from '../../shared/models/company-role';
 import { InviteWorkerDialogComponent } from '../../shared/components/invite-worker-dialog/invite-worker-dialog.component';
+import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { NotificationService } from '../../shared/services/notification.service';
 
 import {
   selectMembers,
@@ -16,7 +18,8 @@ import {
 import {
   loadMembers,
   updateFilters,
-  updatePage
+  updatePage,
+  removeMember
 } from '../../store/company-members/company-members.actions';
 import { CompanyMember } from '../../store/company-members/company-members.models';
 import { selectSelectedCompanyId } from '../../store/user/user.selectors';
@@ -34,6 +37,7 @@ export class WorkersComponent implements OnInit, OnDestroy {
   private readonly _store = inject(Store);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly notificationService = inject(NotificationService);
   private readonly destroy$ = new Subject<void>();
 
   readonly selectedCompanyId$ = this._store.select(selectSelectedCompanyId);
@@ -57,6 +61,12 @@ export class WorkersComponent implements OnInit, OnDestroy {
       label: 'View Details',
       color: 'primary',
       handler: (worker) => this.onViewDetails(worker)
+    },
+    {
+      icon: 'delete',
+      label: 'Delete Worker',
+      color: 'warn',
+      handler: (worker) => this.onDeleteWorker(worker)
     }
   ];
 
@@ -130,6 +140,28 @@ export class WorkersComponent implements OnInit, OnDestroy {
 
   protected onViewDetails(worker: CompanyMember): void {
     this.router.navigate(['/workers', worker.userId]);
+  }
+
+  protected onDeleteWorker(worker: CompanyMember): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '420px',
+      maxWidth: '95vw',
+      panelClass: 'confirmation-dialog-panel',
+      data: {
+        title: 'Delete Worker',
+        message: `Are you sure you want to remove <strong>${worker.firstName} ${worker.lastName}</strong>? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        type: 'danger'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed && this.companyId) {
+        this._store.dispatch(removeMember({ companyId: this.companyId, userId: worker.userId }));
+        this.notificationService.success('Worker removed successfully!');
+      }
+    });
   }
 
   protected openInviteDialog(): void {
