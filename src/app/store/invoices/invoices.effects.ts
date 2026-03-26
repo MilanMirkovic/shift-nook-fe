@@ -40,13 +40,13 @@ export class InvoicesEffects {
     )
   );
 
-  createInvoice$ = createEffect(() =>
+  promoteEstimateToInvoice$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(InvoicesActions.createInvoice),
-      switchMap(({ companyId, invoice }) =>
-        this.invoicesApi.createInvoice(companyId, invoice).pipe(
-          map((newInvoice) => InvoicesActions.createInvoiceSuccess({ invoice: newInvoice })),
-          catchError((error) => of(InvoicesActions.createInvoiceFailure({ error: error?.message || 'Failed to create invoice' })))
+      ofType(InvoicesActions.promoteEstimateToInvoice),
+      switchMap(({ companyId, estimateId }) =>
+        this.invoicesApi.promoteEstimateToInvoice(companyId, estimateId).pipe(
+          map((invoice) => InvoicesActions.promoteEstimateToInvoiceSuccess({ invoice })),
+          catchError((error) => of(InvoicesActions.promoteEstimateToInvoiceFailure({ error: error?.message || 'Failed to promote estimate to invoice' })))
         )
       )
     )
@@ -83,6 +83,30 @@ export class InvoicesEffects {
         this.invoicesApi.deleteInvoice(companyId, invoiceId).pipe(
           map(() => InvoicesActions.deleteInvoiceSuccess({ invoiceId, companyId })),
           catchError((error) => of(InvoicesActions.deleteInvoiceFailure({ error: error?.message || 'Failed to delete invoice' })))
+        )
+      )
+    )
+  );
+
+  downloadInvoicePdf$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(InvoicesActions.downloadInvoicePdf),
+      switchMap(({ companyId, invoiceId }) =>
+        this.invoicesApi.downloadPdf(companyId, invoiceId).pipe(
+          map((blob) => InvoicesActions.downloadInvoicePdfSuccess({ blob, invoiceId })),
+          catchError((error) => of(InvoicesActions.downloadInvoicePdfFailure({ error: error?.message || 'Failed to download invoice PDF' })))
+        )
+      )
+    )
+  );
+
+  getInvoicePdfUrl$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(InvoicesActions.getInvoicePdfUrl),
+      switchMap(({ companyId, invoiceId }) =>
+        this.invoicesApi.getPdfUrl(companyId, invoiceId).pipe(
+          map((response) => InvoicesActions.getInvoicePdfUrlSuccess({ url: response.url, invoiceId })),
+          catchError((error) => of(InvoicesActions.getInvoicePdfUrlFailure({ error: error?.message || 'Failed to get invoice PDF URL' })))
         )
       )
     )

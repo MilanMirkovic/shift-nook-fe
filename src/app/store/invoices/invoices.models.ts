@@ -1,43 +1,46 @@
 export type InvoiceStatus = 'DRAFT' | 'SENT' | 'PAID' | 'OVERDUE' | 'VOID';
 
-export interface LineItem {
+export interface InvoiceItem {
+  id: string;
+  sortOrder: number;
   description: string;
   quantity: number;
-  rate: number;
-  amount: number;
+  unitPrice: number;
+  lineTotal: number;
 }
 
 export interface Invoice {
   id: string;
   companyId: string;
   clientId: string;
-  invoiceNumber: number;
+  estimateId: string | null;
+  invoiceNumber: string;
   title: string;
   status: InvoiceStatus;
-  notes?: string;
-  invoiceDate: string;
-  dueDate: string;
-  lineItems: LineItem[];
-  total: number;
+  currency: string;
+  subtotalAmount: number;
+  taxAmount: number;
+  totalAmount: number;
+  notes: string | null;
+  issuedAt: string;
+  dueAt: string;
+  items: InvoiceItem[];
   createdAt: string;
   updatedAt: string;
+  pdfFileId: string | null;
 }
 
-export interface CreateInvoiceInput {
-  clientId: string;
-  title: string;
-  notes?: string;
-  invoiceDate: string;
-  dueDate: string;
-  lineItems: Omit<LineItem, 'amount'>[];
+export interface InvoiceItemInput {
+  sortOrder: number;
+  description: string;
+  quantity: number;
+  unitPrice: number;
 }
 
 export interface UpdateInvoiceInput {
   title: string;
   notes?: string;
-  invoiceDate: string;
-  dueDate: string;
-  lineItems: Omit<LineItem, 'amount'>[];
+  items: InvoiceItemInput[];
 }
 
 export interface UpdateInvoiceStatusInput {
@@ -58,6 +61,7 @@ export interface InvoicesPageResponse {
 
 export interface InvoicesState {
   invoices: Invoice[];
+  selectedInvoice: Invoice | null;
   total: number;
   loading: boolean;
   error: string | null;
@@ -66,4 +70,3 @@ export interface InvoicesState {
     size: number;
   };
 }
-

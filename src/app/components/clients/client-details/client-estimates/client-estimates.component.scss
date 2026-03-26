@@ -160,7 +160,7 @@
 .col-items  { width: 90px; color: #94a3b8 !important; font-size: 0.825rem !important; }
 .col-total  { width: 110px; }
 .col-status { width: 110px; }
-.col-actions { width: 90px; }
+.col-actions { width: 170px; }
 
 .est-number {
   font-size: 0.78rem;
@@ -214,9 +214,13 @@
 .action-btn {
   width: 32px; height: 32px; line-height: 32px;
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  &.action-btn--promote mat-icon { color: #10b981; }
   &.action-btn--edit mat-icon   { color: #2563eb; }
+  &.action-btn--status mat-icon { color: #f59e0b; }
   &.action-btn--pdf mat-icon    { color: #7c3aed; }
   &.action-btn--delete mat-icon { color: #ef4444; }
+
+  &:disabled mat-icon { color: #cbd5e1; }
 }
 
 .estimates-table-footer {
@@ -263,6 +267,11 @@
     background: rgba(245, 158, 11, 0.1);
     color: #f59e0b;
     border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+  &.estimate-status--invoiced {
+    background: rgba(124, 58, 237, 0.1);
+    color: #7c3aed;
+    border: 1px solid rgba(124, 58, 237, 0.3);
   }
 }
 

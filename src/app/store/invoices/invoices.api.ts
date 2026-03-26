@@ -5,7 +5,6 @@ import { environment } from '../../../environments/environment';
 import {
   InvoicesPageResponse,
   Invoice,
-  CreateInvoiceInput,
   UpdateInvoiceInput,
   UpdateInvoiceStatusInput,
 } from './invoices.models';
@@ -40,10 +39,10 @@ export class InvoicesApiService {
     );
   }
 
-  createInvoice(companyId: string, invoice: CreateInvoiceInput): Observable<Invoice> {
+  promoteEstimateToInvoice(companyId: string, estimateId: string): Observable<Invoice> {
     return this.http.post<Invoice>(
-      `${this.apiUrl}/companies/${companyId}/invoices`,
-      invoice
+      `${this.apiUrl}/companies/${companyId}/invoices/from-estimate/${estimateId}`,
+      null
     );
   }
 
@@ -73,5 +72,10 @@ export class InvoicesApiService {
       { responseType: 'blob' }
     );
   }
-}
 
+  getPdfUrl(companyId: string, invoiceId: string): Observable<{ url: string }> {
+    return this.http.get<{ url: string }>(
+      `${this.apiUrl}/companies/${companyId}/invoices/${invoiceId}/pdf/url`
+    );
+  }
+}

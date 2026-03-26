@@ -9,6 +9,7 @@ export const selectInvoices = createSelector(selectInvoicesState, (state) => sta
 export const selectInvoicesTotal = createSelector(selectInvoicesState, (state) => state.total);
 export const selectInvoicesLoading = createSelector(selectInvoicesState, (state) => state.loading);
 export const selectInvoicesError = createSelector(selectInvoicesState, (state) => state.error);
+export const selectSelectedInvoice = createSelector(selectInvoicesState, (state) => state.selectedInvoice);
 
 export const selectInvoiceById = (invoiceId: string) => createSelector(
   selectInvoicesState,
@@ -20,3 +21,7 @@ export const selectInvoicesByClientId = (clientId: string) => createSelector(
   (state) => state.invoices.filter(i => i.clientId === clientId)
 );
 
+export const selectInvoicesByEstimateId = (estimateId: string) => createSelector(
+  selectInvoicesState,
+  (state) => state.invoices.filter(i => i.estimateId === estimateId)
+);

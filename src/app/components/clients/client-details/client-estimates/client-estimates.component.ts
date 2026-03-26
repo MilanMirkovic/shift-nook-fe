@@ -16,6 +16,7 @@ import { Estimate, EstimateStatus } from '../../../../store/estimates/estimates.
 import {
   loadEstimates,
   createEstimate, createEstimateSuccess, createEstimateFailure,
+  updateEstimate, updateEstimateSuccess, updateEstimateFailure,
   updateEstimateStatus, updateEstimateStatusSuccess, updateEstimateStatusFailure,
   deleteEstimate, deleteEstimateSuccess, deleteEstimateFailure,
 } from '../../../../store/estimates/estimates.actions';
@@ -24,7 +25,12 @@ import {
   selectEstimatesLoading,
   selectEstimatesError,
 } from '../../../../store/estimates/estimates.selectors';
-import { EstimateDialogComponent } from '../../../../shared/components/estimate-dialog/estimate-dialog.component';
+import {
+  promoteEstimateToInvoice,
+  promoteEstimateToInvoiceSuccess,
+  promoteEstimateToInvoiceFailure,
+} from '../../../../store/invoices/invoices.actions';
+import { EstimateDialogComponent, EstimateDialogResult } from '../../../../shared/components/estimate-dialog/estimate-dialog.component';
 import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { EstimatesApiService } from '../../../../store/estimates/estimates.api';
@@ -125,10 +131,10 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
       data: { clientId: this.clientId, clientName: this.clientName },
     });
 
-    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
-      if (!result) return;
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: EstimateDialogResult | undefined) => {
+      if (!result || result.mode !== 'create') return;
 
-      this.store.dispatch(createEstimate({ companyId: this.companyId, estimate: result }));
+      this.store.dispatch(createEstimate({ companyId: this.companyId, estimate: result.payload }));
 
       this.actions$.pipe(
         ofType(createEstimateSuccess, createEstimateFailure),
@@ -146,6 +152,45 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
   }
 
   protected onEditEstimate(estimate: Estimate): void {
+    const dialogRef = this.dialog.open(EstimateDialogComponent, {
+      width: '700px',
+      maxWidth: '95vw',
+      maxHeight: '92vh',
+      disableClose: false,
+      autoFocus: true,
+      panelClass: 'estimate-dialog-container',
+      data: {
+        clientId: this.clientId,
+        clientName: this.clientName,
+        estimate,
+      },
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: EstimateDialogResult | undefined) => {
+      if (!result || result.mode !== 'edit') return;
+
+      this.store.dispatch(updateEstimate({
+        companyId: this.companyId,
+        estimateId: estimate.id,
+        estimate: result.payload,
+      }));
+
+      this.actions$.pipe(
+        ofType(updateEstimateSuccess, updateEstimateFailure),
+        take(1),
+        takeUntil(this.destroy$),
+      ).subscribe(action => {
+        if (action.type === updateEstimateSuccess.type) {
+          this.notificationService.success('Estimate updated successfully!');
+          this.reloadEstimates();
+        } else {
+          this.notificationService.error('Failed to update estimate. Please try again.');
+        }
+      });
+    });
+  }
+
+  protected onChangeEstimateStatus(estimate: Estimate): void {
     const dialogRef = this.dialog.open(EstimateStatusDialogComponent, {
       width: '480px',
       maxWidth: '95vw',
@@ -244,6 +289,39 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
     }
   }
 
+  protected onPromoteToInvoice(estimate: Estimate): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Promote to Invoice',
+        message: `Are you sure you want to promote estimate "${estimate.title}" to an invoice? The estimate will be marked as invoiced.`,
+        confirmText: 'Promote',
+        cancelText: 'Cancel',
+        type: 'primary',
+      },
+      position: { top: '80px' },
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(confirmed => {
+      if (!confirmed) return;
+
+      this.store.dispatch(promoteEstimateToInvoice({ companyId: this.companyId, estimateId: estimate.id }));
+
+      this.actions$.pipe(
+        ofType(promoteEstimateToInvoiceSuccess, promoteEstimateToInvoiceFailure),
+        take(1),
+        takeUntil(this.destroy$),
+      ).subscribe(action => {
+        if (action.type === promoteEstimateToInvoiceSuccess.type) {
+          this.notificationService.success('Estimate promoted to invoice successfully!');
+          this.reloadEstimates();
+        } else {
+          this.notificationService.error('Failed to promote estimate to invoice. Please try again.');
+        }
+      });
+    });
+  }
+
   protected getEstimateStatusClass(status: EstimateStatus): string {
     switch (status) {
       case 'ACCEPTED': return 'estimate-status--accepted';
@@ -251,6 +329,7 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
       case 'DRAFT':    return 'estimate-status--draft';
       case 'DECLINED': return 'estimate-status--rejected';
       case 'VOID':     return 'estimate-status--expired';
+      case 'INVOICED': return 'estimate-status--invoiced';
       default:         return 'estimate-status--draft';
     }
   }

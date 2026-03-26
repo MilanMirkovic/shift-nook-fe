@@ -1,6 +1,7 @@
 import { createAction, props } from '@ngrx/store';
-import { Invoice, CreateInvoiceInput, UpdateInvoiceInput, UpdateInvoiceStatusInput } from './invoices.models';
+import { Invoice, UpdateInvoiceInput, UpdateInvoiceStatusInput } from './invoices.models';
 
+// Load all invoices (optional clientId filter)
 export const loadInvoices = createAction(
   '[Invoices] Load Invoices',
   props<{ companyId: string; clientId?: string; page?: number; size?: number; sort?: string }>()
@@ -14,6 +15,7 @@ export const loadInvoicesFailure = createAction(
   props<{ error: string }>()
 );
 
+// Load single invoice
 export const loadInvoiceById = createAction(
   '[Invoices] Load Invoice By ID',
   props<{ companyId: string; invoiceId: string }>()
@@ -27,19 +29,21 @@ export const loadInvoiceByIdFailure = createAction(
   props<{ error: string }>()
 );
 
-export const createInvoice = createAction(
-  '[Invoices] Create Invoice',
-  props<{ companyId: string; invoice: CreateInvoiceInput }>()
+// Promote estimate → invoice
+export const promoteEstimateToInvoice = createAction(
+  '[Invoices] Promote Estimate To Invoice',
+  props<{ companyId: string; estimateId: string }>()
 );
-export const createInvoiceSuccess = createAction(
-  '[Invoices] Create Invoice Success',
+export const promoteEstimateToInvoiceSuccess = createAction(
+  '[Invoices] Promote Estimate To Invoice Success',
   props<{ invoice: Invoice }>()
 );
-export const createInvoiceFailure = createAction(
-  '[Invoices] Create Invoice Failure',
+export const promoteEstimateToInvoiceFailure = createAction(
+  '[Invoices] Promote Estimate To Invoice Failure',
   props<{ error: string }>()
 );
 
+// Update invoice (title, notes, line items)
 export const updateInvoice = createAction(
   '[Invoices] Update Invoice',
   props<{ companyId: string; invoiceId: string; invoice: UpdateInvoiceInput }>()
@@ -53,6 +57,7 @@ export const updateInvoiceFailure = createAction(
   props<{ error: string }>()
 );
 
+// Change status
 export const updateInvoiceStatus = createAction(
   '[Invoices] Update Invoice Status',
   props<{ companyId: string; invoiceId: string; statusUpdate: UpdateInvoiceStatusInput }>()
@@ -66,6 +71,7 @@ export const updateInvoiceStatusFailure = createAction(
   props<{ error: string }>()
 );
 
+// Soft-delete
 export const deleteInvoice = createAction(
   '[Invoices] Delete Invoice',
   props<{ companyId: string; invoiceId: string }>()
@@ -79,3 +85,30 @@ export const deleteInvoiceFailure = createAction(
   props<{ error: string }>()
 );
 
+// Download PDF (blob)
+export const downloadInvoicePdf = createAction(
+  '[Invoices] Download Invoice PDF',
+  props<{ companyId: string; invoiceId: string }>()
+);
+export const downloadInvoicePdfSuccess = createAction(
+  '[Invoices] Download Invoice PDF Success',
+  props<{ blob: Blob; invoiceId: string }>()
+);
+export const downloadInvoicePdfFailure = createAction(
+  '[Invoices] Download Invoice PDF Failure',
+  props<{ error: string }>()
+);
+
+// Get pre-signed PDF URL
+export const getInvoicePdfUrl = createAction(
+  '[Invoices] Get Invoice PDF URL',
+  props<{ companyId: string; invoiceId: string }>()
+);
+export const getInvoicePdfUrlSuccess = createAction(
+  '[Invoices] Get Invoice PDF URL Success',
+  props<{ url: string; invoiceId: string }>()
+);
+export const getInvoicePdfUrlFailure = createAction(
+  '[Invoices] Get Invoice PDF URL Failure',
+  props<{ error: string }>()
+);

@@ -1,4 +1,4 @@
-export type EstimateStatus = 'DRAFT' | 'SENT' | 'ACCEPTED' | 'DECLINED' | 'VOID';
+export type EstimateStatus = 'DRAFT' | 'SENT' | 'ACCEPTED' | 'DECLINED' | 'VOID' | 'INVOICED';
 
 export interface LineItem {
   description: string;

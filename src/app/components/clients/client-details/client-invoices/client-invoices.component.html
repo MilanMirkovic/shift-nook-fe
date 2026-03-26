@@ -56,10 +56,10 @@
               <span *ngIf="invoice.notes" class="inv-notes">{{ invoice.notes }}</span>
             </div>
           </td>
-          <td class="col-date">{{ invoice.invoiceDate | date:'MMM d, yyyy' }}</td>
-          <td class="col-due">{{ invoice.dueDate | date:'MMM d, yyyy' }}</td>
-          <td class="col-items">{{ invoice.lineItems.length }} item{{ invoice.lineItems.length !== 1 ? 's' : '' }}</td>
-          <td class="col-total"><span class="inv-total">{{ invoice.total | currency }}</span></td>
+          <td class="col-date">{{ invoice.issuedAt | date:'MMM d, yyyy' }}</td>
+          <td class="col-due">{{ invoice.dueAt | date:'MMM d, yyyy' }}</td>
+          <td class="col-items">{{ invoice.items.length }} item{{ invoice.items.length !== 1 ? 's' : '' }}</td>
+          <td class="col-total"><span class="inv-total">{{ invoice.totalAmount | currency }}</span></td>
           <td class="col-status">
             <span class="invoice-status-badge" [ngClass]="getInvoiceStatusClass(invoice.status)">
               {{ invoice.status }}
@@ -89,4 +89,3 @@
   </div>
 
 </ng-container>
-

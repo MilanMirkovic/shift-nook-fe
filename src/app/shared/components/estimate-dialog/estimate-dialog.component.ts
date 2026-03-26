@@ -12,14 +12,18 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subject } from 'rxjs';
-import { CreateEstimateInput } from '../../../store/estimates/estimates.models';
+import { CreateEstimateInput, Estimate, UpdateEstimateInput } from '../../../store/estimates/estimates.models';
 
 export interface EstimateDialogData {
   clientId: string;
   clientName: string;
+  /** When provided, the dialog operates in "edit" mode. */
+  estimate?: Estimate;
 }
 
-export interface EstimateDialogResult extends CreateEstimateInput {}
+export type EstimateDialogResult =
+  | { mode: 'create'; payload: CreateEstimateInput }
+  | { mode: 'edit';   payload: UpdateEstimateInput }
 
 @Component({
   selector: 'app-estimate-dialog',
@@ -51,18 +55,33 @@ export class EstimateDialogComponent implements OnInit, OnDestroy {
 
   protected submitting = false;
   protected readonly form: FormGroup;
+  protected readonly isEditMode: boolean;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: EstimateDialogData) {
+    this.isEditMode = !!data.estimate;
+
     this.form = this.fb.group({
-      title: ['', [Validators.required, Validators.maxLength(255)]],
-      estimateDate: [new Date(), Validators.required],
-      notes: ['', Validators.maxLength(2000)],
+      title: [data.estimate?.title ?? '', [Validators.required, Validators.maxLength(255)]],
+      estimateDate: [data.estimate ? new Date(data.estimate.estimateDate) : new Date(), Validators.required],
+      notes: [data.estimate?.notes ?? '', Validators.maxLength(2000)],
       lineItems: this.fb.array([])
     });
   }
 
   ngOnInit(): void {
-    this.addLineItem();
+    if (this.data.estimate && this.data.estimate.lineItems.length > 0) {
+      for (const li of this.data.estimate.lineItems) {
+        const item = this.fb.group({
+          sortOrder: [this.lineItems.length],
+          description: [li.description, [Validators.required, Validators.maxLength(1000)]],
+          quantity: [li.quantity, [Validators.required, Validators.min(0.01)]],
+          rate: [li.rate, [Validators.required, Validators.min(0)]]
+        });
+        this.lineItems.push(item);
+      }
+    } else {
+      this.addLineItem();
+    }
   }
 
   ngOnDestroy(): void {
@@ -129,20 +148,37 @@ export class EstimateDialogComponent implements OnInit, OnDestroy {
       ? raw.estimateDate.toISOString().split('T')[0]
       : raw.estimateDate;
 
-    const result: EstimateDialogResult = {
-      clientId: this.data.clientId,
-      title: raw.title.trim(),
-      notes: raw.notes?.trim() || undefined,
-      estimateDate,
-      lineItems: raw.lineItems.map((item: any, i: number) => ({
-        sortOrder: i,
-        description: item.description.trim(),
-        quantity: parseFloat(item.quantity),
-        rate: parseFloat(item.rate)
-      }))
-    };
+    const lineItems = raw.lineItems.map((item: any, i: number) => ({
+      sortOrder: i,
+      description: item.description.trim(),
+      quantity: parseFloat(item.quantity),
+      rate: parseFloat(item.rate)
+    }));
 
-    this.dialogRef.close(result);
+    if (this.isEditMode) {
+      const result: EstimateDialogResult = {
+        mode: 'edit',
+        payload: {
+          title: raw.title.trim(),
+          notes: raw.notes?.trim() || undefined,
+          estimateDate,
+          lineItems,
+        }
+      };
+      this.dialogRef.close(result);
+    } else {
+      const result: EstimateDialogResult = {
+        mode: 'create',
+        payload: {
+          clientId: this.data.clientId,
+          title: raw.title.trim(),
+          notes: raw.notes?.trim() || undefined,
+          estimateDate,
+          lineItems,
+        }
+      };
+      this.dialogRef.close(result);
+    }
   }
 
   onCancel(): void {

@@ -106,8 +106,16 @@
           </td>
           <td class="col-actions">
             <div class="row-actions">
+              <button mat-icon-button class="action-btn action-btn--promote" matTooltip="Promote to Invoice"
+                [disabled]="estimate.status === 'INVOICED' || estimate.status === 'VOID'"
+                (click)="onPromoteToInvoice(estimate)">
+                <mat-icon>receipt_long</mat-icon>
+              </button>
               <button mat-icon-button class="action-btn action-btn--edit" matTooltip="Edit estimate" (click)="onEditEstimate(estimate)">
                 <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn action-btn--status" matTooltip="Change status" (click)="onChangeEstimateStatus(estimate)">
+                <mat-icon>swap_horiz</mat-icon>
               </button>
               <button mat-icon-button class="action-btn action-btn--pdf" matTooltip="Download PDF"
                 (click)="onDownloadEstimatePdf(estimate)">

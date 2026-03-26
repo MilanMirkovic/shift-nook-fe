@@ -6,7 +6,7 @@
       <mat-icon>request_quote</mat-icon>
     </div>
     <div class="header-text">
-      <h2 mat-dialog-title>New Estimate</h2>
+      <h2 mat-dialog-title>{{ isEditMode ? 'Edit Estimate' : 'New Estimate' }}</h2>
       <p class="subtitle">
         <mat-icon class="subtitle-icon">person_outline</mat-icon>
         {{ data.clientName }}
@@ -168,11 +168,11 @@
     <button mat-flat-button class="btn-submit" (click)="onSubmit()" [disabled]="submitting || form.invalid">
       @if (submitting) {
         <mat-spinner diameter="18"></mat-spinner>
-        <span>Creating…</span>
+        <span>{{ isEditMode ? 'Saving…' : 'Creating…' }}</span>
       } @else {
         <ng-container>
           <mat-icon>check</mat-icon>
-          <span>Create Estimate</span>
+          <span>{{ isEditMode ? 'Save Changes' : 'Create Estimate' }}</span>
         </ng-container>
       }
     </button>

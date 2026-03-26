@@ -14,7 +14,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { Invoice, InvoiceStatus } from '../../../../store/invoices/invoices.models';
 import {
   loadInvoices,
-  createInvoice, createInvoiceSuccess, createInvoiceFailure,
   updateInvoiceStatus, updateInvoiceStatusSuccess, updateInvoiceStatusFailure,
   deleteInvoice, deleteInvoiceSuccess, deleteInvoiceFailure,
 } from '../../../../store/invoices/invoices.actions';
@@ -175,4 +174,3 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
     }
   }
 }
-
