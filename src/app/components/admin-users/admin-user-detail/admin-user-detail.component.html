@@ -1,0 +1,143 @@
+<app-page-layout title="User Details" subtitle="View and manage user profile and company assignments">
+  <ng-container pageActions>
+    <button mat-button class="back-btn" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Users
+    </button>
+  </ng-container>
+
+  <!-- Loading -->
+  @if (loading$ | async) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error$ | async; as error) {
+    <div class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error }}</p>
+      <button mat-flat-button (click)="goBack()">Go Back</button>
+    </div>
+  }
+
+  <!-- User Detail -->
+  @if (user$ | async; as user) {
+    <div class="user-detail-layout">
+      <!-- Profile Card -->
+      <div class="profile-card">
+        <div class="profile-header">
+          <div class="avatar-large">{{ user.firstName?.charAt(0) }}{{ user.lastName?.charAt(0) }}</div>
+          <div class="profile-info">
+            <h2>{{ user.firstName }} {{ user.lastName }}</h2>
+            <p class="email">{{ user.email }}</p>
+            <div class="profile-meta">
+              <span [class]="getRoleBadgeClass(user.role)">{{ user.role }}</span>
+              @if (user.onboardingComplete) {
+                <span class="status-badge status-badge--active">Active</span>
+              } @else {
+                <span class="status-badge status-badge--pending">Pending Setup</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="profile-details">
+          <div class="detail-row">
+            <span class="detail-label">User ID</span>
+            <span class="detail-value mono">{{ user.id }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Created</span>
+            <span class="detail-value">{{ formatDate(user.createdAt) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Can Create Company</span>
+            <span class="detail-value">{{ user.canCreateCompany ? 'Yes' : 'No' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Onboarding</span>
+            <span class="detail-value">{{ user.onboardingComplete ? 'Complete' : 'Incomplete' }}</span>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="profile-actions">
+          <button mat-stroked-button (click)="onChangeRole(user)">
+            <mat-icon>admin_panel_settings</mat-icon>
+            Change Platform Role
+          </button>
+        </div>
+      </div>
+
+      <!-- Company Assignments -->
+      <div class="companies-section">
+        <div class="section-header">
+          <div>
+            <h3>Company Assignments</h3>
+            <p class="section-subtitle">Companies this user belongs to and their role in each</p>
+          </div>
+          <button mat-flat-button class="assign-btn" (click)="onAssignCompany(user)">
+            <mat-icon>add_business</mat-icon>
+            Assign Company
+          </button>
+        </div>
+
+        @if (user.companies.length > 0) {
+          <div class="companies-table-wrap">
+            <table mat-table [dataSource]="user.companies" class="companies-table">
+
+              <ng-container matColumnDef="companyName">
+                <th mat-header-cell *matHeaderCellDef>Company</th>
+                <td mat-cell *matCellDef="let c">
+                  <span class="company-name">{{ c.companyName }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="companyRole">
+                <th mat-header-cell *matHeaderCellDef>Company Role</th>
+                <td mat-cell *matCellDef="let c">
+                  <span [class]="getRoleBadgeClass(c.companyRole)">{{ c.companyRole }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="memberSince">
+                <th mat-header-cell *matHeaderCellDef>Member Since</th>
+                <td mat-cell *matCellDef="let c">{{ formatDate(c.memberSince) }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef class="actions-header"></th>
+                <td mat-cell *matCellDef="let c" class="actions-cell">
+                  <button mat-icon-button
+                          matTooltip="Remove from company"
+                          color="warn"
+                          (click)="onRemoveFromCompany(user, c); $event.stopPropagation()">
+                    <mat-icon>person_remove</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="companyColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: companyColumns;"></tr>
+            </table>
+          </div>
+        } @else {
+          <div class="empty-companies">
+            <mat-icon>business_center</mat-icon>
+            <p>This user is not assigned to any companies yet.</p>
+            <button mat-stroked-button (click)="onAssignCompany(user)">
+              <mat-icon>add_business</mat-icon>
+              Assign to a Company
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</app-page-layout>
+

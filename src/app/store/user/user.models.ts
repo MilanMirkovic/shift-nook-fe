@@ -1,4 +1,5 @@
 import { CompanyRole } from '../../shared/models/company-role';
+import { UserRole } from '../../shared/models/user-role';
 
 export interface CompanyMembership {
   companyId: string;
@@ -14,6 +15,7 @@ export interface User {
   firstName: string;
   lastName: string;
   cognitoUserId: string;
+  role: UserRole;               // platform-level role
   canCreateCompany: boolean;
   createdAt: string; // ISO 8601 date string
   onboardingComplete: boolean;

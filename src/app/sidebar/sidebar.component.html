@@ -84,6 +84,16 @@
         <mat-icon matListItemIcon>settings</mat-icon>
         <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Settings</span>
       </a>
+
+      <!-- Admin Section -->
+      @if (isPlatformAdmin) {
+        <mat-divider></mat-divider>
+        <div class="admin-section-label" [class.is-hidden]="!isHandset && isCollapsed">ADMIN</div>
+        <a mat-list-item routerLink="/admin/users" routerLinkActive="active" (click)="onLinkClicked()">
+          <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
+          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">User Management</span>
+        </a>
+      }
     </mat-nav-list>
 
     <!-- Footer -->

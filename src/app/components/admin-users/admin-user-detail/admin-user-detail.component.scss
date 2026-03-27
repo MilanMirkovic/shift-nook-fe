@@ -1,0 +1,303 @@
+// ─── Layout ───────────────────────────────────────────────────────────────────
+.user-detail-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// ─── Loading / Error ──────────────────────────────────────────────────────────
+.loading-overlay {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+.error-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #dc2626;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+  }
+
+  p {
+    margin: 0 0 16px;
+    font-size: 0.9375rem;
+  }
+}
+
+// ─── Back Button ──────────────────────────────────────────────────────────────
+.back-btn {
+  color: #64748b;
+  font-weight: 600;
+
+  mat-icon {
+    margin-right: 4px;
+  }
+
+  &:hover {
+    color: #0f172a;
+  }
+}
+
+// ─── Profile Card ─────────────────────────────────────────────────────────────
+.profile-card {
+  background: #fff;
+  border: 1px solid #e8eaf0;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 28px;
+
+  .avatar-large {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+    color: #4338ca;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    text-transform: uppercase;
+  }
+
+  .profile-info {
+    flex: 1;
+
+    h2 {
+      margin: 0;
+      font-size: 1.375rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .email {
+      margin: 4px 0 10px;
+      color: #64748b;
+      font-size: 0.875rem;
+    }
+
+    .profile-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+  }
+}
+
+.profile-details {
+  padding: 20px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .detail-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+
+    .detail-label {
+      min-width: 150px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .detail-value {
+      font-size: 0.875rem;
+      color: #0f172a;
+
+      &.mono {
+        font-family: 'SF Mono', 'Fira Code', monospace;
+        font-size: 0.8rem;
+        color: #475569;
+      }
+    }
+  }
+}
+
+.profile-actions {
+  padding: 16px 28px;
+
+  button {
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.875rem;
+
+    mat-icon {
+      margin-right: 6px;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+// ─── Companies Section ────────────────────────────────────────────────────────
+.companies-section {
+  background: #fff;
+  border: 1px solid #e8eaf0;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 28px 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .section-subtitle {
+    margin: 4px 0 0;
+    color: #94a3b8;
+    font-size: 0.8125rem;
+  }
+}
+
+.assign-btn {
+  background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
+  color: #fff !important;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  padding: 0 16px;
+  height: 36px;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+
+  mat-icon {
+    margin-right: 4px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    transform: translateY(-1px);
+  }
+}
+
+.companies-table-wrap {
+  border-top: 1px solid #e8eaf0;
+}
+
+.companies-table {
+  width: 100%;
+
+  .company-name {
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .actions-header {
+    width: 60px;
+  }
+
+  .actions-cell {
+    text-align: center;
+
+    button {
+      color: #94a3b8;
+      &:hover {
+        color: #dc2626;
+      }
+    }
+  }
+
+  th.mat-mdc-header-cell {
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #f8f9fc;
+    border-bottom: 1px solid #e8eaf0;
+  }
+
+  td.mat-mdc-cell {
+    color: #374151;
+    font-size: 0.875rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+}
+
+.empty-companies {
+  text-align: center;
+  padding: 48px 20px;
+  color: #94a3b8;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #cbd5e1;
+    margin-bottom: 12px;
+  }
+
+  p {
+    margin: 0 0 16px;
+    font-size: 0.875rem;
+  }
+
+  button {
+    border-radius: 10px;
+    font-weight: 600;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      margin-right: 6px;
+    }
+  }
+}
+
+// ─── Role Badge ───────────────────────────────────────────────────────────────
+.role-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+
+  &--admin { background: #fef2f2; color: #dc2626; }
+  &--owner { background: #eff6ff; color: #2563eb; }
+  &--accountant { background: #f0fdf4; color: #16a34a; }
+  &--worker { background: #fffbeb; color: #d97706; }
+  &--subcontractor { background: #fdf4ff; color: #a855f7; }
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &--active { background: #f0fdf4; color: #16a34a; }
+  &--pending { background: #fffbeb; color: #d97706; }
+}
+

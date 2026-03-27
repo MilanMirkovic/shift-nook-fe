@@ -3,6 +3,7 @@ import { provideState } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { authGuard, publicGuard } from './core/auth/auth.guard';
 import { roleGuard } from './core/auth/role.guard';
+import { platformAdminGuard } from './core/auth/platform-admin.guard';
 import { CompanyRole } from './shared/models/company-role';
 import { SUBCONTRACTORS_FEATURE_KEY, subcontractorsReducer } from './store/subcontractors/subcontractors.reducer';
 import { SubcontractorsEffects } from './store/subcontractors/subcontractors.effects';
@@ -192,6 +193,15 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/company-redirect.page').then((m) => m.CompanyRedirectPage),
+  },
+  // ── Platform Admin: user management ───────────────────────────────────────
+  {
+    path: 'admin/users',
+    canActivate: [authGuard, platformAdminGuard],
+    loadChildren: () =>
+      import('./components/admin-users/admin-users-routing.module').then(
+        (m) => m.ADMIN_USERS_ROUTES,
+      ),
   },
   {
     path: '**',

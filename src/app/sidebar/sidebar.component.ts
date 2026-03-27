@@ -48,6 +48,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   protected canSeeSubcontractors = false;   // OWNER or ADMIN of a company
   protected canSeePrincipalCompanies = false; // OWNER whose company is a sub (any company)
   protected canSeeWorkTime = false; // Only show Work Time for ACCOUNTANT
+  protected isPlatformAdmin = false; // Show Admin section for platform ADMIN role
 
   ngOnInit(): void {
     // Check if user is authenticated
@@ -151,6 +152,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
       )
       .subscribe(isWorker => {
         this.isWorker = isWorker;
+      });
+
+    // Determine if user is a PLATFORM ADMIN (to show Admin section)
+    this.userStore.user$
+      .pipe(
+        map(user => user?.role === 'ADMIN'),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(isAdmin => {
+        this.isPlatformAdmin = isAdmin;
       });
   }
 

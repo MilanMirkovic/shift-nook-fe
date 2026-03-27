@@ -23,6 +23,7 @@ import { estimatesReducer } from './store/estimates/estimates.reducer';
 import { invoicesReducer } from './store/invoices/invoices.reducer';
 import { invitationsReducer, INVITATIONS_FEATURE_KEY } from './store/invitations/invitations.reducer';
 import { subcontractorsReducer, SUBCONTRACTORS_FEATURE_KEY } from './store/subcontractors/subcontractors.reducer';
+import { adminUsersReducer, ADMIN_USERS_FEATURE_KEY } from './store/admin-users/admin-users.reducer';
 
 // Import effects
 import { UserEffects } from './store/user/user.effects';
@@ -38,6 +39,7 @@ import { EstimatesEffects } from './store/estimates/estimates.effects';
 import { InvoicesEffects } from './store/invoices/invoices.effects';
 import { InvitationsEffects } from './store/invitations/invitations.effects';
 import { SubcontractorsEffects } from './store/subcontractors/subcontractors.effects';
+import { AdminUsersEffects } from './store/admin-users/admin-users.effects';
 
 // Import feature keys
 import { USER_FEATURE_KEY } from './store/user/user.selectors';
@@ -73,6 +75,7 @@ export const appConfig: ApplicationConfig = {
       [INVOICES_FEATURE_KEY]: invoicesReducer,
       [INVITATIONS_FEATURE_KEY]: invitationsReducer,
       [SUBCONTRACTORS_FEATURE_KEY]: subcontractorsReducer,
+      [ADMIN_USERS_FEATURE_KEY]: adminUsersReducer,
     }),
     provideEffects([
       UserEffects,
@@ -88,6 +91,7 @@ export const appConfig: ApplicationConfig = {
       InvoicesEffects,
       InvitationsEffects,
       SubcontractorsEffects,
+      AdminUsersEffects,
     ]),
     provideStoreDevtools({
       maxAge: 25,

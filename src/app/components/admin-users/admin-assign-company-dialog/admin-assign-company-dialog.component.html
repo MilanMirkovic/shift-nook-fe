@@ -1,0 +1,62 @@
+<div class="assign-company-dialog">
+  <div class="dialog-header">
+    <mat-icon class="header-icon">business</mat-icon>
+    <div class="header-text">
+      <h2 mat-dialog-title>Assign to Company</h2>
+      <p class="subtitle">Add this user to a company</p>
+    </div>
+  </div>
+
+  <mat-dialog-content>
+    @if (serverError) {
+      <div class="server-error">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ serverError }}</span>
+      </div>
+    }
+
+    <form [formGroup]="form" class="assign-form">
+      <div class="form-field">
+        <label class="field-label">Company ID</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>business</mat-icon>
+          <input matInput formControlName="companyId" placeholder="Enter company ID">
+          @if (getErrorMessage('companyId')) {
+            <mat-error>{{ getErrorMessage('companyId') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label">Company Role</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>badge</mat-icon>
+          <mat-select formControlName="role">
+            @for (role of companyRoles; track role) {
+              <mat-option [value]="role">{{ role }}</mat-option>
+            }
+          </mat-select>
+          @if (getErrorMessage('role')) {
+            <mat-error>{{ getErrorMessage('role') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="info-note">
+        <mat-icon>info</mat-icon>
+        <span>The user will gain access to this company with the selected role permissions.</span>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button (click)="onCancel()" [disabled]="submitting">Cancel</button>
+    <button mat-flat-button (click)="onSubmit()" [disabled]="submitting">
+      @if (submitting) {
+        <mat-spinner diameter="20"></mat-spinner>
+      }
+      Assign
+    </button>
+  </mat-dialog-actions>
+</div>
+

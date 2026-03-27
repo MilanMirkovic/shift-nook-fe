@@ -1,0 +1,203 @@
+.change-role-dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 420px;
+}
+
+.dialog-header {
+  background: #ffffff;
+  padding: 24px 28px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border-bottom: 1px solid #e8eaf0;
+
+  .header-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: #2563eb;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .header-text {
+    flex: 1;
+
+    h2[mat-dialog-title] {
+      margin: 0;
+      padding: 0;
+      color: #0f172a;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.25px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: #94a3b8;
+      font-size: 0.875rem;
+
+      strong {
+        color: #475569;
+      }
+    }
+  }
+}
+
+.server-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 0.8125rem;
+  font-weight: 500;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+}
+
+mat-dialog-content {
+  padding: 24px 28px !important;
+  margin: 0;
+  overflow: visible;
+  max-height: none;
+}
+
+.change-role-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    .field-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    mat-form-field {
+      width: 100%;
+
+      ::ng-deep {
+        .mat-mdc-text-field-wrapper {
+          background: #f8f9fc;
+          border-radius: 10px !important;
+        }
+
+        .mdc-text-field--outlined .mdc-notched-outline {
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #e2e8f0;
+          }
+        }
+
+        .mdc-text-field--focused .mdc-notched-outline {
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #2563eb !important;
+            border-width: 2px;
+          }
+        }
+
+        .mat-mdc-form-field-icon-prefix {
+          color: #94a3b8;
+          padding-right: 8px;
+        }
+
+        .mdc-text-field--focused .mat-mdc-form-field-icon-prefix {
+          color: #2563eb;
+        }
+
+        .mat-mdc-select-trigger {
+          font-size: 0.875rem;
+          color: #0f172a;
+        }
+
+        .mdc-floating-label { display: none; }
+
+        .mat-mdc-form-field-infix {
+          padding-top: 10px;
+          padding-bottom: 10px;
+          min-height: 42px;
+        }
+
+        .mat-mdc-form-field-subscript-wrapper {
+          margin-top: 0;
+          padding-top: 2px;
+        }
+      }
+    }
+  }
+
+  .info-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 14px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    color: #1e40af;
+    font-size: 0.8rem;
+    line-height: 1.4;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+  }
+}
+
+mat-dialog-actions {
+  padding: 16px 28px !important;
+  margin: 0;
+  border-top: 1px solid #e8eaf0;
+  background: #f8f9fc;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+
+  button {
+    min-width: 92px;
+    height: 40px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.875rem;
+
+    &[mat-button] {
+      color: #64748b;
+      &:hover:not(:disabled) { background: #f1f5f9; color: #0f172a; }
+    }
+
+    &[mat-flat-button] {
+      background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+      &:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4); transform: translateY(-1px); }
+      &:disabled { opacity: 0.6; box-shadow: none; }
+      mat-spinner { display: inline-block; vertical-align: middle; ::ng-deep circle { stroke: white !important; } }
+    }
+  }
+}
+

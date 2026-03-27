@@ -35,6 +35,11 @@ export class UserStoreService {
     map(user => this.hasRole(user, CompanyRole.ADMIN))
   );
 
+  // Platform-level admin check (checks user.role, NOT company role)
+  readonly isPlatformAdmin$ = this.user$.pipe(
+    map(user => user?.role === 'ADMIN')
+  );
+
   // Actions
   loadUser(): void {
     this.store.dispatch(loadUser());

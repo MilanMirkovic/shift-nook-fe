@@ -1,0 +1,48 @@
+<div class="change-role-dialog">
+  <div class="dialog-header">
+    <mat-icon class="header-icon">shield</mat-icon>
+    <div class="header-text">
+      <h2 mat-dialog-title>Change Platform Role</h2>
+      <p class="subtitle">Current role: <strong>{{ currentRole }}</strong></p>
+    </div>
+  </div>
+
+  <mat-dialog-content>
+    @if (serverError) {
+      <div class="server-error">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ serverError }}</span>
+      </div>
+    }
+
+    <form [formGroup]="form" class="change-role-form">
+      <div class="form-field">
+        <label class="field-label">New Role</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>shield</mat-icon>
+          <mat-select formControlName="role">
+            @for (role of roles; track role) {
+              <mat-option [value]="role">{{ role }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="info-note">
+        <mat-icon>info</mat-icon>
+        <span>Changing the platform role will immediately affect the user's permissions across the system.</span>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button (click)="onCancel()" [disabled]="submitting">Cancel</button>
+    <button mat-flat-button (click)="onSubmit()" [disabled]="submitting">
+      @if (submitting) {
+        <mat-spinner diameter="20"></mat-spinner>
+      }
+      Update Role
+    </button>
+  </mat-dialog-actions>
+</div>
+

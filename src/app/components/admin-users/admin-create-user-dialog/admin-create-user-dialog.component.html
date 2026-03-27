@@ -1,0 +1,84 @@
+<div class="create-user-dialog">
+  <div class="dialog-header">
+    <mat-icon class="header-icon">person_add</mat-icon>
+    <div class="header-text">
+      <h2 mat-dialog-title>Create User</h2>
+      <p class="subtitle">Add a new user to the platform</p>
+    </div>
+  </div>
+
+  <mat-dialog-content>
+    @if (serverError) {
+      <div class="server-error">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ serverError }}</span>
+      </div>
+    }
+
+    <form [formGroup]="form" class="create-form">
+      <div class="form-field">
+        <label class="field-label">First Name</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>badge</mat-icon>
+          <input matInput formControlName="firstName" placeholder="e.g. John">
+          @if (getErrorMessage('firstName')) {
+            <mat-error>{{ getErrorMessage('firstName') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label">Last Name</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>badge</mat-icon>
+          <input matInput formControlName="lastName" placeholder="e.g. Doe">
+          @if (getErrorMessage('lastName')) {
+            <mat-error>{{ getErrorMessage('lastName') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label">Email</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>email</mat-icon>
+          <input matInput formControlName="email" placeholder="e.g. john@example.com" type="email">
+          @if (getErrorMessage('email')) {
+            <mat-error>{{ getErrorMessage('email') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label">Role</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>shield</mat-icon>
+          <mat-select formControlName="role">
+            @for (role of roles; track role) {
+              <mat-option [value]="role">{{ role }}</mat-option>
+            }
+          </mat-select>
+          @if (getErrorMessage('role')) {
+            <mat-error>{{ getErrorMessage('role') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="info-note">
+        <mat-icon>info</mat-icon>
+        <span>The user will receive an email with instructions to set their password.</span>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button (click)="onCancel()" [disabled]="submitting">Cancel</button>
+    <button mat-flat-button (click)="onSubmit()" [disabled]="submitting">
+      @if (submitting) {
+        <mat-spinner diameter="20"></mat-spinner>
+      }
+      Create User
+    </button>
+  </mat-dialog-actions>
+</div>
+
