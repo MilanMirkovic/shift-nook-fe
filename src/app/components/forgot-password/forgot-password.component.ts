@@ -82,11 +82,8 @@ export class ForgotPasswordComponent implements OnInit {
       this.email = emailParam;
       this.emailForm.patchValue({ email: emailParam });
 
-      // Automatically request the code if we already know the email
-      // (worker was pre-provisioned — skip the email-entry step)
-      if (this.mode === 'set') {
-        this.requestCode();
-      }
+      // Automatically request the code whenever email is pre-filled via query param
+      void this.requestCode();
     }
   }
 
@@ -182,4 +179,3 @@ export class ForgotPasswordComponent implements OnInit {
     }
   }
 }
-
