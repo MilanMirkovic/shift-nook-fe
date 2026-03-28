@@ -69,23 +69,34 @@ export class LoginComponent implements OnInit, OnDestroy {
         )
         .subscribe((user) => {
           this.isLoading = false;
+          console.log('User object after login:', user);
 
           if (this.returnUrl) {
             this.router.navigateByUrl(this.returnUrl);
             return;
           }
 
+          // Ensure admin check is first and exclusive
+          if (user?.role === 'ADMIN') {
+            this.router.navigate(['/dashboard']);
+            return;
+          }
+
           if (user.companies && user.companies.length > 1) {
             this.router.navigate(['/select-company']);
-          } else if (!user.companies || user.companies.length === 0) {
+            return;
+          }
+
+          if (!user.companies || user.companies.length === 0) {
             if (user.canCreateCompany) {
               this.router.navigate(['/create-company']);
             } else {
               this.router.navigate(['/dashboard']);
             }
-          } else {
-            this.router.navigate(['/dashboard']);
+            return;
           }
+
+          this.router.navigate(['/dashboard']);
         });
     } catch (err: any) {
       this.isLoading = false;

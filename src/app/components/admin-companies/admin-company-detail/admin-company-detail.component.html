@@ -1,0 +1,93 @@
+<app-page-layout title="Company Details" subtitle="View company profile and information">
+  <ng-container pageActions>
+    <button mat-button class="back-btn" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Companies
+    </button>
+  </ng-container>
+
+  <!-- Loading -->
+  @if (loading$ | async) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error$ | async; as error) {
+    <div class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error }}</p>
+      <button mat-flat-button (click)="goBack()">Go Back</button>
+    </div>
+  }
+
+  <!-- Company Detail -->
+  @if (company$ | async; as company) {
+    <div class="company-detail-layout">
+      <!-- Profile Card -->
+      <div class="profile-card">
+        <div class="profile-header">
+          @if (company.logoUrl) {
+            <img class="logo-large" [src]="company.logoUrl" [alt]="company.name + ' logo'" />
+          } @else {
+            <div class="avatar-large">{{ getInitials(company.name) }}</div>
+          }
+          <div class="profile-info">
+            <h2>{{ company.name }}</h2>
+            @if (company.email) {
+              <p class="email">{{ company.email }}</p>
+            }
+            <div class="profile-meta">
+              <span class="member-badge">
+                <mat-icon>group</mat-icon>
+                {{ company.memberCount }} {{ company.memberCount === 1 ? 'member' : 'members' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="profile-details">
+          <div class="detail-row">
+            <span class="detail-label">Company ID</span>
+            <span class="detail-value mono">{{ company.id }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Email</span>
+            <span class="detail-value">{{ company.email || '—' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Phone</span>
+            <span class="detail-value">{{ company.phone || '—' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Address</span>
+            <span class="detail-value">{{ company.address || '—' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Website</span>
+            @if (company.website) {
+              <a class="detail-value link" [href]="company.website" target="_blank" rel="noopener">
+                {{ formatWebsite(company.website) }}
+                <mat-icon class="external-icon">open_in_new</mat-icon>
+              </a>
+            } @else {
+              <span class="detail-value">—</span>
+            }
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Members</span>
+            <span class="detail-value">{{ company.memberCount }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Created</span>
+            <span class="detail-value">{{ formatDate(company.createdAt) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</app-page-layout>
+

@@ -196,6 +196,14 @@ export const routes: Routes = [
   },
   // ── Platform Admin: user management ───────────────────────────────────────
   {
+    path: 'admin/companies',
+    canActivate: [authGuard, platformAdminGuard],
+    loadChildren: () =>
+      import('./components/admin-companies/admin-companies-routing.module').then(
+        (m) => m.ADMIN_COMPANIES_ROUTES,
+      ),
+  },
+  {
     path: 'admin/users',
     canActivate: [authGuard, platformAdminGuard],
     loadChildren: () =>

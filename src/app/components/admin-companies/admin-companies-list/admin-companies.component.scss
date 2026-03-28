@@ -1,0 +1,150 @@
+// ─── Filters Bar ──────────────────────────────────────────────────────────────
+.filters-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+
+  .search-field {
+    flex: 1;
+    min-width: 240px;
+    max-width: 400px;
+
+    ::ng-deep {
+      .mat-mdc-text-field-wrapper {
+        background: #f8f9fc;
+        border-radius: 10px !important;
+      }
+      .mat-mdc-form-field-icon-prefix {
+        color: #94a3b8;
+        padding-right: 8px;
+      }
+      .mat-mdc-form-field-infix {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        min-height: 42px;
+      }
+      .mdc-floating-label { display: none; }
+      .mat-mdc-form-field-subscript-wrapper { display: none; }
+    }
+  }
+}
+
+// ─── Create Button ────────────────────────────────────────────────────────────
+.create-btn {
+  background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
+  color: #fff !important;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0 20px;
+  height: 40px;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+
+  mat-icon {
+    margin-right: 6px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    transform: translateY(-1px);
+  }
+}
+
+// ─── Loading ──────────────────────────────────────────────────────────────────
+.loading-overlay {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+// ─── Table ────────────────────────────────────────────────────────────────────
+.companies-table-wrap {
+  border: 1px solid #e8eaf0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.companies-table {
+  width: 100%;
+
+  .name-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .company-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+    color: #4338ca;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    text-transform: uppercase;
+  }
+
+  .company-full-name {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 0.875rem;
+  }
+
+  .company-row {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: #f8fafc;
+    }
+  }
+
+  .actions-header {
+    width: 48px;
+  }
+
+  .actions-cell {
+    text-align: center;
+  }
+}
+
+// ─── Empty State ──────────────────────────────────────────────────────────────
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: #cbd5e1;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #334155;
+    margin: 0 0 8px;
+  }
+
+  p {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin: 0;
+  }
+}
+
