@@ -33,7 +33,6 @@ export const routes: Routes = [
   },
   {
     path: 'forgot-password',
-    canActivate: [publicGuard],
     loadComponent: () =>
       import('./components/forgot-password/forgot-password.component').then(
         (m) => m.ForgotPasswordComponent,
