@@ -78,6 +78,42 @@ export const adminCompaniesReducer = createReducer(
     submitError: error,
   })),
 
+  // ── Delete ──────────────────────────────────────────────────────────────
+  on(Actions.deleteAdminCompany, (state) => ({
+    ...state,
+    submitting: true,
+    submitError: null,
+  })),
+  on(Actions.deleteAdminCompanySuccess, (state, { companyId }) => ({
+    ...state,
+    items: state.items.filter((c) => c.id !== companyId),
+    total: state.total - 1,
+    submitting: false,
+  })),
+  on(Actions.deleteAdminCompanyFailure, (state, { error }) => ({
+    ...state,
+    submitting: false,
+    submitError: error,
+  })),
+
+  // ── Update ──────────────────────────────────────────────────────────────
+  on(Actions.updateAdminCompany, (state) => ({
+    ...state,
+    submitting: true,
+    submitError: null,
+  })),
+  on(Actions.updateAdminCompanySuccess, (state, { company }) => ({
+    ...state,
+    submitting: false,
+    selectedCompany: company,
+    items: state.items.map((c) => c.id === company.id ? company : c),
+  })),
+  on(Actions.updateAdminCompanyFailure, (state, { error }) => ({
+    ...state,
+    submitting: false,
+    submitError: error,
+  })),
+
   // ── Clear detail ────────────────────────────────────────────────────────
   on(Actions.clearAdminCompanyDetail, (state) => ({
     ...state,
@@ -86,4 +122,3 @@ export const adminCompaniesReducer = createReducer(
     selectedCompanyError: null,
   })),
 );
-

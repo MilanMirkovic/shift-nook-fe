@@ -1,4 +1,4 @@
-.create-company-dialog {
+.edit-company-dialog {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -75,7 +75,7 @@ mat-dialog-content {
 }
 
 // ─── Form ─────────────────────────────────────────────────────────────────────
-.create-form {
+.edit-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -160,31 +160,6 @@ mat-dialog-content {
       }
     }
   }
-
-  .info-note {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 10px 14px;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    border-radius: 8px;
-    color: #1e40af;
-    font-size: 0.8rem;
-    line-height: 1.4;
-
-    mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    strong {
-      font-weight: 700;
-    }
-  }
 }
 
 // ─── Actions ──────────────────────────────────────────────────────────────────
@@ -241,3 +216,4 @@ mat-dialog-actions {
     }
   }
 }
+

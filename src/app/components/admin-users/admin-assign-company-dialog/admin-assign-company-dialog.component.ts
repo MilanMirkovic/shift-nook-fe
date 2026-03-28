@@ -1,9 +1,9 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Actions, ofType } from '@ngrx/effects';
-import { take } from 'rxjs';
+import { combineLatest, map, startWith, take } from 'rxjs';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -19,6 +19,9 @@ import {
   assignAdminUserCompanySuccess,
   assignAdminUserCompanyFailure,
 } from '../../../store/admin-users/admin-users.actions';
+import { loadAdminCompanies } from '../../../store/admin-companies/admin-companies.actions';
+import { selectAdminCompanies, selectAdminCompaniesLoading } from '../../../store/admin-companies/admin-companies.selectors';
+import { AdminCompany } from '../../../store/admin-companies/admin-companies.models';
 
 export interface AssignCompanyDialogData {
   userId: string;
@@ -50,7 +53,7 @@ const COMPANY_ROLES: CompanyRole[] = [
   styleUrls: ['./admin-assign-company-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdminAssignCompanyDialogComponent {
+export class AdminAssignCompanyDialogComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<AdminAssignCompanyDialogComponent>);
   private readonly data: AssignCompanyDialogData = inject(MAT_DIALOG_DATA);
@@ -58,13 +61,32 @@ export class AdminAssignCompanyDialogComponent {
   private readonly actions$ = inject(Actions);
 
   readonly companyRoles = COMPANY_ROLES;
+  readonly companies$ = this.store.select(selectAdminCompanies);
+  readonly companiesLoading$ = this.store.select(selectAdminCompaniesLoading);
+
+  readonly companySearch = new FormControl('');
+
+  readonly filteredCompanies$ = combineLatest([
+    this.companies$,
+    this.companySearch.valueChanges.pipe(startWith('')),
+  ]).pipe(
+    map(([companies, search]) => {
+      const term = (search ?? '').toLowerCase().trim();
+      return term ? companies.filter(c => c.name.toLowerCase().includes(term)) : companies;
+    })
+  );
+
   protected submitting = false;
   protected serverError: string | null = null;
 
   protected readonly form: FormGroup = this.fb.group({
-    companyId: ['', [Validators.required]],
+    company: [null as AdminCompany | null, [Validators.required]],
     role: [CompanyRole.WORKER, [Validators.required]],
   });
+
+  ngOnInit(): void {
+    this.store.dispatch(loadAdminCompanies({ page: 0, size: 200 }));
+  }
 
   onSubmit(): void {
     if (this.form.invalid) {
@@ -75,7 +97,9 @@ export class AdminAssignCompanyDialogComponent {
     this.submitting = true;
     this.serverError = null;
 
-    const { companyId, role } = this.form.value;
+    const { company, role } = this.form.value;
+    const companyId = (company as AdminCompany).id;
+
     this.store.dispatch(
       assignAdminUserCompany({
         userId: this.data.userId,
@@ -101,8 +125,7 @@ export class AdminAssignCompanyDialogComponent {
   getErrorMessage(fieldName: string): string {
     const control = this.form.get(fieldName);
     if (!control || !control.errors || !control.touched) return '';
-    if (control.errors['required']) return `${fieldName === 'companyId' ? 'Company ID' : 'Role'} is required`;
+    if (control.errors['required']) return `${fieldName === 'company' ? 'Company' : 'Role'} is required`;
     return '';
   }
 }
-

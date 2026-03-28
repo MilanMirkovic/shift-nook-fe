@@ -1,9 +1,9 @@
-<div class="create-company-dialog">
+<div class="edit-company-dialog">
   <div class="dialog-header">
-    <mat-icon class="header-icon">add_business</mat-icon>
+    <mat-icon class="header-icon">edit</mat-icon>
     <div class="header-text">
-      <h2 mat-dialog-title>Create Company</h2>
-      <p class="subtitle">Add a new company to the platform</p>
+      <h2 mat-dialog-title>Edit Company</h2>
+      <p class="subtitle">Update company profile information</p>
     </div>
   </div>
 
@@ -15,7 +15,7 @@
       </div>
     }
 
-    <form [formGroup]="form" id="create-company-form" class="create-form">
+    <form [formGroup]="form" id="edit-company-form" class="edit-form">
 
       <div class="form-field">
         <label class="field-label">Company Name <span class="required">*</span></label>
@@ -66,29 +66,17 @@
         </mat-form-field>
       </div>
 
-      <div class="form-field">
-        <label class="field-label">Owner User ID</label>
-        <mat-form-field appearance="outline">
-          <mat-icon matPrefix>person</mat-icon>
-          <input matInput formControlName="ownerUserId" placeholder="UUID of the owner (optional)" autocomplete="off" />
-        </mat-form-field>
-      </div>
-
-      <div class="info-note">
-        <mat-icon>info</mat-icon>
-        <span>If an owner is provided, that user will be assigned as <strong>OWNER</strong> of this company.</span>
-      </div>
-
     </form>
   </mat-dialog-content>
 
   <mat-dialog-actions>
     <button mat-button type="button" (click)="onCancel()" [disabled]="submitting">Cancel</button>
-    <button mat-flat-button type="submit" form="create-company-form" (click)="onSubmit()" [disabled]="submitting">
+    <button mat-flat-button type="submit" form="edit-company-form" (click)="onSubmit()" [disabled]="submitting">
       @if (submitting) {
         <mat-spinner diameter="20"></mat-spinner>
       }
-      Create Company
+      Save Changes
     </button>
   </mat-dialog-actions>
 </div>
+

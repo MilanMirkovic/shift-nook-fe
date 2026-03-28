@@ -6,6 +6,7 @@ import {
   AdminCompany,
   AdminCompaniesPageResponse,
   CreateCompanyRequest,
+  UpdateCompanyRequest,
 } from './admin-companies.models';
 
 @Injectable({ providedIn: 'root' })
@@ -41,5 +42,18 @@ export class AdminCompaniesApiService {
   createCompany(request: CreateCompanyRequest): Observable<AdminCompany> {
     return this.http.post<AdminCompany>(this.baseUrl, request);
   }
-}
 
+  /**
+   * Update a company
+   */
+  updateCompany(companyId: string, request: UpdateCompanyRequest): Observable<AdminCompany> {
+    return this.http.put<AdminCompany>(`${this.baseUrl}/${companyId}`, request);
+  }
+
+  /**
+   * Delete a company (soft-delete)
+   */
+  deleteCompany(companyId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${companyId}`);
+  }
+}

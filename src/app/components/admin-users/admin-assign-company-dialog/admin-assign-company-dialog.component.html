@@ -17,12 +17,42 @@
 
     <form [formGroup]="form" class="assign-form">
       <div class="form-field">
-        <label class="field-label">Company ID</label>
+        <label class="field-label">Company</label>
         <mat-form-field appearance="outline">
           <mat-icon matPrefix>business</mat-icon>
-          <input matInput formControlName="companyId" placeholder="Enter company ID">
-          @if (getErrorMessage('companyId')) {
-            <mat-error>{{ getErrorMessage('companyId') }}</mat-error>
+          <mat-select formControlName="company" placeholder="Select a company">
+            <mat-select-trigger>
+              {{ form.get('company')?.value?.name ?? 'Select a company' }}
+            </mat-select-trigger>
+
+            <!-- Search box inside the dropdown panel -->
+            <div class="select-search-wrapper" (click)="$event.stopPropagation()">
+              <mat-form-field appearance="outline" class="select-search-field">
+                <mat-icon matPrefix>search</mat-icon>
+                <input matInput [formControl]="companySearch" placeholder="Search companies…" autocomplete="off">
+                @if (companySearch.value) {
+                  <button matSuffix mat-icon-button (click)="companySearch.setValue('')">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                }
+              </mat-form-field>
+            </div>
+
+            @if (companiesLoading$ | async) {
+              <mat-option disabled>
+                <mat-spinner diameter="18" style="display:inline-block;margin-right:8px"></mat-spinner>
+                Loading companies…
+              </mat-option>
+            }
+            @for (company of (filteredCompanies$ | async); track company.id) {
+              <mat-option [value]="company">{{ company.name }}</mat-option>
+            }
+            @if ((filteredCompanies$ | async)?.length === 0 && !(companiesLoading$ | async)) {
+              <mat-option disabled>No companies found</mat-option>
+            }
+          </mat-select>
+          @if (getErrorMessage('company')) {
+            <mat-error>{{ getErrorMessage('company') }}</mat-error>
           }
         </mat-form-field>
       </div>
@@ -59,4 +89,3 @@
     </button>
   </mat-dialog-actions>
 </div>
-

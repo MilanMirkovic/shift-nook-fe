@@ -197,3 +197,54 @@ mat-dialog-actions {
   }
 }
 
+.select-search-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #fff;
+  padding: 8px 8px 4px;
+  border-bottom: 1px solid #e2e8f0;
+
+  .select-search-field {
+    width: 100%;
+
+    ::ng-deep {
+      .mat-mdc-text-field-wrapper {
+        background: #f8f9fc;
+        border-radius: 8px !important;
+      }
+
+      .mat-mdc-form-field-infix {
+        padding-top: 6px;
+        padding-bottom: 6px;
+        min-height: 36px;
+      }
+
+      .mdc-text-field--outlined .mdc-notched-outline {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: #e2e8f0;
+        }
+      }
+
+      .mdc-text-field--focused .mdc-notched-outline {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: #2563eb !important;
+          border-width: 2px;
+        }
+      }
+
+      .mat-mdc-form-field-icon-prefix { color: #94a3b8; padding-right: 6px; }
+      .mdc-text-field--focused .mat-mdc-form-field-icon-prefix { color: #2563eb; }
+
+      input { font-size: 0.8125rem; color: #0f172a; }
+
+      .mdc-floating-label { display: none; }
+
+      .mat-mdc-form-field-subscript-wrapper { display: none; }
+    }
+  }
+}

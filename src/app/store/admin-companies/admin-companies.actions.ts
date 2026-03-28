@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { AdminCompany, CreateCompanyRequest } from './admin-companies.models';
+import { AdminCompany, CreateCompanyRequest, UpdateCompanyRequest } from './admin-companies.models';
 
 // ── List companies ──────────────────────────────────────────────────────────
 export const loadAdminCompanies = createAction(
@@ -54,3 +54,34 @@ export const clearAdminCompanyDetail = createAction(
   '[Admin Companies] Clear Detail'
 );
 
+// ── Delete company ──────────────────────────────────────────────────────────
+export const deleteAdminCompany = createAction(
+  '[Admin Companies] Delete',
+  props<{ companyId: string }>()
+);
+
+export const deleteAdminCompanySuccess = createAction(
+  '[Admin Companies] Delete Success',
+  props<{ companyId: string }>()
+);
+
+export const deleteAdminCompanyFailure = createAction(
+  '[Admin Companies] Delete Failure',
+  props<{ error: string }>()
+);
+
+// ── Update company ──────────────────────────────────────────────────────────
+export const updateAdminCompany = createAction(
+  '[Admin Companies] Update',
+  props<{ companyId: string; request: UpdateCompanyRequest }>()
+);
+
+export const updateAdminCompanySuccess = createAction(
+  '[Admin Companies] Update Success',
+  props<{ company: AdminCompany }>()
+);
+
+export const updateAdminCompanyFailure = createAction(
+  '[Admin Companies] Update Failure',
+  props<{ error: string }>()
+);

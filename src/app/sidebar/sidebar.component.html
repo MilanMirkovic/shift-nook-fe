@@ -58,10 +58,12 @@
           <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Clients</span>
         </a>
       }
-      <a mat-list-item routerLink="/jobsites" routerLinkActive="active" (click)="onLinkClicked()">
-        <mat-icon matListItemIcon>location_on</mat-icon>
-        <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Jobsites</span>
-      </a>
+      @if (!isPlatformAdmin) {
+        <a mat-list-item routerLink="/jobsites" routerLinkActive="active" (click)="onLinkClicked()">
+          <mat-icon matListItemIcon>location_on</mat-icon>
+          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Jobsites</span>
+        </a>
+      }
       @if (canSeeWorkTime) {
         <a mat-list-item routerLink="/work-time" routerLinkActive="active" (click)="onLinkClicked()">
           <mat-icon matListItemIcon>schedule</mat-icon>
@@ -80,15 +82,21 @@
           <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Principal Companies</span>
         </a>
       }
-      <a mat-list-item routerLink="/settings" routerLinkActive="active" (click)="onLinkClicked()">
-        <mat-icon matListItemIcon>settings</mat-icon>
-        <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Settings</span>
-      </a>
+      @if (!isPlatformAdmin) {
+        <a mat-list-item routerLink="/settings" routerLinkActive="active" (click)="onLinkClicked()">
+          <mat-icon matListItemIcon>settings</mat-icon>
+          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Settings</span>
+        </a>
+      }
 
       <!-- Admin Section -->
       @if (isPlatformAdmin) {
         <mat-divider></mat-divider>
         <div class="admin-section-label" [class.is-hidden]="!isHandset && isCollapsed">ADMIN</div>
+        <a mat-list-item routerLink="/admin/companies" routerLinkActive="active" (click)="onLinkClicked()">
+          <mat-icon matListItemIcon>business</mat-icon>
+          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Company Management</span>
+        </a>
         <a mat-list-item routerLink="/admin/users" routerLinkActive="active" (click)="onLinkClicked()">
           <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
           <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">User Management</span>

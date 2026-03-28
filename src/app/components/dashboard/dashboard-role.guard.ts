@@ -29,6 +29,11 @@ export const dashboardRoleGuard: CanActivateFn = () => {
     filter(([user, loading]) => !loading && user !== null),
     take(1),
     map(([user, , currentCompany]) => {
+      // Platform admins always have access to the dashboard
+      if (user?.role === 'ADMIN') {
+        return router.createUrlTree(['/admin/users']);
+      }
+
       // No companies at all — send to create-company or select-company
       if (!user?.companies || user.companies.length === 0) {
         if (user?.canCreateCompany) {

@@ -5,27 +5,41 @@ export interface AdminCompany {
   phone: string | null;
   address: string | null;
   website: string | null;
-  logoUrl: string | null;
-  memberCount: number;
+  logoFileId: string | null;
   createdAt: string; // ISO-8601
 }
 
-export interface AdminCompaniesPageResponse {
-  content: AdminCompany[];
+// Matches Spring's Page<T> JSON structure
+export interface SpringPage<T> {
+  content: T[];
   totalElements: number;
   totalPages: number;
-  number: number;
-  size: number;
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+  };
   first: boolean;
   last: boolean;
+  numberOfElements: number;
 }
+
+export type AdminCompaniesPageResponse = SpringPage<AdminCompany>;
 
 export interface CreateCompanyRequest {
   name: string;
-  email?: string;
-  phone?: string;
   address?: string;
+  email?: string;
   website?: string;
+  phone?: string;
+  ownerUserId?: string;
+}
+
+export interface UpdateCompanyRequest {
+  name?: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  website?: string | null;
 }
 
 export interface AdminCompaniesState {
@@ -41,8 +55,7 @@ export interface AdminCompaniesState {
   selectedCompanyLoading: boolean;
   selectedCompanyError: string | null;
 
-  // For create/update operations
+  // For create/update/delete operations
   submitting: boolean;
   submitError: string | null;
 }
-

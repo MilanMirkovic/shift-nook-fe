@@ -24,6 +24,7 @@ import { invoicesReducer } from './store/invoices/invoices.reducer';
 import { invitationsReducer, INVITATIONS_FEATURE_KEY } from './store/invitations/invitations.reducer';
 import { subcontractorsReducer, SUBCONTRACTORS_FEATURE_KEY } from './store/subcontractors/subcontractors.reducer';
 import { adminUsersReducer, ADMIN_USERS_FEATURE_KEY } from './store/admin-users/admin-users.reducer';
+import { adminCompaniesReducer, ADMIN_COMPANIES_FEATURE_KEY } from './store/admin-companies/admin-companies.reducer';
 
 // Import effects
 import { UserEffects } from './store/user/user.effects';
@@ -40,6 +41,7 @@ import { InvoicesEffects } from './store/invoices/invoices.effects';
 import { InvitationsEffects } from './store/invitations/invitations.effects';
 import { SubcontractorsEffects } from './store/subcontractors/subcontractors.effects';
 import { AdminUsersEffects } from './store/admin-users/admin-users.effects';
+import { AdminCompaniesEffects } from './store/admin-companies/admin-companies.effects';
 
 // Import feature keys
 import { USER_FEATURE_KEY } from './store/user/user.selectors';
@@ -76,6 +78,7 @@ export const appConfig: ApplicationConfig = {
       [INVITATIONS_FEATURE_KEY]: invitationsReducer,
       [SUBCONTRACTORS_FEATURE_KEY]: subcontractorsReducer,
       [ADMIN_USERS_FEATURE_KEY]: adminUsersReducer,
+      [ADMIN_COMPANIES_FEATURE_KEY]: adminCompaniesReducer,
     }),
     provideEffects([
       UserEffects,
@@ -92,6 +95,7 @@ export const appConfig: ApplicationConfig = {
       InvitationsEffects,
       SubcontractorsEffects,
       AdminUsersEffects,
+      AdminCompaniesEffects,
     ]),
     provideStoreDevtools({
       maxAge: 25,
