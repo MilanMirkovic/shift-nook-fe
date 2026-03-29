@@ -163,6 +163,16 @@ mat-dialog-content {
       margin-top: 1px;
     }
   }
+
+  .checkbox-field {
+    padding: 4px 0;
+
+    .checkbox-label {
+      font-size: 0.875rem;
+      color: #374151;
+      font-weight: 500;
+    }
+  }
 }
 
 mat-dialog-actions {
@@ -196,4 +206,3 @@ mat-dialog-actions {
     }
   }
 }
-

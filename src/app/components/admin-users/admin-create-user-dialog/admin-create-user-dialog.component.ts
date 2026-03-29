@@ -1,4 +1,4 @@
-  import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -6,6 +6,7 @@ import { Actions, ofType } from '@ngrx/effects';
 import { take } from 'rxjs';
 
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -23,6 +24,7 @@ import { createAdminUser, createAdminUserSuccess, createAdminUserFailure } from 
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
+    MatCheckboxModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
@@ -49,6 +51,7 @@ export class AdminCreateUserDialogComponent {
     firstName: ['', [Validators.required, Validators.minLength(1)]],
     lastName: ['', [Validators.required, Validators.minLength(1)]],
     role: ['WORKER', [Validators.required]],
+    canCreateCompany: [false],
   });
 
   onSubmit(): void {
@@ -93,8 +96,8 @@ export class AdminCreateUserDialogComponent {
       firstName: 'First name',
       lastName: 'Last name',
       role: 'Role',
+      canCreateCompany: 'Can create company',
     };
     return labels[name] || name;
   }
 }
-

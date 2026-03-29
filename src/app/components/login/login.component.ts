@@ -5,6 +5,7 @@ import { Subject, takeUntil, filter, take, of } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { UserStoreService } from '../../store/user/user-store.service';
 import { catchError, tap } from 'rxjs/operators';
+import { CompanyRole } from '../../shared/models/company-role';
 
 @Component({
   selector: 'app-login',
@@ -110,6 +111,14 @@ export class LoginComponent implements OnInit, OnDestroy {
               console.log('Branch: user has no companies and cannot create, navigating to /dashboard');
               this.router.navigate(['/dashboard']);
             }
+            return;
+          }
+
+          // User has companies but is not an owner of any — and is allowed to create one
+          const isOwnerOfAny = user.companies.some(c => c.role === CompanyRole.OWNER);
+          if (user.role === 'USER' && user.canCreateCompany && !isOwnerOfAny) {
+            console.log('Branch: user has no owned company and can create, navigating to /create-company');
+            this.router.navigate(['/create-company']);
             return;
           }
 

@@ -35,6 +35,7 @@ export interface CreateUserRequest {
   firstName: string;
   lastName: string;
   role: UserRole;
+  canCreateCompany: boolean;
 }
 
 export interface UpdateRoleRequest {
@@ -63,4 +64,3 @@ export interface AdminUsersState {
   submitting: boolean;
   submitError: string | null;
 }
-
