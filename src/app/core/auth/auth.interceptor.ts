@@ -41,7 +41,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError(err => {
       if (err?.status === 401) {
         const currentUrl = router.url;
-        const publicRoutes = ['/accept-invite', '/subcontractor-invite', '/auth/set-password', '/auth/reset-password', '/login', '/signup'];
+        const publicRoutes = ['/accept-invite', '/subcontractor-invite', '/auth/set-password', '/auth/reset-password', '/login', '/signup', '/forgot-password'];
         const isPublicRoute = publicRoutes.some(r => currentUrl.startsWith(r));
         if (!isPublicRoute) {
           // Token expired or invalid — force logout and redirect to login

@@ -109,7 +109,10 @@ export class App implements OnInit, OnDestroy {
     this.authService.isAuthenticated().then(isAuth => {
       if (isAuth) {
         const currentUrl = this.router.url;
-        if (!currentUrl.startsWith('/subcontractor-invite')) {
+        const skipLoadRoutes = ['/subcontractor-invite', '/forgot-password', '/auth/reset-password', '/auth/set-password'];
+        if (skipLoadRoutes.some(r => currentUrl.startsWith(r))) {
+          this.appInitializing.set(false);
+        } else {
           this.userStore.loadUser();
           this.workSessionStore.loadCurrentSession();
           // Wait until user data has actually loaded before hiding the loading screen
@@ -122,8 +125,6 @@ export class App implements OnInit, OnDestroy {
             .subscribe(() => {
               this.appInitializing.set(false);
             });
-        } else {
-          this.appInitializing.set(false);
         }
       } else {
         this.appInitializing.set(false);
