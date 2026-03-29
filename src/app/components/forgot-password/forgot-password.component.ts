@@ -7,7 +7,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
+import { UserApi } from '../../store/user/user.api';
 
 @Component({
   selector: 'app-forgot-password',
@@ -51,6 +53,7 @@ export class ForgotPasswordComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private authService: AuthService,
+    private userApi: UserApi,
   ) {
     this.emailForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -131,6 +134,14 @@ export class ForgotPasswordComponent implements OnInit {
       if (this.mode === 'set') {
         // Sign the worker in automatically after setting their password
         await this.authService.signIn(this.email, newPassword);
+
+        // Fetch current profile and call updateProfile to mark onboardingComplete = true
+        try {
+          const profile = await firstValueFrom(this.userApi.getCurrentUser());
+          await firstValueFrom(this.userApi.updateProfile(profile.firstName, profile.lastName));
+        } catch {
+          // Non-fatal — proceed even if this fails
+        }
 
         // Restore the pending invite token that was saved before the redirect
         const pendingToken = sessionStorage.getItem('pendingInviteToken');
