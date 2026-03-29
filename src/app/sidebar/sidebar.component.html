@@ -93,6 +93,10 @@
       @if (isPlatformAdmin) {
         <mat-divider></mat-divider>
         <div class="admin-section-label" [class.is-hidden]="!isHandset && isCollapsed">ADMIN</div>
+        <a mat-list-item routerLink="/admin/dashboard" routerLinkActive="active" (click)="onLinkClicked()">
+          <mat-icon matListItemIcon>bar_chart</mat-icon>
+          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Admin Dashboard</span>
+        </a>
         <a mat-list-item routerLink="/admin/companies" routerLinkActive="active" (click)="onLinkClicked()">
           <mat-icon matListItemIcon>business</mat-icon>
           <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Company Management</span>

@@ -7,6 +7,8 @@ import { platformAdminGuard } from './core/auth/platform-admin.guard';
 import { CompanyRole } from './shared/models/company-role';
 import { SUBCONTRACTORS_FEATURE_KEY, subcontractorsReducer } from './store/subcontractors/subcontractors.reducer';
 import { SubcontractorsEffects } from './store/subcontractors/subcontractors.effects';
+import { ADMIN_DASHBOARD_FEATURE_KEY, adminDashboardReducer } from './store/admin-dashboard/admin-dashboard.reducer';
+import { AdminDashboardEffects } from './store/admin-dashboard/admin-dashboard.effects';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -194,6 +196,18 @@ export const routes: Routes = [
       import('./pages/company-redirect.page').then((m) => m.CompanyRedirectPage),
   },
   // ── Platform Admin: user management ───────────────────────────────────────
+  {
+    path: 'admin/dashboard',
+    canActivate: [authGuard, platformAdminGuard],
+    providers: [
+      provideState(ADMIN_DASHBOARD_FEATURE_KEY, adminDashboardReducer),
+      provideEffects(AdminDashboardEffects),
+    ],
+    loadComponent: () =>
+      import('./components/admin-dashboard/admin-dashboard.component').then(
+        (m) => m.AdminDashboardComponent,
+      ),
+  },
   {
     path: 'admin/companies',
     canActivate: [authGuard, platformAdminGuard],

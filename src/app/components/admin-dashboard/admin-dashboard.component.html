@@ -1,0 +1,270 @@
+<app-page-layout title="Admin Dashboard" [subtitle]="today" icon="admin_panel_settings">
+  <ng-container ngProjectAs="actions">
+    <button mat-stroked-button (click)="refresh()" matTooltip="Refresh data">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </ng-container>
+
+  @if (loading$ | async) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading platform statistics…</p>
+    </div>
+  }
+
+  @if (error$ | async; as error) {
+    <div class="error-banner">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+      <button mat-button (click)="refresh()">Retry</button>
+    </div>
+  }
+
+  @if ((loading$ | async) === false && (stats$ | async); as stats) {
+    <!-- ── KPI Cards Row 1 ───────────────────────────────────────────── -->
+    <div class="kpi-grid">
+
+      <!-- Total Users -->
+      <div class="kpi-card kpi-card--blue" (click)="goToUsers()">
+        <div class="kpi-icon"><mat-icon>group</mat-icon></div>
+        <div class="kpi-content">
+          <div class="kpi-value">{{ stats.totalUsers | number }}</div>
+          <div class="kpi-label">Total Users</div>
+          <div class="kpi-sub">
+            <span class="badge badge--purple">{{ stats.totalAdmins }} admins</span>
+            <span class="badge badge--gray">{{ stats.totalRegularUsers }} regular</span>
+          </div>
+        </div>
+        <mat-icon class="kpi-arrow">arrow_forward_ios</mat-icon>
+      </div>
+
+      <!-- Total Companies -->
+      <div class="kpi-card kpi-card--indigo" (click)="goToCompanies()">
+        <div class="kpi-icon"><mat-icon>business</mat-icon></div>
+        <div class="kpi-content">
+          <div class="kpi-value">{{ stats.totalCompanies | number }}</div>
+          <div class="kpi-label">Total Companies</div>
+          <div class="kpi-sub">
+            <span class="badge badge--green">+{{ stats.newCompaniesLast30Days }} this month</span>
+          </div>
+        </div>
+        <mat-icon class="kpi-arrow">arrow_forward_ios</mat-icon>
+      </div>
+
+      <!-- New Users (30d) -->
+      <div class="kpi-card kpi-card--emerald">
+        <div class="kpi-icon"><mat-icon>person_add</mat-icon></div>
+        <div class="kpi-content">
+          <div class="kpi-value">{{ stats.newUsersLast30Days }}</div>
+          <div class="kpi-label">New Users</div>
+          <div class="kpi-sub">
+            <span class="badge badge--gray">last 30 days</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Companies (30d) -->
+      <div class="kpi-card kpi-card--violet">
+        <div class="kpi-icon"><mat-icon>add_business</mat-icon></div>
+        <div class="kpi-content">
+          <div class="kpi-value">{{ stats.newCompaniesLast30Days }}</div>
+          <div class="kpi-label">New Companies</div>
+          <div class="kpi-sub">
+            <span class="badge badge--gray">last 30 days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Progress / Insight Cards ─────────────────────────────────────── -->
+    <div class="insight-grid">
+
+      <!-- Onboarding Progress -->
+      <div class="insight-card">
+        <div class="insight-header">
+          <mat-icon class="insight-icon">check_circle</mat-icon>
+          <div>
+            <div class="insight-title">Onboarding Completion</div>
+            <div class="insight-subtitle">Users who completed setup</div>
+          </div>
+        </div>
+        <div class="progress-block">
+          <div class="progress-nums">
+            <span class="progress-big">{{ onboardingPercent(stats) }}%</span>
+            <span class="progress-detail">{{ stats.onboardingCompleteUsers }} / {{ stats.totalUsers }} users</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill progress-fill--green"
+                 [style.width.%]="onboardingPercent(stats)"></div>
+          </div>
+          <div class="progress-legend">
+            <span class="dot dot--green"></span> Complete: {{ stats.onboardingCompleteUsers }}
+            <span class="dot dot--red" style="margin-left:12px"></span> Pending: {{ stats.onboardingIncompleteUsers }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Company Assignment -->
+      <div class="insight-card">
+        <div class="insight-header">
+          <mat-icon class="insight-icon">link</mat-icon>
+          <div>
+            <div class="insight-title">Company Assignment</div>
+            <div class="insight-subtitle">Users linked to at least one company</div>
+          </div>
+        </div>
+        <div class="progress-block">
+          <div class="progress-nums">
+            <span class="progress-big">{{ companyAssignedPercent(stats) }}%</span>
+            <span class="progress-detail">{{ stats.usersWithCompanies }} / {{ stats.totalUsers }} users</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill progress-fill--blue"
+                 [style.width.%]="companyAssignedPercent(stats)"></div>
+          </div>
+          <div class="progress-legend">
+            <span class="dot dot--blue"></span> Assigned: {{ stats.usersWithCompanies }}
+            <span class="dot dot--gray" style="margin-left:12px"></span> Unassigned: {{ stats.usersWithoutCompanies }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Role Breakdown -->
+      <div class="insight-card">
+        <div class="insight-header">
+          <mat-icon class="insight-icon">shield</mat-icon>
+          <div>
+            <div class="insight-title">Role Breakdown</div>
+            <div class="insight-subtitle">Platform-level user roles</div>
+          </div>
+        </div>
+        <div class="role-breakdown">
+          <div class="role-row">
+            <div class="role-pill role-pill--admin">
+              <mat-icon>admin_panel_settings</mat-icon>
+              ADMIN
+            </div>
+            <div class="role-count">{{ stats.totalAdmins }}</div>
+            <div class="role-bar-wrap">
+              <div class="role-bar role-bar--admin"
+                   [style.width.%]="stats.totalUsers ? (stats.totalAdmins / stats.totalUsers) * 100 : 0"></div>
+            </div>
+          </div>
+          <div class="role-row">
+            <div class="role-pill role-pill--user">
+              <mat-icon>person</mat-icon>
+              USER
+            </div>
+            <div class="role-count">{{ stats.totalRegularUsers }}</div>
+            <div class="role-bar-wrap">
+              <div class="role-bar role-bar--user"
+                   [style.width.%]="stats.totalUsers ? (stats.totalRegularUsers / stats.totalUsers) * 100 : 0"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Recent Activity ──────────────────────────────────────────────── -->
+    <div class="recent-grid">
+
+      <!-- Recent Users -->
+      <div class="recent-card">
+        <div class="recent-card-header">
+          <div class="recent-card-title">
+            <mat-icon>person_add</mat-icon>
+            Recent Users
+          </div>
+          <button mat-button class="view-all-btn" (click)="goToUsers()">
+            View all <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </div>
+
+        @if ((recentUsers$ | async); as recentUsers) {
+          @if (recentUsers.length === 0) {
+            <div class="empty-state">
+              <mat-icon>people_outline</mat-icon>
+              <span>No users yet</span>
+            </div>
+          } @else {
+            <div class="recent-list">
+              @for (user of recentUsers; track user.id) {
+                <div class="recent-item" (click)="goToUser(user.id)">
+                  <div class="user-avatar">{{ getInitials(user.firstName, user.lastName) }}</div>
+                  <div class="recent-item-info">
+                    <div class="recent-item-name">{{ user.firstName }} {{ user.lastName }}</div>
+                    <div class="recent-item-sub">{{ user.email }}</div>
+                  </div>
+                  <div class="recent-item-meta">
+                    <span class="badge" [class.badge--purple]="user.role === 'ADMIN'" [class.badge--gray]="user.role !== 'ADMIN'">
+                      {{ user.role }}
+                    </span>
+                    <span class="meta-date">{{ formatDate(user.createdAt) }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <!-- Recent Companies -->
+      <div class="recent-card">
+        <div class="recent-card-header">
+          <div class="recent-card-title">
+            <mat-icon>add_business</mat-icon>
+            Recent Companies
+          </div>
+          <button mat-button class="view-all-btn" (click)="goToCompanies()">
+            View all <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </div>
+
+        @if ((recentCompanies$ | async); as recentCompanies) {
+          @if (recentCompanies.length === 0) {
+            <div class="empty-state">
+              <mat-icon>business_outline</mat-icon>
+              <span>No companies yet</span>
+            </div>
+          } @else {
+            <div class="recent-list">
+              @for (company of recentCompanies; track company.id) {
+                <div class="recent-item" (click)="goToCompany(company.id)">
+                  <div class="company-avatar">{{ getCompanyInitials(company.name) }}</div>
+                  <div class="recent-item-info">
+                    <div class="recent-item-name">{{ company.name }}</div>
+                    <div class="recent-item-sub">{{ company.email || 'No email' }}</div>
+                  </div>
+                  <div class="recent-item-meta">
+                    <span class="meta-date">{{ formatDate(company.createdAt) }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- ── Quick Actions ────────────────────────────────────────────────── -->
+    <div class="quick-actions">
+      <div class="section-title">Quick Actions</div>
+      <div class="actions-row">
+        <button mat-stroked-button class="action-btn" (click)="goToUsers()">
+          <mat-icon>group</mat-icon>
+          Manage Users
+        </button>
+        <button mat-stroked-button class="action-btn" (click)="goToCompanies()">
+          <mat-icon>business</mat-icon>
+          Manage Companies
+        </button>
+        <button mat-flat-button class="action-btn action-btn--primary" (click)="refresh()">
+          <mat-icon>refresh</mat-icon>
+          Refresh Stats
+        </button>
+      </div>
+    </div>
+  }
+</app-page-layout>
+
