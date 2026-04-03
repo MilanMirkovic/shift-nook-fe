@@ -101,7 +101,6 @@ export class ClientJobsitesComponent implements OnInit, OnDestroy {
       disableClose: false,
       autoFocus: true,
       panelClass: 'jobsite-dialog-container',
-      position: { top: '25%' },
       data: { clientId: this.clientId, clientName: this.clientName },
     });
 
@@ -133,7 +132,6 @@ export class ClientJobsitesComponent implements OnInit, OnDestroy {
       disableClose: false,
       autoFocus: true,
       panelClass: 'jobsite-dialog-container',
-      position: { top: '15%' },
       data: {
         mode: 'edit',
         jobsite: {

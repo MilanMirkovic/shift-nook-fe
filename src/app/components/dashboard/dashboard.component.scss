@@ -9,17 +9,15 @@
 .stat-card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: var(--sn-space-5) var(--sn-space-6);
+  gap: 18px;
+  padding: var(--sn-space-6) var(--sn-space-6);
   background: var(--sn-surface);
-  border: 1px solid var(--sn-gray-200);
+  border: 2px solid transparent;
   border-radius: var(--sn-radius-xl);
-  box-shadow: var(--sn-shadow-card);
+  box-shadow: var(--sn-shadow-lg);
   position: relative;
-  overflow: hidden;
-  transition: transform var(--sn-duration-slow) var(--sn-ease-smooth),
-              border-color var(--sn-duration-normal) var(--sn-ease-out),
-              box-shadow var(--sn-duration-normal) var(--sn-ease-out);
+  overflow: visible;
+  transition: all var(--sn-duration-slow) var(--sn-ease-smooth);
   animation: fadeUp 0.5s ease both;
   animation-fill-mode: forwards;
   opacity: 0;
@@ -29,35 +27,117 @@
   &:nth-child(3) { animation-delay: calc(2 * 70ms + 100ms); }
   &:nth-child(4) { animation-delay: calc(3 * 70ms + 100ms); }
 
-  &:hover {
-    transform: translateY(-2px);
-    border-color: var(--sn-gray-300);
-    box-shadow: var(--sn-shadow-lg);
+  /* Gradient border effect */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, transparent, transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity var(--sn-duration-slow) var(--sn-ease-smooth);
+    pointer-events: none; // Allow clicks to pass through
   }
 
-  &:active { transform: translateY(-1px); }
+  /* Different gradient borders for each card */
+  &:nth-child(1)::before { background: linear-gradient(135deg, #2563eb, #7c3aed); }
+  &:nth-child(2)::before { background: linear-gradient(135deg, #7c3aed, #ec4899); }
+  &:nth-child(3)::before { background: linear-gradient(135deg, #06b6d4, #2563eb); }
+  &:nth-child(4)::before { background: linear-gradient(135deg, #059669, #06b6d4); }
+
+  &:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(37, 99, 235, 0.2),
+                0 10px 30px rgba(15, 23, 42, 0.1);
+
+    &::before {
+      opacity: 1;
+    }
+
+    /* Glow effects for each card on hover */
+    &:nth-child(1) {
+      box-shadow: 0 20px 60px rgba(37, 99, 235, 0.3),
+                  0 0 80px rgba(37, 99, 235, 0.15);
+    }
+
+    &:nth-child(2) {
+      box-shadow: 0 20px 60px rgba(236, 72, 153, 0.3),
+                  0 0 80px rgba(236, 72, 153, 0.15);
+    }
+
+    &:nth-child(3) {
+      box-shadow: 0 20px 60px rgba(6, 182, 212, 0.3),
+                  0 0 80px rgba(6, 182, 212, 0.15);
+    }
+
+    &:nth-child(4) {
+      box-shadow: 0 20px 60px rgba(5, 150, 105, 0.3),
+                  0 0 80px rgba(5, 150, 105, 0.15);
+    }
+  }
+
+  &:active { transform: translateY(-6px) scale(1.01); }
 }
 
 .stat-icon {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: var(--sn-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  position: relative;
+  transition: transform var(--sn-duration-slow) var(--sn-ease-smooth);
 
   mat-icon {
-    font-size: 22px;
-    width: 22px;
-    height: 22px;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
     color: #ffffff;
+    position: relative;
+    z-index: 1;
   }
 
-  &.clients  { background: linear-gradient(135deg, #2563eb, #7c3aed); }
-  &.jobsites { background: linear-gradient(135deg, #7c3aed, #06b6d4); }
-  &.team     { background: linear-gradient(135deg, #06b6d4, #2563eb); }
-  &.active   { background: linear-gradient(135deg, #059669, #06b6d4); }
+  /* Gradient backgrounds with glow */
+  &.clients {
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4),
+                0 4px 12px rgba(124, 58, 237, 0.3);
+  }
+
+  &.jobsites {
+    background: linear-gradient(135deg, #7c3aed, #ec4899);
+    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4),
+                0 4px 12px rgba(236, 72, 153, 0.3);
+  }
+
+  &.team {
+    background: linear-gradient(135deg, #06b6d4, #2563eb);
+    box-shadow: 0 8px 24px rgba(6, 182, 212, 0.4),
+                0 4px 12px rgba(37, 99, 235, 0.3);
+  }
+
+  &.active {
+    background: linear-gradient(135deg, #059669, #06b6d4);
+    box-shadow: 0 8px 24px rgba(5, 150, 105, 0.4),
+                0 4px 12px rgba(6, 182, 212, 0.3);
+  }
+
+  /* Animated pulse on hover */
+  .stat-card:hover & {
+    transform: scale(1.1) rotate(5deg);
+    animation: iconPulse 0.6s ease;
+  }
+}
+
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1.1) rotate(5deg); }
+  50% { transform: scale(1.15) rotate(5deg); }
 }
 
 .stat-content {
@@ -117,18 +197,41 @@
 
 .dashboard-card {
   background: var(--sn-surface);
-  border: 1px solid var(--sn-gray-200);
+  border: 2px solid transparent;
   border-radius: var(--sn-radius-xl);
-  box-shadow: var(--sn-shadow-card);
-  overflow: hidden;
+  box-shadow: var(--sn-shadow-lg);
+  overflow: visible;
   animation: fadeUp 0.5s ease both;
   animation-fill-mode: forwards;
   opacity: 0;
   animation-delay: 0.35s;
-  transition: var(--sn-transition-shadow);
+  position: relative;
+  transition: all var(--sn-duration-slow) var(--sn-ease-smooth);
+
+  /* Gradient border on hover */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed, #ec4899);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity var(--sn-duration-slow) var(--sn-ease-smooth);
+    pointer-events: none; // Allow clicks to pass through
+  }
 
   &:hover {
-    box-shadow: var(--sn-shadow-md);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(37, 99, 235, 0.15),
+                0 8px 24px rgba(15, 23, 42, 0.1);
+
+    &::before {
+      opacity: 1;
+    }
   }
 
   &.full-width {
