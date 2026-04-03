@@ -45,6 +45,7 @@ export class ClientsComponent implements OnInit, OnDestroy {
     { id: 'name', header: 'Name', field: 'name', searchable: true },
     { id: 'email', header: 'Email', field: 'email', searchable: true },
     { id: 'phone', header: 'Phone', field: 'phone', searchable: true, width: '180px' },
+    { id: 'address', header: 'Address', field: 'address', searchable: true },
     {
       id: 'createdAt',
       header: 'Created',

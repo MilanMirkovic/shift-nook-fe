@@ -4,27 +4,37 @@
 
 @if (isLoading) {
   <div class="skeleton-card">
-    <div class="sk-profile-row">
+    <div class="sk-banner-row">
       <div class="sk-avatar"></div>
       <div class="sk-lines">
         <div class="sk-row sk-title"></div>
         <div class="sk-row sk-short"></div>
       </div>
     </div>
-    <div class="sk-row"></div>
-    <div class="sk-row"></div>
+    <div class="sk-divider"></div>
+    <div class="sk-body">
+      <div class="sk-row sk-label"></div>
+      <div class="sk-detail-grid">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="sk-detail-item">
+            <div class="sk-row sk-detail-label"></div>
+            <div class="sk-row sk-detail-value"></div>
+          </div>
+        }
+      </div>
+    </div>
   </div>
 }
 
 @if (!isLoading) {
   <div class="settings-card">
 
-    <!-- ── Identity banner ──────────────────────────────────────────────── -->
+    <!-- ── Banner ───────────────────────────────────────────────────────── -->
     <div class="profile-banner">
       <div class="profile-avatar">
         {{ (firstName[0] ?? '') + (lastName[0] ?? '') | uppercase }}
       </div>
-      <div class="profile-banner__text">
+      <div class="profile-banner__info">
         <span class="profile-banner__name">{{ firstName }} {{ lastName }}</span>
         <span class="profile-banner__email">
           <mat-icon>mail_outline</mat-icon>{{ email }}
@@ -37,25 +47,29 @@
       }
     </div>
 
-    <div class="profile-divider"></div>
+    <div class="sn-divider"></div>
 
     <!-- ── View mode ────────────────────────────────────────────────────── -->
     @if (!isEditing) {
       <div class="card-body">
         <p class="section-label">Personal details</p>
         <div class="detail-grid">
+
           <div class="detail-item">
             <span class="detail-label">First name</span>
             <span class="detail-value">{{ firstName || '—' }}</span>
           </div>
+
           <div class="detail-item">
             <span class="detail-label">Last name</span>
             <span class="detail-value">{{ lastName || '—' }}</span>
           </div>
+
           <div class="detail-item detail-item--full">
             <span class="detail-label">Email</span>
             <span class="detail-value">{{ email }}</span>
           </div>
+
         </div>
       </div>
     }

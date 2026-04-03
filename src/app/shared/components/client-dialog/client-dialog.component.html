@@ -41,6 +41,17 @@
           }
         </mat-form-field>
       </div>
+
+      <div class="form-field">
+        <label class="field-label">Address</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>location_on</mat-icon>
+          <input matInput formControlName="address" placeholder="e.g. 123 Main St, New York, NY 10001">
+          @if (getErrorMessage('address')) {
+            <mat-error>{{ getErrorMessage('address') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
     </form>
   </mat-dialog-content>
 

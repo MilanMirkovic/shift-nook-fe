@@ -25,7 +25,20 @@ export interface Timesheet {
 
 export interface CreateTimesheetRequest {
   jobsiteId: string;
-  jobsiteTaskId: string;
+  /**
+   * ID of an existing task to check in against.
+   * Mutually exclusive with newTaskName / newTaskDescription.
+   */
+  jobsiteTaskId?: string;
+  /**
+   * Name of a new task to create on-the-fly at check-in (max 255 chars).
+   * Required when not providing jobsiteTaskId.
+   */
+  newTaskName?: string;
+  /**
+   * Optional description for the new task being created inline at check-in (max 2000 chars).
+   */
+  newTaskDescription?: string;
   checkInTime: string;
   checkInLat: number;
   checkInLng: number;

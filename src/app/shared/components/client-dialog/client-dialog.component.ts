@@ -36,7 +36,8 @@ export class ClientDialogComponent {
     this.clientForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required, Validators.pattern(/^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/)]]
+      phone: ['', [Validators.required, Validators.pattern(/^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/)]],
+      address: ['']
     });
   }
 
@@ -68,9 +69,9 @@ export class ClientDialogComponent {
     const labels: { [key: string]: string } = {
       name: 'Name',
       email: 'Email',
-      phone: 'Phone'
+      phone: 'Phone',
+      address: 'Address'
     };
     return labels[fieldName] || fieldName;
   }
 }
-

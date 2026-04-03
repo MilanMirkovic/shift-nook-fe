@@ -70,7 +70,20 @@
           <mat-icon matPrefix>business</mat-icon>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="sn-field">
+        <!-- ── Task mode switcher ── -->
+        <div class="sn-task-mode">
+          <button type="button" class="sn-task-mode__tab" [class.is-active]="!createNewTask" (click)="createNewTask && toggleTaskMode()">
+            <mat-icon>assignment</mat-icon>
+            <span>Existing task</span>
+          </button>
+          <button type="button" class="sn-task-mode__tab" [class.is-active]="createNewTask" (click)="!createNewTask && toggleTaskMode()">
+            <mat-icon>add_task</mat-icon>
+            <span>New task</span>
+          </button>
+        </div>
+
+        <!-- Existing task picker -->
+        <mat-form-field *ngIf="!createNewTask" appearance="outline" class="sn-field">
           <mat-label>Task</mat-label>
           <mat-select formControlName="jobsiteTaskId" required>
             <mat-option *ngFor="let task of jobsiteTasks$ | async" [value]="task.id">
@@ -79,6 +92,27 @@
           </mat-select>
           <mat-icon matPrefix>work_outline</mat-icon>
         </mat-form-field>
+
+        <!-- New task fields -->
+        <ng-container *ngIf="createNewTask">
+          <mat-form-field appearance="outline" class="sn-field">
+            <mat-label>Task name</mat-label>
+            <input matInput formControlName="newTaskName" placeholder="e.g. Install north-side cabling" maxlength="255" />
+            <mat-icon matPrefix>drive_file_rename_outline</mat-icon>
+            <mat-hint align="end">{{ checkInForm.get('newTaskName')?.value?.length || 0 }}/255</mat-hint>
+            <mat-error *ngIf="newTaskNameHasMaxError">Max 255 characters</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="sn-field">
+            <mat-label>Task description <span class="sn-optional">(optional)</span></mat-label>
+            <textarea matInput formControlName="newTaskDescription"
+              placeholder="Brief description of the work to be done…"
+              rows="3" maxlength="2000"></textarea>
+            <mat-icon matPrefix>notes</mat-icon>
+            <mat-hint align="end">{{ checkInForm.get('newTaskDescription')?.value?.length || 0 }}/2000</mat-hint>
+            <mat-error *ngIf="newTaskDescriptionHasMaxError">Max 2000 characters</mat-error>
+          </mat-form-field>
+        </ng-container>
       </form>
     </div>
 

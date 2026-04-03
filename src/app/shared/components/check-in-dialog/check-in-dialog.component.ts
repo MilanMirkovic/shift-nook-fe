@@ -71,19 +71,24 @@ export class CheckInDialogComponent implements OnInit, OnDestroy, AfterViewInit 
   protected gettingLocation = false;
   protected currentLocation?: { lat: number; lng: number; accuracy: number };
   protected mapLoading = false;
+  /** Whether the worker is creating a brand-new task on the fly */
+  protected createNewTask = false;
 
   @ViewChild('mapContainer', { static: false }) mapContainer?: ElementRef;
   private map?: L.Map;
   private marker?: L.Marker;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: DialogData) {
-    // Store the values immediately as readonly to prevent change detection issues
     this.isCheckedIn = !!data?.isCheckedIn;
     this.activeTimesheet = data?.activeTimesheet;
 
     this.checkInForm = this.fb.group({
       jobsiteId: ['', Validators.required],
-      jobsiteTaskId: ['', Validators.required]
+      // Existing-task mode
+      jobsiteTaskId: [''],
+      // New-task mode
+      newTaskName: ['', [Validators.maxLength(255)]],
+      newTaskDescription: ['', [Validators.maxLength(2000)]]
     });
 
     this.checkOutForm = this.fb.group({
@@ -91,6 +96,9 @@ export class CheckInDialogComponent implements OnInit, OnDestroy, AfterViewInit 
       lunchtimeDurationMinutes: [null, [Validators.min(0)]],
       markTaskAsComplete: [false]
     });
+
+    // Apply conditional validators based on createNewTask flag
+    this._applyTaskModeValidators();
   }
 
   ngOnInit(): void {
@@ -270,6 +278,32 @@ export class CheckInDialogComponent implements OnInit, OnDestroy, AfterViewInit 
     }, 150);
   }
 
+  /** Toggle between picking an existing task and creating a new one */
+  protected toggleTaskMode(): void {
+    this.createNewTask = !this.createNewTask;
+    this.checkInForm.patchValue({ jobsiteTaskId: '', newTaskName: '', newTaskDescription: '' });
+    this._applyTaskModeValidators();
+    this.checkInForm.updateValueAndValidity();
+    this.cdr.markForCheck();
+  }
+
+  private _applyTaskModeValidators(): void {
+    const taskIdCtrl = this.checkInForm.get('jobsiteTaskId');
+    const nameCtrl = this.checkInForm.get('newTaskName');
+
+    if (this.createNewTask) {
+      taskIdCtrl?.clearValidators();
+      nameCtrl?.setValidators([Validators.required, Validators.maxLength(255)]);
+    } else {
+      taskIdCtrl?.setValidators([Validators.required]);
+      nameCtrl?.clearValidators();
+      nameCtrl?.setValidators([Validators.maxLength(255)]);
+    }
+
+    taskIdCtrl?.updateValueAndValidity();
+    nameCtrl?.updateValueAndValidity();
+  }
+
   onCheckIn(): void {
     if (this.checkInForm.invalid || !this.currentLocation) {
       return;
@@ -279,9 +313,15 @@ export class CheckInDialogComponent implements OnInit, OnDestroy, AfterViewInit 
       .pipe(takeUntil(this.destroy$), filter(company => !!company?.companyId))
       .subscribe(company => {
         const formValue = this.checkInForm.value;
-        const checkInData = {
+
+        const checkInData: import('../../../store/timesheets/timesheets.models').CreateTimesheetRequest = {
           jobsiteId: formValue.jobsiteId,
-          jobsiteTaskId: formValue.jobsiteTaskId,
+          ...(this.createNewTask
+            ? {
+                newTaskName: formValue.newTaskName?.trim(),
+                newTaskDescription: formValue.newTaskDescription?.trim() || undefined
+              }
+            : { jobsiteTaskId: formValue.jobsiteTaskId }),
           checkInTime: new Date().toISOString(),
           checkInLat: this.currentLocation!.lat,
           checkInLng: this.currentLocation!.lng,
@@ -366,5 +406,13 @@ export class CheckInDialogComponent implements OnInit, OnDestroy, AfterViewInit 
 
   get lunchDurationHasMinError(): boolean {
     return !!this.checkOutForm.get('lunchtimeDurationMinutes')?.hasError('min');
+  }
+
+  get newTaskNameHasMaxError(): boolean {
+    return !!this.checkInForm.get('newTaskName')?.hasError('maxlength');
+  }
+
+  get newTaskDescriptionHasMaxError(): boolean {
+    return !!this.checkInForm.get('newTaskDescription')?.hasError('maxlength');
   }
 }
