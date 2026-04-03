@@ -10,16 +10,16 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px 20px;
-  background: #ffffff;
-  border: 1px solid #e8eaf0;
-  border-radius: 18px;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05);
+  padding: var(--sn-space-5) var(--sn-space-6);
+  background: var(--sn-surface);
+  border: 1px solid var(--sn-gray-200);
+  border-radius: var(--sn-radius-xl);
+  box-shadow: var(--sn-shadow-card);
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-              border-color 0.25s ease,
-              box-shadow 0.25s ease;
+  transition: transform var(--sn-duration-slow) var(--sn-ease-smooth),
+              border-color var(--sn-duration-normal) var(--sn-ease-out),
+              box-shadow var(--sn-duration-normal) var(--sn-ease-out);
   animation: fadeUp 0.5s ease both;
   animation-fill-mode: forwards;
   opacity: 0;
@@ -30,10 +30,9 @@
   &:nth-child(4) { animation-delay: calc(3 * 70ms + 100ms); }
 
   &:hover {
-    transform: translateY(-4px);
-    border-color: #c7d2fe;
-    box-shadow: 0 12px 40px rgba(37, 99, 235, 0.10),
-                0 2px 8px rgba(15, 23, 42, 0.06);
+    transform: translateY(-2px);
+    border-color: var(--sn-gray-300);
+    box-shadow: var(--sn-shadow-lg);
   }
 
   &:active { transform: translateY(-1px); }
@@ -42,7 +41,7 @@
 .stat-icon {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  border-radius: var(--sn-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -67,18 +66,18 @@
 }
 
 .stat-value {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #0f172a;
-  line-height: 1;
-  letter-spacing: -0.5px;
+  font-size: var(--sn-text-4xl);
+  font-weight: var(--sn-weight-bold);
+  color: var(--sn-text-primary);
+  line-height: var(--sn-leading-none);
+  letter-spacing: var(--sn-tracking-tighter);
 }
 
 .stat-label {
-  font-size: 0.8125rem;
-  color: #94a3b8;
-  margin-top: 4px;
-  font-weight: 500;
+  font-size: var(--sn-text-sm);
+  color: var(--sn-text-tertiary);
+  margin-top: var(--sn-space-1);
+  font-weight: var(--sn-weight-medium);
 }
 
 .stat-link {
@@ -117,15 +116,20 @@
 }
 
 .dashboard-card {
-  background: #ffffff;
-  border: 1px solid #e8eaf0;
-  border-radius: 18px;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05);
+  background: var(--sn-surface);
+  border: 1px solid var(--sn-gray-200);
+  border-radius: var(--sn-radius-xl);
+  box-shadow: var(--sn-shadow-card);
   overflow: hidden;
   animation: fadeUp 0.5s ease both;
   animation-fill-mode: forwards;
   opacity: 0;
   animation-delay: 0.35s;
+  transition: var(--sn-transition-shadow);
+
+  &:hover {
+    box-shadow: var(--sn-shadow-md);
+  }
 
   &.full-width {
     grid-column: 1 / -1;
@@ -138,23 +142,23 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 16px 20px;
-  border-bottom: 1px solid #f1f5f9;
+  padding: var(--sn-space-5) var(--sn-space-6);
+  border-bottom: 1px solid var(--sn-gray-200);
 
   mat-icon {
     font-size: 20px;
     width: 20px;
     height: 20px;
-    color: #2563eb;
+    color: var(--sn-blue);
   }
 
   h3 {
     margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #0f172a;
+    font-size: var(--sn-text-lg);
+    font-weight: var(--sn-weight-semibold);
+    color: var(--sn-text-primary);
     flex: 1;
-    letter-spacing: -0.1px;
+    letter-spacing: var(--sn-tracking-tight);
   }
 }
 
@@ -248,28 +252,30 @@
   text-align: center;
 
   .empty-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--sn-radius-lg);
+    background: var(--sn-gray-50);
+    border: 1px solid var(--sn-gray-200);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 4px;
+    color: var(--sn-text-muted);
 
     mat-icon {
       font-size: 22px;
       width: 22px;
       height: 22px;
-      color: #cbd5e1;
+      color: var(--sn-text-muted);
     }
   }
 
   p {
     margin: 0;
-    font-size: 0.875rem;
-    color: #94a3b8;
+    font-size: var(--sn-text-base);
+    color: var(--sn-text-tertiary);
+    line-height: var(--sn-leading-normal);
   }
 }
 

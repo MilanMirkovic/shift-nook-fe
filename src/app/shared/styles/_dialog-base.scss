@@ -6,17 +6,17 @@
   // ─── Header ─────────────────────────────────────────────────────────────────
   .dialog-header {
     background: #ffffff;
-    padding: 24px 28px 20px;
+    padding: var(--sn-space-6) var(--sn-space-8) var(--sn-space-5);
     display: flex;
     align-items: flex-start;
     gap: 14px;
-    border-bottom: 1px solid #e8eaf0;
+    border-bottom: 1px solid var(--sn-gray-200);
 
     .header-icon {
       font-size: 24px;
       width: 24px;
       height: 24px;
-      color: #2563eb;
+      color: var(--sn-blue);
       flex-shrink: 0;
       margin-top: 2px;
     }
@@ -27,18 +27,18 @@
       h2[mat-dialog-title] {
         margin: 0;
         padding: 0;
-        color: #0f172a;
-        font-size: 1.25rem;
-        font-weight: 700;
-        letter-spacing: -0.25px;
-        line-height: 1.2;
+        color: var(--sn-text-primary);
+        font-size: var(--sn-text-xl);
+        font-weight: var(--sn-weight-bold);
+        letter-spacing: var(--sn-tracking-tight);
+        line-height: var(--sn-leading-tight);
       }
 
       .subtitle {
-        margin: 4px 0 0;
-        color: #94a3b8;
-        font-size: 0.875rem;
-        line-height: 1.5;
+        margin: var(--sn-space-1) 0 0;
+        color: var(--sn-text-tertiary);
+        font-size: var(--sn-text-sm);
+        line-height: var(--sn-leading-normal);
       }
     }
 
@@ -46,16 +46,16 @@
       width: 32px;
       height: 32px;
       line-height: 32px;
-      border-radius: 8px;
+      border-radius: var(--sn-radius-sm);
       background: transparent;
       border: none;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      color: #94a3b8;
+      color: var(--sn-text-muted);
       flex-shrink: 0;
-      transition: background 0.2s ease, color 0.2s ease;
+      transition: var(--sn-transition-colors);
 
       mat-icon {
         font-size: 18px;
@@ -65,8 +65,8 @@
       }
 
       &:hover {
-        background: #f1f5f9;
-        color: #0f172a;
+        background: var(--sn-gray-100);
+        color: var(--sn-text-primary);
       }
     }
   }
@@ -83,12 +83,13 @@
   .form-field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--sn-space-2);
 
     .field-label {
-      font-size: 0.8125rem;
-      font-weight: 600;
-      color: #374151;
+      font-size: var(--sn-text-sm);
+      font-weight: var(--sn-weight-semibold);
+      color: var(--sn-text-secondary);
+      letter-spacing: var(--sn-tracking-normal);
     }
 
     mat-form-field {
@@ -96,15 +97,15 @@
 
       ::ng-deep {
         .mat-mdc-text-field-wrapper {
-          background: #f8f9fc;
-          border-radius: 10px !important;
+          background: var(--sn-gray-50);
+          border-radius: var(--sn-radius-md) !important;
         }
 
         .mdc-text-field--outlined .mdc-notched-outline {
           .mdc-notched-outline__leading,
           .mdc-notched-outline__notch,
           .mdc-notched-outline__trailing {
-            border-color: #e2e8f0;
+            border-color: var(--sn-gray-200);
           }
         }
 
@@ -112,7 +113,13 @@
           .mdc-notched-outline__leading,
           .mdc-notched-outline__notch,
           .mdc-notched-outline__trailing {
-            border-color: #c7d2fe;
+            border-color: var(--sn-gray-300);
+          }
+        }
+
+        .mdc-text-field--outlined:hover:not(.mdc-text-field--focused) {
+          .mat-mdc-text-field-wrapper {
+            background: var(--sn-surface);
           }
         }
 
@@ -120,25 +127,33 @@
           .mdc-notched-outline__leading,
           .mdc-notched-outline__notch,
           .mdc-notched-outline__trailing {
-            border-color: #2563eb !important;
+            border-color: var(--sn-blue) !important;
             border-width: 2px;
           }
         }
 
+        .mdc-text-field--focused {
+          .mat-mdc-text-field-wrapper {
+            background: var(--sn-surface);
+            box-shadow: var(--sn-shadow-focus);
+          }
+        }
+
         .mat-mdc-form-field-icon-prefix {
-          color: #94a3b8;
+          color: var(--sn-text-muted);
           padding-right: 8px;
-          transition: color 0.2s ease;
+          transition: color var(--sn-duration-normal) var(--sn-ease-out);
         }
 
         .mdc-text-field--focused .mat-mdc-form-field-icon-prefix {
-          color: #2563eb;
+          color: var(--sn-blue);
         }
 
         input,
         .mat-mdc-select-trigger {
-          font-size: 0.875rem;
-          color: #0f172a;
+          font-size: var(--sn-text-base);
+          color: var(--sn-text-primary);
+          line-height: var(--sn-leading-snug);
         }
 
         .mdc-floating-label {
@@ -161,50 +176,52 @@
 
   // ─── Actions ─────────────────────────────────────────────────────────────────
   mat-dialog-actions {
-    padding: 16px 28px;
+    padding: var(--sn-space-4) var(--sn-space-8);
     margin: 0;
-    border-top: 1px solid #e8eaf0;
-    background: #f8f9fc;
+    border-top: 1px solid var(--sn-gray-200);
+    background: var(--sn-gray-50);
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
+    gap: var(--sn-space-2);
 
     button {
-      min-width: 88px;
-      height: 40px;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 0.875rem;
+      min-width: 96px;
+      height: 44px;
+      border-radius: var(--sn-radius-md);
+      font-weight: var(--sn-weight-semibold);
+      font-size: var(--sn-text-base);
       text-transform: none;
-      transition: all 0.2s ease;
+      transition: var(--sn-transition-colors),
+                  var(--sn-transition-shadow),
+                  var(--sn-transition-transform);
 
       &[mat-button] {
-        color: #64748b;
+        color: var(--sn-text-tertiary);
         background: transparent;
 
         &:hover:not(:disabled) {
-          background: #f1f5f9;
-          color: #0f172a;
+          background: var(--sn-gray-100);
+          color: var(--sn-text-primary);
         }
       }
 
       &[mat-stroked-button] {
-        border: 1px solid #e8eaf0 !important;
-        color: #0f172a !important;
+        border: 1px solid var(--sn-gray-200) !important;
+        color: var(--sn-text-primary) !important;
 
         &:hover:not(:disabled) {
-          background: #f1f5f9 !important;
-          border-color: #c7d2fe !important;
+          background: var(--sn-gray-100) !important;
+          border-color: var(--sn-gray-300) !important;
         }
       }
 
       &[mat-flat-button] {
-        background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
+        background: var(--sn-primary-gradient) !important;
         color: #ffffff !important;
-        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+        box-shadow: var(--sn-shadow-button);
 
         &:hover:not(:disabled) {
-          box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+          box-shadow: 0 4px 14px rgba(37, 99, 235, 0.32);
           transform: translateY(-1px);
         }
 
@@ -224,11 +241,11 @@
 
       // Danger variant
       &[mat-flat-button].btn-danger {
-        background: #dc2626 !important;
-        box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+        background: var(--sn-red) !important;
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.20);
 
         &:hover:not(:disabled) {
-          box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+          box-shadow: 0 4px 14px rgba(220, 38, 38, 0.32);
         }
       }
     }
