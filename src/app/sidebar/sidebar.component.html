@@ -110,6 +110,13 @@
 
     <!-- Footer -->
     <div class="sidenav-footer" [class.is-hidden]="!isHandset && isCollapsed">
+      <!-- Work Session Timer for Accountants -->
+      @if (isAccountant) {
+        <div class="timer-wrapper">
+          <app-work-session-timer />
+        </div>
+      }
+
       <div class="support-section">
         <div class="support-title">Need help?</div>
         <div class="support-subtitle">Contact support or check the documentation.</div>

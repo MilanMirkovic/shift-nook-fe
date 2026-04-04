@@ -83,11 +83,6 @@
       <!-- Check In FAB for workers -->
       <app-check-in-fab />
 
-      <!-- Work Session Timer (only for ACCOUNTANT role) -->
-      @if (isAccountant$ | async) {
-        <app-work-session-timer />
-      }
-
     </mat-sidenav-content>
 
   </mat-sidenav-container>

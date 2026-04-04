@@ -46,6 +46,7 @@ export class WorkerDetailsComponent implements OnInit, OnDestroy {
   protected worker: CompanyMember | null = null;
   protected loading = true;
   protected error: string | null = null;
+  protected selectedTabIndex = 0;
 
   // Activity timeline properties
   protected activities: Activity[] = [];

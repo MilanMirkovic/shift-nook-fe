@@ -1,128 +1,247 @@
-<ng-container *ngIf="client$ | async as client; else loading">
-  <!-- Premium Header Section -->
-  <header class="client-header">
-    <div class="client-header__breadcrumb">
+@if (client$ | async; as client) {
+  <!-- Modern Page Container -->
+  <div class="client-page">
+
+    <!-- Floating Breadcrumb -->
+    <div class="breadcrumb-float">
       <a routerLink="/clients" class="breadcrumb-link">
         <mat-icon>arrow_back</mat-icon>
-        Back to Clients
+        <span>Clients</span>
       </a>
+      <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
+      <span class="breadcrumb-current">{{ client.name }}</span>
     </div>
 
-    <div class="client-header__title-section">
-      <div class="client-header__avatar">
-        {{ client.name.charAt(0).toUpperCase() }}
+    <!-- Hero Header with Gradient Background -->
+    <div class="hero-header">
+      <div class="hero-gradient"></div>
+      <div class="hero-content">
+        <!-- Avatar with Status -->
+        <div class="hero-avatar-wrapper">
+          <div class="hero-avatar">
+            <span class="avatar-text">{{ getClientInitials(client) }}</span>
+            <div class="avatar-ring"></div>
+          </div>
+          <div class="status-badge status-badge--active">
+            <span class="status-dot"></span>
+            Active
+          </div>
+        </div>
+
+        <!-- Client Info -->
+        <div class="hero-info">
+          <h1 class="hero-name">{{ client.name }}</h1>
+
+          <div class="hero-meta">
+            <div class="meta-item">
+              <mat-icon>email</mat-icon>
+              <span>{{ client.email }}</span>
+            </div>
+            @if (client.phone) {
+              <div class="meta-divider"></div>
+              <div class="meta-item">
+                <mat-icon>phone</mat-icon>
+                <span>{{ formatPhone(client.phone) }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="hero-actions">
+            <button mat-flat-button class="sn-btn-primary">
+              <mat-icon>receipt_long</mat-icon>
+              <span>New Invoice</span>
+            </button>
+            <button mat-stroked-button class="sn-btn-secondary">
+              <mat-icon>request_quote</mat-icon>
+              <span>New Estimate</span>
+            </button>
+            <button mat-stroked-button class="sn-btn-secondary">
+              <mat-icon>edit</mat-icon>
+              <span>Edit Client</span>
+            </button>
+          </div>
+        </div>
       </div>
-      <div class="client-header__info">
-        <h1 class="client-header__name">{{ client.name }}</h1>
-        <p class="client-header__meta">
-          <mat-icon class="meta-icon">email</mat-icon>
-          {{ client.email }}
-          <span class="divider">•</span>
-          <mat-icon class="meta-icon">phone</mat-icon>
-          {{ client.phone }}
-        </p>
+    </div>
+
+    <!-- Premium Tabs Navigation -->
+    <div class="tabs-container">
+      <mat-tab-group class="modern-tabs" [(selectedIndex)]="selectedTabIndex" animationDuration="400ms">
+
+        <!-- Invoices Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="tab-label">
+              <mat-icon>receipt_long</mat-icon>
+              <span>Invoices</span>
+            </div>
+          </ng-template>
+
+          <div class="tab-panel">
+            @if (currentClientId && currentCompanyId) {
+              <app-client-invoices
+                [clientId]="currentClientId"
+                [clientName]="client.name"
+                [companyId]="currentCompanyId">
+              </app-client-invoices>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- Estimates Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="tab-label">
+              <mat-icon>request_quote</mat-icon>
+              <span>Estimates</span>
+            </div>
+          </ng-template>
+
+          <div class="tab-panel">
+            @if (currentClientId && currentCompanyId) {
+              <app-client-estimates
+                [clientId]="currentClientId"
+                [clientName]="client.name"
+                [companyId]="currentCompanyId">
+              </app-client-estimates>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- Jobsites Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="tab-label">
+              <mat-icon>location_on</mat-icon>
+              <span>Jobsites</span>
+            </div>
+          </ng-template>
+
+          <div class="tab-panel">
+            @if (currentClientId && currentCompanyId) {
+              <app-client-jobsites
+                [clientId]="currentClientId"
+                [clientName]="client.name"
+                [companyId]="currentCompanyId">
+              </app-client-jobsites>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- Details Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="tab-label">
+              <mat-icon>info</mat-icon>
+              <span>Details</span>
+            </div>
+          </ng-template>
+
+          <div class="tab-panel">
+            <!-- Info Cards Grid -->
+            <div class="section">
+              <h2 class="section-title">
+                <span class="title-accent"></span>
+                Client Information
+              </h2>
+
+              <div class="info-grid">
+                <div class="info-card info-card--primary">
+                  <div class="info-card-icon">
+                    <mat-icon>business</mat-icon>
+                  </div>
+                  <div class="info-card-content">
+                    <div class="info-label">Company Name</div>
+                    <div class="info-value">{{ client.name }}</div>
+                  </div>
+                </div>
+
+                <div class="info-card info-card--secondary">
+                  <div class="info-card-icon">
+                    <mat-icon>email</mat-icon>
+                  </div>
+                  <div class="info-card-content">
+                    <div class="info-label">Email Address</div>
+                    <div class="info-value">{{ client.email }}</div>
+                  </div>
+                </div>
+
+                <div class="info-card info-card--accent">
+                  <div class="info-card-icon">
+                    <mat-icon>phone</mat-icon>
+                  </div>
+                  <div class="info-card-content">
+                    <div class="info-label">Phone Number</div>
+                    <div class="info-value">{{ formatPhone(client.phone) }}</div>
+                  </div>
+                </div>
+
+                <div class="info-card info-card--neutral">
+                  <div class="info-card-icon">
+                    <mat-icon>location_on</mat-icon>
+                  </div>
+                  <div class="info-card-content">
+                    <div class="info-label">Address</div>
+                    <div class="info-value">{{ formatAddress(client.address) }}</div>
+                  </div>
+                </div>
+
+                @if (client.createdAt) {
+                  <div class="info-card info-card--primary">
+                    <div class="info-card-icon">
+                      <mat-icon>event</mat-icon>
+                    </div>
+                    <div class="info-card-content">
+                      <div class="info-label">Client Since</div>
+                      <div class="info-value">{{ client.createdAt | date:'MMMM d, yyyy' }}</div>
+                    </div>
+                  </div>
+                }
+
+                @if (client.id) {
+                  <div class="info-card info-card--secondary">
+                    <div class="info-card-icon">
+                      <mat-icon>fingerprint</mat-icon>
+                    </div>
+                    <div class="info-card-content">
+                      <div class="info-label">Client ID</div>
+                      <div class="info-value info-value--mono">{{ client.id }}</div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Activity Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="tab-label">
+              <mat-icon>history</mat-icon>
+              <span>Activity</span>
+            </div>
+          </ng-template>
+
+          <div class="tab-panel">
+            @if (currentClientId) {
+              <app-client-activity [clientId]="currentClientId"></app-client-activity>
+            }
+          </div>
+        </mat-tab>
+
+      </mat-tab-group>
+    </div>
+  </div>
+} @else {
+  <div class="loading-container">
+    <div class="loading-content">
+      <div class="loading-spinner">
+        <mat-spinner diameter="56"></mat-spinner>
       </div>
+      <h3>Loading client details</h3>
+      <p>Please wait while we fetch the information...</p>
     </div>
-
-    <div class="client-header__actions">
-      <button mat-stroked-button type="button">
-        <mat-icon>edit</mat-icon>
-        Edit Client
-      </button>
-      <button mat-flat-button color="primary" type="button">
-        <mat-icon>add</mat-icon>
-        New Invoice
-      </button>
-    </div>
-  </header>
-
-  <!-- Tabs Section -->
-  <div class="client-content">
-    <mat-tab-group animationDuration="300ms" class="premium-tabs">
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon class="tab-icon">receipt_long</mat-icon>
-          Invoices
-        </ng-template>
-        <ng-template matTabContent>
-          <div class="tab-content">
-            <app-client-invoices
-              *ngIf="currentClientId && currentCompanyId"
-              [clientId]="currentClientId"
-              [clientName]="(client$ | async)?.name || ''"
-              [companyId]="currentCompanyId">
-            </app-client-invoices>
-          </div>
-        </ng-template>
-      </mat-tab>
-
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon class="tab-icon">request_quote</mat-icon>
-          Estimates
-        </ng-template>
-        <ng-template matTabContent>
-          <div class="tab-content">
-            <app-client-estimates
-              *ngIf="currentClientId && currentCompanyId"
-              [clientId]="currentClientId"
-              [clientName]="(client$ | async)?.name || ''"
-              [companyId]="currentCompanyId">
-            </app-client-estimates>
-          </div>
-        </ng-template>
-      </mat-tab>
-
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon class="tab-icon">location_on</mat-icon>
-          Jobsites
-        </ng-template>
-        <ng-template matTabContent>
-          <div class="tab-content">
-            <app-client-jobsites
-              *ngIf="currentClientId && currentCompanyId"
-              [clientId]="currentClientId"
-              [clientName]="(client$ | async)?.name || ''"
-              [companyId]="currentCompanyId">
-            </app-client-jobsites>
-          </div>
-        </ng-template>
-      </mat-tab>
-
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon class="tab-icon">info</mat-icon>
-          Details
-        </ng-template>
-        <ng-template matTabContent>
-          <div class="tab-content">
-            <app-client-details-info [client]="client"></app-client-details-info>
-          </div>
-        </ng-template>
-      </mat-tab>
-
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon class="tab-icon">history</mat-icon>
-          Activity
-        </ng-template>
-        <ng-template matTabContent>
-          <div class="tab-content">
-            <app-client-activity
-              *ngIf="currentClientId"
-              [clientId]="currentClientId">
-            </app-client-activity>
-          </div>
-        </ng-template>
-      </mat-tab>
-    </mat-tab-group>
   </div>
-</ng-container>
-
-<ng-template #loading>
-  <div class="loading-state">
-    <mat-spinner diameter="48"></mat-spinner>
-    <p>Loading client details…</p>
-  </div>
-</ng-template>
+}

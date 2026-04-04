@@ -8,7 +8,7 @@ import { loadClientById } from '../../../store/clients/clients.actions';
 import { selectClientById } from '../../../store/clients/clients.selectors';
 import { selectSelectedCompanyId } from '../../../store/user/user.selectors';
 import { Client } from '../../../store/clients/clients.models';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -25,6 +25,7 @@ import { ClientDetailsInfoComponent } from './client-details-info/client-details
   templateUrl: './client-details.component.html',
   imports: [
     AsyncPipe,
+    DatePipe,
     NgIf,
     MatTabsModule,
     MatIconModule,
@@ -49,6 +50,7 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
 
   protected currentClientId: string | null = null;
   protected currentCompanyId: string | null = null;
+  protected selectedTabIndex = 0;
 
   ngOnInit(): void {
     const clientId = this.route.snapshot.paramMap.get('id');
@@ -77,5 +79,24 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  protected getClientInitials(client: Client | null): string {
+    if (!client) return 'C';
+    const nameParts = client.name.trim().split(' ');
+    if (nameParts.length >= 2) {
+      return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase();
+    }
+    return client.name.substring(0, 2).toUpperCase();
+  }
+
+  protected formatPhone(phone: string | undefined): string {
+    if (!phone) return 'Not provided';
+    return phone;
+  }
+
+  protected formatAddress(address: string | undefined): string {
+    if (!address) return 'Not provided';
+    return address;
   }
 }

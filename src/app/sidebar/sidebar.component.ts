@@ -16,11 +16,12 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../shared/c
 import { StopSessionDialogComponent, StopSessionDialogResult } from '../shared/components/stop-session-dialog/stop-session-dialog.component';
 import { CompanyWorkSessionsStoreService } from '../store/company-work-sessions/company-work-sessions-store.service';
 import { AuthService } from '../core/auth/auth.service';
+import { WorkSessionTimerComponent } from '../shared/components/work-session-timer/work-session-timer.component';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, MatIconModule, MatButtonModule, MatListModule, MatDividerModule],
+  imports: [CommonModule, RouterLink, RouterLinkActive, MatIconModule, MatButtonModule, MatListModule, MatDividerModule, WorkSessionTimerComponent],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss']
 })
@@ -49,6 +50,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   protected canSeePrincipalCompanies = false; // OWNER whose company is a sub (any company)
   protected canSeeWorkTime = false; // Only show Work Time for ACCOUNTANT
   protected isPlatformAdmin = false; // Show Admin section for platform ADMIN role
+  protected isAccountant = false; // Show work session timer for ACCOUNTANT
 
   ngOnInit(): void {
     // Check if user is authenticated
@@ -162,6 +164,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
       )
       .subscribe(isAdmin => {
         this.isPlatformAdmin = isAdmin;
+      });
+
+    // Determine if user is an ACCOUNTANT (to show work session timer)
+    this.userStore.currentCompany$
+      .pipe(
+        map(company => company?.role === CompanyRole.ACCOUNTANT),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(isAccountant => {
+        this.isAccountant = isAccountant;
       });
   }
 

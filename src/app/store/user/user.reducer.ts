@@ -8,9 +8,31 @@ import {
   selectCompany
 } from './user.actions';
 
+const SELECTED_COMPANY_KEY = 'selectedCompanyId';
+
+function getPersistedCompanyId(): string | null {
+  try {
+    return localStorage.getItem(SELECTED_COMPANY_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function persistCompanyId(companyId: string | null): void {
+  try {
+    if (companyId) {
+      localStorage.setItem(SELECTED_COMPANY_KEY, companyId);
+    } else {
+      localStorage.removeItem(SELECTED_COMPANY_KEY);
+    }
+  } catch {
+    // ignore
+  }
+}
+
 export const initialState: UserState = {
   user: null,
-  selectedCompanyId: null,
+  selectedCompanyId: getPersistedCompanyId(),
   loading: false,
   error: null
 };
@@ -24,14 +46,29 @@ export const reducer = createReducer(
     error: null
   })),
 
-  on(loadUserSuccess, (state, { user }) => ({
-    ...state,
-    user,
-    loading: false,
-    error: null,
-    // Auto-select first company if user has only one
-    selectedCompanyId: user.companies?.length === 1 ? user.companies[0].companyId : state.selectedCompanyId
-  })),
+  on(loadUserSuccess, (state, { user }) => {
+    const companies = user.companies ?? [];
+
+    // Keep persisted selection if it's still valid for this user
+    const persistedId = state.selectedCompanyId;
+    const persistedStillValid = persistedId && companies.some(c => c.companyId === persistedId);
+
+    const selectedCompanyId = persistedStillValid
+      ? persistedId
+      : companies.length === 1
+        ? companies[0].companyId
+        : null;
+
+    persistCompanyId(selectedCompanyId);
+
+    return {
+      ...state,
+      user,
+      loading: false,
+      error: null,
+      selectedCompanyId
+    };
+  }),
 
   on(loadUserFailure, (state, { error }) => ({
     ...state,
@@ -39,10 +76,16 @@ export const reducer = createReducer(
     error
   })),
 
-  on(clearUser, () => initialState),
+  on(clearUser, () => {
+    persistCompanyId(null);
+    return initialState;
+  }),
 
-  on(selectCompany, (state, { companyId }) => ({
-    ...state,
-    selectedCompanyId: companyId
-  }))
+  on(selectCompany, (state, { companyId }) => {
+    persistCompanyId(companyId);
+    return {
+      ...state,
+      selectedCompanyId: companyId
+    };
+  })
 );

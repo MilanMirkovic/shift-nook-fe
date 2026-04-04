@@ -13,35 +13,13 @@
   overflow: hidden;
   border-radius: var(--sn-radius-xl);
   background: var(--sn-surface);
-  border: 2px solid transparent;
-  box-shadow: var(--sn-shadow-lg);
+  border: 1px solid var(--sn-gray-200);
+  box-shadow: var(--sn-shadow-card);
   position: relative;
-  transition: all var(--sn-duration-slow) var(--sn-ease-smooth);
-
-  /* Subtle gradient border */
-  &::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: inherit;
-    padding: 2px;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.3), rgba(124, 58, 237, 0.3));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    opacity: 0;
-    transition: opacity var(--sn-duration-slow) var(--sn-ease-smooth);
-    pointer-events: none; // Allow clicks to pass through
-  }
+  transition: var(--sn-transition-shadow);
 
   &:hover {
-    box-shadow: 0 16px 48px rgba(37, 99, 235, 0.15),
-                0 8px 24px rgba(15, 23, 42, 0.1);
-    transform: translateY(-2px);
-
-    &::before {
-      opacity: 1;
-    }
+    box-shadow: var(--sn-shadow-md);
   }
 }
 

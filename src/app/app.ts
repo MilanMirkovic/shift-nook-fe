@@ -12,13 +12,11 @@ import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { CheckInFabComponent } from './shared/components/check-in-fab/check-in-fab.component';
-import { WorkSessionTimerComponent } from './shared/components/work-session-timer/work-session-timer.component';
 import { NotificationBellComponent } from './shared/components/notification-bell/notification-bell.component';
 import { CommonModule } from '@angular/common';
 import { CompanyWorkSessionsStoreService } from './store/company-work-sessions/company-work-sessions-store.service';
 import { UserStoreService } from './store/user/user-store.service';
 import { AuthService } from './core/auth/auth.service';
-import { CompanyRole } from './shared/models/company-role';
 
 @Component({
   selector: 'app-root',
@@ -33,7 +31,6 @@ import { CompanyRole } from './shared/models/company-role';
     MatProgressSpinnerModule,
     SidebarComponent,
     CheckInFabComponent,
-    WorkSessionTimerComponent,
     NotificationBellComponent
   ],
   templateUrl: './app.html',
@@ -66,11 +63,6 @@ export class App implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
 
   protected readonly sidenavMode = computed(() => (this.isHandset() ? 'over' : 'side'));
-
-  // Only show work session timer for ACCOUNTANT role
-  protected isAccountant$ = this.userStore.currentCompany$.pipe(
-    map(company => company?.role === CompanyRole.ACCOUNTANT)
-  );
 
   constructor() {
     this.breakpointObserver.observe([Breakpoints.Handset])
