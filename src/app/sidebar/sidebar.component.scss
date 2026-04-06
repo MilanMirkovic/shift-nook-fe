@@ -22,7 +22,7 @@
 .sidenav-header {
   padding: 20px 16px 16px;
   flex-shrink: 0;
-  border-bottom: 1px solid #e8eaf0;
+  border-bottom: 1px solid var(--sn-gray-200);
   /* safe area for notched phones */
   padding-top: max(20px, calc(env(safe-area-inset-top) + 12px));
 }
@@ -87,10 +87,10 @@
   padding: 12px 10px;
 
   scrollbar-width: thin;
-  scrollbar-color: #e2e8f0 transparent;
+  scrollbar-color: var(--sn-gray-200) transparent;
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-track { background: transparent; }
-  &::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 99px; }
+  &::-webkit-scrollbar-thumb { background: var(--sn-gray-200); border-radius: var(--sn-radius-full); }
 }
 
 // ─── Company section ──────────────────────────────────────────────────────────
@@ -122,12 +122,12 @@
 .company-avatar {
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: var(--sn-radius-md);
   display: grid;
   place-items: center;
-  font-weight: 700;
-  font-size: 0.8125rem;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  font-weight: var(--sn-weight-bold);
+  font-size: var(--sn-text-sm);
+  background: var(--sn-gradient-blue-purple);
   color: #ffffff;
   flex-shrink: 0;
 
@@ -143,23 +143,23 @@
 }
 
 .company-name {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #0f172a;
+  font-size: var(--sn-text-sm);
+  font-weight: var(--sn-weight-semibold);
+  color: var(--sn-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .company-role {
-  font-size: 0.75rem;
-  color: #94a3b8;
+  font-size: var(--sn-text-xs);
+  color: var(--sn-text-muted);
   text-transform: capitalize;
   margin-top: 1px;
 }
 
 .switch-company-btn {
-  mat-icon { color: #64748b !important; }
+  mat-icon { color: var(--sn-text-tertiary) !important; }
 }
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
@@ -229,7 +229,7 @@
   margin-top: auto;
   padding: 12px;
   padding-bottom: max(12px, env(safe-area-inset-bottom));
-  border-top: 1px solid #e8eaf0;
+  border-top: 1px solid var(--sn-gray-200);
 }
 
 .timer-wrapper {
@@ -243,28 +243,28 @@
 }
 
 .support-title {
-  font-weight: 600;
-  font-size: 0.8125rem;
-  color: #0f172a;
+  font-weight: var(--sn-weight-semibold);
+  font-size: var(--sn-text-sm);
+  color: var(--sn-text-primary);
 }
 
 .support-subtitle {
-  font-size: 0.75rem;
+  font-size: var(--sn-text-xs);
   margin-top: 2px;
-  color: #94a3b8;
-  line-height: 1.5;
+  color: var(--sn-text-muted);
+  line-height: var(--sn-leading-normal);
 }
 
 .signin-button {
   width: 100%;
   height: 40px;
-  font-weight: 600;
-  font-size: 0.875rem;
-  border-radius: 10px !important;
+  font-weight: var(--sn-weight-semibold);
+  font-size: var(--sn-text-sm);
+  border-radius: var(--sn-radius-lg) !important;
   background: var(--sn-primary-gradient) !important;
-  color: #fff !important;
+  color: #ffffff !important;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: var(--sn-transition-shadow), var(--sn-transition-transform);
 
   &:hover {
     box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
@@ -275,16 +275,16 @@
 .signout-button {
   width: 100%;
   height: 40px;
-  font-weight: 600;
-  font-size: 0.875rem;
-  border-radius: 10px !important;
+  font-weight: var(--sn-weight-semibold);
+  font-size: var(--sn-text-sm);
+  border-radius: var(--sn-radius-lg) !important;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: #64748b !important;
-  border-color: #e8eaf0 !important;
-  transition: background 0.2s ease, color 0.2s ease;
+  color: var(--sn-text-tertiary) !important;
+  border-color: var(--sn-gray-200) !important;
+  transition: var(--sn-transition-colors);
 
   mat-icon {
     font-size: 18px;
@@ -293,8 +293,8 @@
   }
 
   &:hover {
-    background: #f1f5f9 !important;
-    color: #dc2626 !important;
-    border-color: #fecaca !important;
+    background: var(--sn-gray-100) !important;
+    color: var(--sn-red) !important;
+    border-color: rgba(220, 38, 38, 0.2) !important;
   }
 }

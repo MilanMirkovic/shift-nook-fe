@@ -501,4 +501,25 @@ export class JobsiteDetailsComponent implements OnInit, OnDestroy {
       });
     });
   }
+
+  protected getJobsiteInitials(jobsite: Jobsite | null): string {
+    if (!jobsite) return 'JS';
+    const nameParts = jobsite.name.trim().split(' ');
+    if (nameParts.length >= 2) {
+      return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase();
+    }
+    return jobsite.name.substring(0, 2).toUpperCase();
+  }
+
+  protected formatAddress(address: string | undefined): string {
+    if (!address) return 'Not provided';
+    return address;
+  }
+
+  protected formatCoordinates(lat: number | undefined, lng: number | undefined): string {
+    if (!lat || !lng) return 'Not provided';
+    return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+  }
+
+  protected selectedTabIndex = 0;
 }
