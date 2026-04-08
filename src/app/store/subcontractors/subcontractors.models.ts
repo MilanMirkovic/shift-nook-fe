@@ -36,6 +36,8 @@ export interface SubcontractorInvitePreviewResponse {
   ownerCompanyName: string;
   invitedEmail: string;
   acceptorStatus: 'NOT_AUTHENTICATED' | 'NO_COMPANY' | 'READY' | 'ALREADY_LINKED';
+  /** True when the invited email already has a registered account in the system */
+  isExistingUser?: boolean;
 }
 
 export interface SubcontractorInviteRequest {

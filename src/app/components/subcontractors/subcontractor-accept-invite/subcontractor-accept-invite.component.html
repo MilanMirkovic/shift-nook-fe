@@ -26,8 +26,30 @@
     @if (view() === 'status') {
       @if (preview$ | async; as preview) {
 
-        <!-- NOT_AUTHENTICATED -->
-        @if (preview.acceptorStatus === 'NOT_AUTHENTICATED') {
+        <!-- NOT_AUTHENTICATED — existing user: prompt login only -->
+        @if (preview.acceptorStatus === 'NOT_AUTHENTICATED' && preview.isExistingUser) {
+          <div class="state">
+            <div class="company-avatar">{{ preview.ownerCompanyName[0].toUpperCase() }}</div>
+            <div class="invite-header">
+              <h2 class="state-title">You've been invited!</h2>
+              <p class="state-msg">
+                <strong>{{ preview.ownerCompanyName }}</strong> has invited you to join as a subcontractor.
+              </p>
+            </div>
+            <div class="email-chip">
+              <mat-icon>mail_outline</mat-icon>
+              <span>{{ preview.invitedEmail }}</span>
+            </div>
+            <p class="state-msg">This email is already registered. Log in to accept the invitation.</p>
+            <button mat-flat-button class="btn-primary btn-full" (click)="onLogin()">
+              <mat-icon>login</mat-icon>
+              Log In &amp; Accept
+            </button>
+          </div>
+        }
+
+        <!-- NOT_AUTHENTICATED — new user: offer sign-up or login -->
+        @if (preview.acceptorStatus === 'NOT_AUTHENTICATED' && !preview.isExistingUser) {
           <div class="state">
             <div class="company-avatar">{{ preview.ownerCompanyName[0].toUpperCase() }}</div>
             <div class="invite-header">
