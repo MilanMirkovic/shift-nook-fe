@@ -1,0 +1,77 @@
+<div class="edit-client-dialog">
+  <div class="dialog-header">
+    <mat-icon class="header-icon">edit</mat-icon>
+    <div class="header-text">
+      <h2 mat-dialog-title>Edit Client</h2>
+      <p class="subtitle">Update client profile information</p>
+    </div>
+  </div>
+
+  <mat-dialog-content>
+    @if (serverError) {
+      <div class="server-error">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ serverError }}</span>
+      </div>
+    }
+
+    <form [formGroup]="form" id="edit-client-form" class="edit-form">
+
+      <div class="form-field">
+        <label class="field-label">Client Name <span class="required">*</span></label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>business</mat-icon>
+          <input matInput formControlName="name" placeholder="e.g. Acme Corporation" autocomplete="off" />
+          @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+            <mat-error>Client name is required</mat-error>
+          }
+          @if (form.get('name')?.hasError('minlength') && form.get('name')?.touched) {
+            <mat-error>Name must be at least 2 characters</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label">Email Address <span class="required">*</span></label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>email</mat-icon>
+          <input matInput type="email" formControlName="email" placeholder="e.g. contact@acme.com" autocomplete="off" />
+          @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
+            <mat-error>Email is required</mat-error>
+          }
+          @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
+            <mat-error>Enter a valid email address</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label">Phone Number</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>phone</mat-icon>
+          <input matInput formControlName="phone" placeholder="e.g. +1 555 000 0000" autocomplete="off" />
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label">Address</label>
+        <mat-form-field appearance="outline">
+          <mat-icon matPrefix>location_on</mat-icon>
+          <input matInput formControlName="address" placeholder="e.g. 123 Main St, New York, NY" autocomplete="off" />
+        </mat-form-field>
+      </div>
+
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button type="button" (click)="onCancel()" [disabled]="submitting">Cancel</button>
+    <button mat-flat-button type="submit" form="edit-client-form" (click)="onSubmit()" [disabled]="submitting">
+      @if (submitting) {
+        <mat-spinner diameter="20"></mat-spinner>
+      }
+      Save Changes
+    </button>
+  </mat-dialog-actions>
+</div>
+

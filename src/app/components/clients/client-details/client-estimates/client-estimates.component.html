@@ -111,7 +111,7 @@
           </td>
           <td class="col-actions">
             <div class="row-actions">
-              <button mat-icon-button class="action-btn action-btn--promote" matTooltip="Promote to Invoice"
+              <button mat-icon-button class="action-btn action-btn--promote" matTooltip="Convert to Invoice"
                 [disabled]="estimate.status === 'INVOICED' || estimate.status === 'VOID'"
                 (click)="onPromoteToInvoice(estimate)">
                 <mat-icon>receipt_long</mat-icon>

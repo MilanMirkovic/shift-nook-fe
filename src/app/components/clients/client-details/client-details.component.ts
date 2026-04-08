@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, take, shareReplay, tap } from 'rxjs/operators';
+import { MatDialog } from '@angular/material/dialog';
 
 import { loadClientById } from '../../../store/clients/clients.actions';
 import { selectClientById } from '../../../store/clients/clients.selectors';
@@ -18,6 +19,7 @@ import { ClientJobsitesComponent } from './client-jobsites/client-jobsites.compo
 import { ClientActivityComponent } from './client-activity/client-activity.component';
 import { ClientInvoicesComponent } from './client-invoices/client-invoices.component';
 import { ClientDetailsInfoComponent } from './client-details-info/client-details-info.component';
+import { EditClientDialogComponent, EditClientDialogData } from './edit-client-dialog/edit-client-dialog.component';
 
 @Component({
   selector: 'app-client-details',
@@ -43,6 +45,7 @@ import { ClientDetailsInfoComponent } from './client-details-info/client-details
 export class ClientDetailsComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly route = inject(ActivatedRoute);
+  private readonly dialog = inject(MatDialog);
   private readonly destroy$ = new Subject<void>();
 
   private readonly clientSubject$ = new BehaviorSubject<Client | null>(null);
@@ -98,5 +101,15 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
   protected formatAddress(address: string | undefined): string {
     if (!address) return 'Not provided';
     return address;
+  }
+
+  onEditClient(client: Client): void {
+    if (!this.currentCompanyId) return;
+    this.dialog.open(EditClientDialogComponent, {
+      width: '520px',
+      maxWidth: '95vw',
+      data: { client, companyId: this.currentCompanyId } satisfies EditClientDialogData,
+      panelClass: 'sn-dialog',
+    });
   }
 }

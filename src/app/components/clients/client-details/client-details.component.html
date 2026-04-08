@@ -48,15 +48,7 @@
 
           <!-- Quick Actions -->
           <div class="hero-actions">
-            <button mat-flat-button class="sn-btn-primary">
-              <mat-icon>receipt_long</mat-icon>
-              <span>New Invoice</span>
-            </button>
-            <button mat-stroked-button class="sn-btn-secondary">
-              <mat-icon>request_quote</mat-icon>
-              <span>New Estimate</span>
-            </button>
-            <button mat-stroked-button class="sn-btn-secondary">
+            <button mat-stroked-button class="sn-btn-secondary" (click)="onEditClient(client)">
               <mat-icon>edit</mat-icon>
               <span>Edit Client</span>
             </button>

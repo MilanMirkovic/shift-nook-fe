@@ -112,6 +112,7 @@ export class SubcontractorsListComponent implements OnInit, OnDestroy {
         data: { companyId },
         width: '480px',
         disableClose: true,
+        panelClass: 'centered-dialog',
       });
       ref.afterClosed().pipe(take(1)).subscribe(sent => {
         if (sent) {

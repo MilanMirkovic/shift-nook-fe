@@ -1,0 +1,206 @@
+.edit-client-dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 500px;
+}
+
+// ─── Header ───────────────────────────────────────────────────────────────────
+.dialog-header {
+  background: #ffffff;
+  padding: 24px 28px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border-bottom: 1px solid #e8eaf0;
+
+  .header-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: #2563eb;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .header-text {
+    flex: 1;
+
+    h2[mat-dialog-title] {
+      margin: 0;
+      padding: 0;
+      color: #0f172a;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.25px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: #94a3b8;
+      font-size: 0.875rem;
+    }
+  }
+}
+
+// ─── Content ──────────────────────────────────────────────────────────────────
+mat-dialog-content {
+  padding: 24px 28px !important;
+  margin: 0 !important;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+// ─── Server Error ─────────────────────────────────────────────────────────────
+.server-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 0.8125rem;
+  font-weight: 500;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+}
+
+// ─── Form ─────────────────────────────────────────────────────────────────────
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    .field-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #374151;
+
+      .required {
+        color: #dc2626;
+        margin-left: 2px;
+      }
+    }
+
+    mat-form-field {
+      width: 100%;
+
+      ::ng-deep {
+        .mat-mdc-text-field-wrapper {
+          background: #f8f9fc;
+          border-radius: 10px !important;
+        }
+
+        .mdc-text-field--outlined .mdc-notched-outline {
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #e2e8f0;
+          }
+        }
+
+        .mdc-text-field--outlined:hover:not(.mdc-text-field--focused):not(.mdc-text-field--disabled) .mdc-notched-outline {
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #c7d2fe;
+          }
+        }
+
+        .mdc-text-field--focused .mdc-notched-outline {
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #2563eb !important;
+            border-width: 2px;
+          }
+        }
+
+        .mat-mdc-form-field-icon-prefix {
+          color: #94a3b8;
+          padding-right: 8px;
+          transition: color 0.2s ease;
+        }
+
+        .mdc-text-field--focused .mat-mdc-form-field-icon-prefix {
+          color: #2563eb;
+        }
+
+        input {
+          font-size: 0.875rem;
+          color: #0f172a;
+        }
+
+        .mdc-floating-label { display: none; }
+
+        .mat-mdc-form-field-infix {
+          padding-top: 10px;
+          padding-bottom: 10px;
+          min-height: 42px;
+        }
+
+        .mat-mdc-form-field-subscript-wrapper {
+          margin-top: 0;
+          padding-top: 2px;
+        }
+      }
+    }
+  }
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+mat-dialog-actions {
+  padding: 16px 28px !important;
+  margin: 0 !important;
+  border-top: 1px solid #e8eaf0;
+  background: #f8f9fc;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+
+  button[mat-button] {
+    color: #64748b;
+    font-weight: 500;
+    border-radius: 8px;
+
+    &:hover:not([disabled]) {
+      background: #f1f5f9;
+      color: #334155;
+    }
+  }
+
+  button[mat-flat-button] {
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    mat-spinner {
+      --mdc-circular-progress-active-indicator-color: #ffffff;
+    }
+  }
+}
+

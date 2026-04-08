@@ -294,9 +294,9 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '400px',
       data: {
-        title: 'Promote to Invoice',
-        message: `Are you sure you want to promote estimate "${estimate.title}" to an invoice? The estimate will be marked as invoiced.`,
-        confirmText: 'Promote',
+        title: 'Convert to Invoice',
+        message: `Are you sure you want to Convert estimate "${estimate.title}" to an invoice? The estimate will be marked as invoiced.`,
+        confirmText: 'Convert',
         cancelText: 'Cancel',
         type: 'primary',
       },

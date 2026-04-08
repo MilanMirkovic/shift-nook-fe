@@ -64,3 +64,18 @@ export const loadClientByIdFailure = createAction(
   '[Clients] Load By Id Failure',
   props<{ error: string }>()
 );
+
+export const updateClient = createAction(
+  '[Clients] Update',
+  props<{ companyId: string; clientId: string; client: Partial<Client> }>()
+);
+
+export const updateClientSuccess = createAction(
+  '[Clients] Update Success',
+  props<{ client: Client }>()
+);
+
+export const updateClientFailure = createAction(
+  '[Clients] Update Failure',
+  props<{ error: string }>()
+);

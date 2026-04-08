@@ -5,13 +5,16 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import {
   loadClientById,
   loadClientByIdSuccess,
-  loadClientByIdFailure
-} from './clients.actions';
-
-import {
+  loadClientByIdFailure,
   loadClients,
   loadClientsSuccess,
-  loadClientsFailure, createClient, createClientSuccess, createClientFailure
+  loadClientsFailure,
+  createClient,
+  createClientSuccess,
+  createClientFailure,
+  updateClient,
+  updateClientSuccess,
+  updateClientFailure,
 } from './clients.actions';
 
 import { ClientsApiService } from './clients.api';
@@ -57,6 +60,20 @@ export class ClientsEffects {
           map((client) => loadClientByIdSuccess({ client })),
           catchError((err) =>
             of(loadClientByIdFailure({ error: this.toErrorMessage(err) }))
+          )
+        )
+      )
+    )
+  );
+
+  updateClient$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(updateClient),
+      switchMap(({ companyId, clientId, client }) =>
+        this.api.updateClient(companyId, clientId, client).pipe(
+          map((updated) => updateClientSuccess({ client: updated })),
+          catchError((err) =>
+            of(updateClientFailure({ error: this.toErrorMessage(err) }))
           )
         )
       )

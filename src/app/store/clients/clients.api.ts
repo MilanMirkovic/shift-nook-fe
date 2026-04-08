@@ -53,4 +53,10 @@ export class ClientsApiService {
     );
   }
 
+  updateClient(companyId: string, clientId: string, client: Partial<Client>) {
+    return this.http.put<Client>(
+      `${this.apiUrl}/companies/${companyId}/clients/${clientId}`,
+      client
+    );
+  }
 }

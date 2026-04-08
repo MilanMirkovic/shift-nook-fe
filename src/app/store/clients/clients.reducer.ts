@@ -3,10 +3,16 @@ import {
   loadClients,
   loadClientsSuccess,
   loadClientsFailure,
-  updatePage, createClientSuccess, createClient, createClientFailure,
+  updatePage,
+  createClientSuccess,
+  createClient,
+  createClientFailure,
   loadClientById,
   loadClientByIdSuccess,
-  loadClientByIdFailure
+  loadClientByIdFailure,
+  updateClient,
+  updateClientSuccess,
+  updateClientFailure,
 } from './clients.actions';
 
 import { ClientsState } from './clients.models';
@@ -93,6 +99,24 @@ on(createClient, (state) => ({
     ...state,
     loading: false,
     error
+  })),
+
+  on(updateClient, (state) => ({
+    ...state,
+    loading: true,
+    error: null,
+  })),
+
+  on(updateClientSuccess, (state, { client }) => ({
+    ...state,
+    items: state.items.map(c => c.id === client.id ? client : c),
+    loading: false,
+  })),
+
+  on(updateClientFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error,
   }))
 
 );

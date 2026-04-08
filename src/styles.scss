@@ -206,7 +206,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Global touch & interaction improvements ─────────────────────────────── */
+/* ─── Global touch & interaction improvements ��────────────────────────────── */
 
 /* All interactive elements get touch-manipulation to remove 300ms tap delay */
 a, button, [role="button"], input, select, textarea, label {
@@ -840,3 +840,8 @@ select:focus-visible {
 }
 
 /* You can add global styles to this file, and also import other style files */
+
+/* ─── Dialog Centering ──────────────────────────────────────────────────── */
+.cdk-global-overlay-wrapper:has(.sn-dialog) {
+  align-items: center !important;
+}
