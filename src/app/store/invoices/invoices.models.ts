@@ -3,6 +3,7 @@ export type InvoiceStatus = 'DRAFT' | 'SENT' | 'PAID' | 'OVERDUE' | 'VOID';
 export interface InvoiceItem {
   id: string;
   sortOrder: number;
+  service?: string;
   description: string;
   quantity: number;
   unitPrice: number;
@@ -32,6 +33,7 @@ export interface Invoice {
 
 export interface InvoiceItemInput {
   sortOrder: number;
+  service?: string;
   description: string;
   quantity: number;
   unitPrice: number;

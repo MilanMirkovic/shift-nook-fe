@@ -73,6 +73,7 @@ export class EstimateDialogComponent implements OnInit, OnDestroy {
       for (const li of this.data.estimate.lineItems) {
         const item = this.fb.group({
           sortOrder: [this.lineItems.length],
+          service: [li.service ?? '', Validators.maxLength(500)],
           description: [li.description, [Validators.required, Validators.maxLength(1000)]],
           quantity: [li.quantity, [Validators.required, Validators.min(0.01)]],
           rate: [li.rate, [Validators.required, Validators.min(0)]]
@@ -104,6 +105,7 @@ export class EstimateDialogComponent implements OnInit, OnDestroy {
   addLineItem(): void {
     const item = this.fb.group({
       sortOrder: [this.lineItems.length],
+      service: ['', Validators.maxLength(500)],
       description: ['', [Validators.required, Validators.maxLength(1000)]],
       quantity: [1, [Validators.required, Validators.min(0.01)]],
       rate: [0, [Validators.required, Validators.min(0)]]
@@ -150,6 +152,7 @@ export class EstimateDialogComponent implements OnInit, OnDestroy {
 
     const lineItems = raw.lineItems.map((item: any, i: number) => ({
       sortOrder: i,
+      service: item.service?.trim() || undefined,
       description: item.description.trim(),
       quantity: parseFloat(item.quantity),
       rate: parseFloat(item.rate)

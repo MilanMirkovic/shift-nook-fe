@@ -1,6 +1,7 @@
 export type EstimateStatus = 'DRAFT' | 'SENT' | 'ACCEPTED' | 'DECLINED' | 'VOID' | 'INVOICED';
 
 export interface LineItem {
+  service?: string;
   description: string;
   quantity: number;
   rate: number;

@@ -79,6 +79,7 @@
         <!-- Table header -->
         <div class="items-table">
           <div class="table-head">
+            <span class="th th-service">Service</span>
             <span class="th th-desc">Description</span>
             <span class="th th-qty">Qty</span>
             <span class="th th-rate">Rate</span>
@@ -91,6 +92,15 @@
             @for (item of lineItems.controls; track $index) {
               <div [formGroupName]="$index" class="table-row"
                    [class.table-row--error]="item.invalid && item.touched">
+
+                <div class="td td-service">
+                  <input
+                    class="cell-input cell-input--service"
+                    type="text"
+                    formControlName="service"
+                    placeholder="e.g. Plumbing"
+                    autocomplete="off">
+                </div>
 
                 <div class="td td-desc">
                   <textarea

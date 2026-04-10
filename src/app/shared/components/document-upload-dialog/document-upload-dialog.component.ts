@@ -160,6 +160,7 @@ export class DocumentUploadDialogComponent implements OnInit, OnDestroy {
       for (const li of data.lineItems) {
         const item = this.fb.group({
           sortOrder: [this.lineItems.length],
+          service: [li.service ?? '', Validators.maxLength(500)],
           description: [
             li.description,
             [Validators.required, Validators.maxLength(1000)],
@@ -190,6 +191,7 @@ export class DocumentUploadDialogComponent implements OnInit, OnDestroy {
   addLineItem(): void {
     const item = this.fb.group({
       sortOrder: [this.lineItems.length],
+      service: ['', Validators.maxLength(500)],
       description: ['', [Validators.required, Validators.maxLength(1000)]],
       quantity: [1, [Validators.required, Validators.min(0.01)]],
       rate: [0, [Validators.required, Validators.min(0)]],
@@ -226,6 +228,7 @@ export class DocumentUploadDialogComponent implements OnInit, OnDestroy {
         notes: formValue.notes || null,
         lineItems: formValue.lineItems.map((item: any, index: number) => ({
           sortOrder: index,
+          service: item.service?.trim() || undefined,
           description: item.description,
           quantity: parseFloat(item.quantity),
           rate: parseFloat(item.rate),

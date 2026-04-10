@@ -140,6 +140,12 @@
             </div>
 
             <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Service <span class="optional">(optional)</span></mat-label>
+              <input matInput formControlName="service" placeholder="e.g. Plumbing" />
+              <mat-error>{{ getErrorMessage('service', i) }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
               <mat-label>Description</mat-label>
               <textarea
                 matInput

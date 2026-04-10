@@ -1,6 +1,7 @@
 export type DocumentType = 'INVOICE' | 'ESTIMATE';
 
 export interface ParsedLineItem {
+  service?: string | null;
   description: string;
   quantity: number | null;
   rate: number | null;
