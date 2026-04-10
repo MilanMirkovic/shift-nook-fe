@@ -1,0 +1,267 @@
+import {
+  Component,
+  inject,
+  OnInit,
+  OnDestroy,
+  Inject,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+} from '@angular/core';
+import { CommonModule, CurrencyPipe } from '@angular/common';
+import {
+  FormBuilder,
+  FormGroup,
+  FormArray,
+  ReactiveFormsModule,
+  FormsModule,
+  Validators,
+} from '@angular/forms';
+import { TextFieldModule } from '@angular/cdk/text-field';
+import { MatButtonModule } from '@angular/material/button';
+import {
+  MatDialogModule,
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatRadioModule } from '@angular/material/radio';
+import { Subject, takeUntil } from 'rxjs';
+import { DocumentUploadService } from '../../services/document-upload.service';
+import {
+  DocumentType,
+  ParsedDocumentData,
+} from '../../models/document-upload.models';
+import { CreateEstimateInput } from '../../../store/estimates/estimates.models';
+import { NotificationService } from '../../services/notification.service';
+
+export interface DocumentUploadDialogData {
+  companyId: string;
+  clientId: string;
+  clientName: string;
+}
+
+export type DocumentUploadDialogResult =
+  | { mode: 'estimate'; payload: CreateEstimateInput }
+  | { mode: 'invoice'; payload: any };
+
+@Component({
+  selector: 'app-document-upload-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    CurrencyPipe,
+    ReactiveFormsModule,
+    FormsModule,
+    TextFieldModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatProgressSpinnerModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatRadioModule,
+  ],
+  templateUrl: './document-upload-dialog.component.html',
+  styleUrls: ['./document-upload-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class DocumentUploadDialogComponent implements OnInit, OnDestroy {
+  private readonly fb = inject(FormBuilder);
+  private readonly dialogRef = inject(
+    MatDialogRef<DocumentUploadDialogComponent>
+  );
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly uploadService = inject(DocumentUploadService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly destroy$ = new Subject<void>();
+
+  protected uploading = false;
+  protected parsedData: ParsedDocumentData | null = null;
+  protected selectedFile: File | null = null;
+  protected documentType: DocumentType = 'ESTIMATE';
+  protected form: FormGroup | null = null;
+
+  constructor(@Inject(MAT_DIALOG_DATA) public data: DocumentUploadDialogData) {}
+
+  ngOnInit(): void {}
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      if (file.type !== 'application/pdf') {
+        this.notificationService.error('Please select a PDF file');
+        return;
+      }
+      this.selectedFile = file;
+      this.uploadDocument();
+    }
+  }
+
+  uploadDocument(): void {
+    if (!this.selectedFile) return;
+
+    this.uploading = true;
+    this.cdr.markForCheck();
+
+    this.uploadService
+      .uploadDocument(this.data.companyId, this.selectedFile, this.documentType)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.parsedData = data;
+          this.initializeForm(data);
+          this.uploading = false;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Upload failed:', error);
+          this.notificationService.error(
+            'Failed to parse document. Please try again.'
+          );
+          this.uploading = false;
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  private initializeForm(data: ParsedDocumentData): void {
+    this.form = this.fb.group({
+      title: [
+        data.documentNumber
+          ? `${data.documentType} ${data.documentNumber}`
+          : '',
+        [Validators.required, Validators.maxLength(255)],
+      ],
+      documentDate: [
+        data.documentDate ? new Date(data.documentDate) : new Date(),
+        Validators.required,
+      ],
+      dueDate: [data.dueDate ? new Date(data.dueDate) : null],
+      notes: [data.notes ?? '', Validators.maxLength(2000)],
+      lineItems: this.fb.array([]),
+    });
+
+    if (data.lineItems && data.lineItems.length > 0) {
+      for (const li of data.lineItems) {
+        const item = this.fb.group({
+          sortOrder: [this.lineItems.length],
+          description: [
+            li.description,
+            [Validators.required, Validators.maxLength(1000)],
+          ],
+          quantity: [li.quantity ?? 1, [Validators.required, Validators.min(0.01)]],
+          rate: [li.rate ?? 0, [Validators.required, Validators.min(0)]],
+        });
+        this.lineItems.push(item);
+      }
+    } else {
+      this.addLineItem();
+    }
+  }
+
+  get lineItems(): FormArray {
+    return this.form?.get('lineItems') as FormArray;
+  }
+
+  get total(): number {
+    if (!this.form) return 0;
+    return this.lineItems.controls.reduce((sum, ctrl) => {
+      const qty = parseFloat(ctrl.get('quantity')?.value) || 0;
+      const rate = parseFloat(ctrl.get('rate')?.value) || 0;
+      return sum + qty * rate;
+    }, 0);
+  }
+
+  addLineItem(): void {
+    const item = this.fb.group({
+      sortOrder: [this.lineItems.length],
+      description: ['', [Validators.required, Validators.maxLength(1000)]],
+      quantity: [1, [Validators.required, Validators.min(0.01)]],
+      rate: [0, [Validators.required, Validators.min(0)]],
+    });
+    this.lineItems.push(item);
+    this.cdr.markForCheck();
+  }
+
+  removeLineItem(index: number): void {
+    this.lineItems.removeAt(index);
+    this.lineItems.controls.forEach((ctrl, i) => {
+      ctrl.get('sortOrder')?.setValue(i);
+    });
+    this.cdr.markForCheck();
+  }
+
+  onCancel(): void {
+    this.dialogRef.close();
+  }
+
+  onSave(): void {
+    if (!this.form || this.form.invalid) {
+      this.form?.markAllAsTouched();
+      return;
+    }
+
+    const formValue = this.form.value;
+
+    if (this.documentType === 'ESTIMATE') {
+      const payload: CreateEstimateInput = {
+        clientId: this.data.clientId,
+        title: formValue.title,
+        estimateDate: this.formatDate(formValue.documentDate),
+        notes: formValue.notes || null,
+        lineItems: formValue.lineItems.map((item: any, index: number) => ({
+          sortOrder: index,
+          description: item.description,
+          quantity: parseFloat(item.quantity),
+          rate: parseFloat(item.rate),
+        })),
+      };
+      this.dialogRef.close({ mode: 'estimate', payload });
+    } else {
+      // For invoices, you'll need to implement similar payload structure
+      // based on your invoice creation API
+      this.notificationService.info(
+        'Invoice creation from upload coming soon'
+      );
+    }
+  }
+
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  getErrorMessage(controlName: string, index?: number): string {
+    const control =
+      index !== undefined
+        ? this.lineItems.at(index).get(controlName)
+        : this.form?.get(controlName);
+
+    if (!control || !control.errors) return '';
+
+    if (control.errors['required']) return 'This field is required';
+    if (control.errors['maxLength'])
+      return `Maximum ${control.errors['maxLength'].requiredLength} characters`;
+    if (control.errors['min'])
+      return `Minimum value is ${control.errors['min'].min}`;
+
+    return '';
+  }
+}

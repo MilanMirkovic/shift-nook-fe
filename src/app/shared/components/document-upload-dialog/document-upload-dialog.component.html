@@ -1,0 +1,211 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>
+    {{ parsedData ? 'Review Document' : 'Upload Document' }}
+  </h2>
+
+  <mat-dialog-content>
+    <!-- Upload State -->
+    <div *ngIf="!parsedData && !uploading" class="upload-section">
+      <div class="document-type-selector">
+        <label class="section-label">Document Type</label>
+        <mat-radio-group [(ngModel)]="documentType" class="radio-group">
+          <mat-radio-button value="ESTIMATE">Estimate</mat-radio-button>
+          <mat-radio-button value="INVOICE">Invoice</mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <div class="file-upload">
+        <label class="section-label">Select PDF Document</label>
+        <div class="upload-zone">
+          <input
+            type="file"
+            accept="application/pdf"
+            (change)="onFileSelected($event)"
+            #fileInput
+            style="display: none"
+          />
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="fileInput.click()"
+            type="button"
+          >
+            <mat-icon>upload_file</mat-icon>
+            Choose PDF File
+          </button>
+          <p class="upload-hint">Upload an invoice or estimate PDF to automatically extract data</p>
+        </div>
+      </div>
+
+      <div class="client-info">
+        <mat-icon>info</mat-icon>
+        <span>Document will be created for: <strong>{{ data.clientName }}</strong></span>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="uploading" class="loading-section">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Uploading and parsing document...</p>
+    </div>
+
+    <!-- Review/Edit Form State -->
+    <form *ngIf="parsedData && form" [formGroup]="form" class="review-form">
+      <!-- Basic Info -->
+      <div class="form-section">
+        <h3>Document Details</h3>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Title</mat-label>
+          <input matInput formControlName="title" />
+          <mat-error>{{ getErrorMessage('title') }}</mat-error>
+        </mat-form-field>
+
+        <div class="date-row">
+          <mat-form-field appearance="outline">
+            <mat-label>{{ documentType === 'ESTIMATE' ? 'Estimate Date' : 'Invoice Date' }}</mat-label>
+            <input
+              matInput
+              [matDatepicker]="datePicker"
+              formControlName="documentDate"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="datePicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #datePicker></mat-datepicker>
+            <mat-error>{{ getErrorMessage('documentDate') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" *ngIf="documentType === 'INVOICE'">
+            <mat-label>Due Date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="dueDatePicker"
+              formControlName="dueDate"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="dueDatePicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #dueDatePicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notes (optional)</mat-label>
+          <textarea
+            matInput
+            formControlName="notes"
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="2"
+            cdkAutosizeMaxRows="6"
+          ></textarea>
+          <mat-error>{{ getErrorMessage('notes') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Line Items -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3>Line Items</h3>
+          <button
+            mat-mini-fab
+            color="primary"
+            type="button"
+            (click)="addLineItem()"
+            matTooltip="Add line item"
+          >
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+
+        <div formArrayName="lineItems" class="line-items">
+          <div
+            *ngFor="let item of lineItems.controls; let i = index"
+            [formGroupName]="i"
+            class="line-item"
+          >
+            <div class="line-item-header">
+              <span class="item-number">#{{ i + 1 }}</span>
+              <button
+                mat-icon-button
+                type="button"
+                (click)="removeLineItem(i)"
+                [disabled]="lineItems.length === 1"
+                matTooltip="Remove item"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea
+                matInput
+                formControlName="description"
+                cdkTextareaAutosize
+                cdkAutosizeMinRows="2"
+                cdkAutosizeMaxRows="4"
+              ></textarea>
+              <mat-error>{{ getErrorMessage('description', i) }}</mat-error>
+            </mat-form-field>
+
+            <div class="item-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Quantity</mat-label>
+                <input matInput type="number" formControlName="quantity" step="0.01" />
+                <mat-error>{{ getErrorMessage('quantity', i) }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Rate</mat-label>
+                <span matPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="rate" step="0.01" />
+                <mat-error>{{ getErrorMessage('rate', i) }}</mat-error>
+              </mat-form-field>
+
+              <div class="item-total">
+                <span class="label">Amount</span>
+                <span class="amount">{{
+                  (item.get('quantity')?.value || 0) *
+                    (item.get('rate')?.value || 0) | currency
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="total-section">
+          <div class="total-row">
+            <span class="label">Total</span>
+            <span class="amount">{{ total | currency }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Parsed Info Alert -->
+      <div class="info-alert" *ngIf="parsedData.clientInfo.name">
+        <mat-icon>info</mat-icon>
+        <div>
+          <strong>Detected Client:</strong> {{ parsedData.clientInfo.name }}
+          <br />
+          <small>Document will be created for: {{ data.clientName }}</small>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSave()"
+      [disabled]="!form || form.invalid || uploading"
+      *ngIf="parsedData"
+    >
+      Create {{ documentType === 'ESTIMATE' ? 'Estimate' : 'Invoice' }}
+    </button>
+  </mat-dialog-actions>
+</div>

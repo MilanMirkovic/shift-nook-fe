@@ -8,10 +8,16 @@
         {{ (vm.estimates?.length || 0) }} estimate{{ (vm.estimates?.length || 0) !== 1 ? 's' : '' }} for {{ clientName }}
       </p>
     </div>
-    <button mat-flat-button color="primary" (click)="onAddEstimate()">
-      <mat-icon>add</mat-icon>
-      New Estimate
-    </button>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="onUploadDocument()" matTooltip="Upload PDF estimate">
+        <mat-icon>upload_file</mat-icon>
+        Upload
+      </button>
+      <button mat-flat-button color="primary" (click)="onAddEstimate()">
+        <mat-icon>add</mat-icon>
+        New Estimate
+      </button>
+    </div>
   </div>
 
   <!-- Search Bar -->

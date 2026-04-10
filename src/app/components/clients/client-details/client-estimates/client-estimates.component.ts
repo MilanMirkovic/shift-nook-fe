@@ -35,6 +35,7 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { EstimatesApiService } from '../../../../store/estimates/estimates.api';
 import { EstimateStatusDialogComponent } from '../../../../shared/components/estimate-status-dialog/estimate-status-dialog.component';
+import { DocumentUploadDialogComponent, DocumentUploadDialogResult } from '../../../../shared/components/document-upload-dialog/document-upload-dialog.component';
 
 @Component({
   selector: 'app-client-estimates',
@@ -320,6 +321,43 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
           this.notificationService.error('Failed to promote estimate to invoice. Please try again.');
         }
       });
+    });
+  }
+
+  protected onUploadDocument(): void {
+    const dialogRef = this.dialog.open(DocumentUploadDialogComponent, {
+      width: '700px',
+      maxWidth: '95vw',
+      maxHeight: '92vh',
+      disableClose: false,
+      autoFocus: true,
+      panelClass: 'document-upload-dialog-container',
+      data: {
+        companyId: this.companyId,
+        clientId: this.clientId,
+        clientName: this.clientName,
+      },
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: DocumentUploadDialogResult | undefined) => {
+      if (!result) return;
+
+      if (result.mode === 'estimate') {
+        this.store.dispatch(createEstimate({ companyId: this.companyId, estimate: result.payload }));
+
+        this.actions$.pipe(
+          ofType(createEstimateSuccess, createEstimateFailure),
+          take(1),
+          takeUntil(this.destroy$),
+        ).subscribe(action => {
+          if (action.type === createEstimateSuccess.type) {
+            this.notificationService.success('Estimate created from uploaded document!');
+            this.reloadEstimates();
+          } else {
+            this.notificationService.error('Failed to create estimate. Please try again.');
+          }
+        });
+      }
     });
   }
 
