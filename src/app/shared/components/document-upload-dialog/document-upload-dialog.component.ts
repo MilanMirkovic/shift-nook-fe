@@ -218,45 +218,26 @@ export class DocumentUploadDialogComponent implements OnInit, OnDestroy {
   onSave(): void {
     if (!this.form) return;
 
-    // Debug: log any remaining invalid controls
-    if (this.form.invalid) {
-      console.warn('[DocumentUploadDialog] Form invalid. Control errors:');
-      Object.keys(this.form.controls).forEach(key => {
-        const ctrl = this.form!.get(key);
-        if (ctrl?.invalid) console.warn(` - ${key}:`, ctrl.errors, 'value:', ctrl.value);
-      });
-      this.lineItems.controls.forEach((grp, i) => {
-        const g = grp as FormGroup;
-        Object.keys(g.controls).forEach(key => {
-          const ctrl = g.get(key);
-          if (ctrl?.invalid) console.warn(` - lineItems[${i}].${key}:`, ctrl.errors, 'value:', ctrl.value);
-        });
-      });
-    }
-
-    const formValue = this.form.value;
+    const v = this.form.getRawValue();
+    const docDate: Date = v.documentDate instanceof Date ? v.documentDate : new Date();
 
     if (this.documentType === 'ESTIMATE') {
       const payload: CreateEstimateInput = {
         clientId: this.data.clientId,
-        title: formValue.title,
-        estimateDate: this.formatDate(formValue.documentDate),
-        notes: formValue.notes || null,
-        lineItems: formValue.lineItems.map((item: any, index: number) => ({
+        title: (v.title ?? this.documentType).trim().substring(0, 255) || this.documentType,
+        estimateDate: this.formatDate(docDate),
+        notes: v.notes?.trim().substring(0, 2000) || null,
+        lineItems: (v.lineItems ?? []).map((item: any, index: number) => ({
           sortOrder: index,
-          service: item.service?.trim() || undefined,
-          description: item.description,
-          quantity: parseFloat(item.quantity),
-          rate: parseFloat(item.rate),
+          service: item.service?.trim().substring(0, 500) || undefined,
+          description: (item.description ?? '').trim().substring(0, 1000),
+          quantity: parseFloat(item.quantity) || 1,
+          rate: parseFloat(item.rate) || 0,
         })),
       };
       this.dialogRef.close({ mode: 'estimate', payload });
     } else {
-      // For invoices, you'll need to implement similar payload structure
-      // based on your invoice creation API
-      this.notificationService.info(
-        'Invoice creation from upload coming soon'
-      );
+      this.notificationService.info('Invoice creation from upload coming soon');
     }
   }
 
