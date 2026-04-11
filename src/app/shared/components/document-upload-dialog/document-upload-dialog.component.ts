@@ -144,7 +144,7 @@ export class DocumentUploadDialogComponent implements OnInit, OnDestroy {
       title: [
         data.documentNumber
           ? `${data.documentType} ${data.documentNumber}`
-          : '',
+          : data.documentType,
         [Validators.required, Validators.maxLength(255)],
       ],
       documentDate: [
@@ -162,10 +162,10 @@ export class DocumentUploadDialogComponent implements OnInit, OnDestroy {
           sortOrder: [this.lineItems.length],
           service: [li.service ?? '', Validators.maxLength(500)],
           description: [
-            li.description,
+            li.description ?? '',
             [Validators.required, Validators.maxLength(1000)],
           ],
-          quantity: [li.quantity ?? 1, [Validators.required, Validators.min(0.01)]],
+          quantity: [li.quantity != null && li.quantity > 0 ? li.quantity : 1, [Validators.required, Validators.min(0.01)]],
           rate: [li.rate ?? 0, [Validators.required, Validators.min(0)]],
         });
         this.lineItems.push(item);
