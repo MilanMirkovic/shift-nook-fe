@@ -33,5 +33,6 @@ export interface ClientsState {
   size: number;
 
   loading: boolean;
+  loaded: boolean;
   error: string | null;
 }

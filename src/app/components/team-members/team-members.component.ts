@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Subject, takeUntil, filter } from 'rxjs';
+import { Subject, takeUntil, filter, distinctUntilChanged, take } from 'rxjs';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -9,7 +9,8 @@ import { DataTableColumn, DataTableAction } from '../../layout/data-table/data-t
 import {
   selectMembers,
   selectTotal,
-  selectLoading
+  selectLoading,
+  selectLoaded
 } from '../../store/company-members/company-members.selectors';
 import {
   loadMembers,
@@ -39,6 +40,7 @@ export class TeamMembersComponent implements OnInit, OnDestroy {
   readonly members$ = this.store.select(selectMembers);
   readonly total$ = this.store.select(selectTotal);
   readonly loading$ = this.store.select(selectLoading);
+  readonly loaded$ = this.store.select(selectLoaded);
   readonly currentUserRole$ = this.store.select(selectCurrentUserRole);
 
   protected readonly CompanyRole = CompanyRole;
@@ -125,20 +127,27 @@ export class TeamMembersComponent implements OnInit, OnDestroy {
 
     this.selectedCompanyId$
       .pipe(
-        takeUntil(this.destroy$),
-        filter((id): id is string => id !== null)
+        filter((id): id is string => id !== null),
+        distinctUntilChanged(),  // only react when company ID actually changes
+        takeUntil(this.destroy$)
       )
       .subscribe((companyId) => {
         this.companyId = companyId;
-        this.store.dispatch(
-          loadMembers({
-            companyId,
-            page: this.currentPage,
-            size: this.pageSize,
-            role: null,
-            q: this.currentQuery
-          })
-        );
+
+        // Skip API call if data is already loaded for this session
+        this.loaded$.pipe(take(1)).subscribe(loaded => {
+          if (!loaded) {
+            this.store.dispatch(
+              loadMembers({
+                companyId,
+                page: this.currentPage,
+                size: this.pageSize,
+                role: null,
+                q: this.currentQuery
+              })
+            );
+          }
+        });
       });
   }
 

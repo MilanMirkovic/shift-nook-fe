@@ -20,6 +20,11 @@ export const selectLoading = createSelector(
   (state) => state.loading
 );
 
+export const selectLoaded = createSelector(
+  selectJobsitesState,
+  (state) => state.loaded
+);
+
 export const selectError = createSelector(
   selectJobsitesState,
   (state) => state.error

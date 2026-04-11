@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Subject, takeUntil, filter } from 'rxjs';
+import { Subject, takeUntil, filter, distinctUntilChanged, take } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
@@ -8,12 +8,12 @@ import { DataTableColumn, DataTableAction } from '../../layout/data-table/data-t
 import {
   selectClients,
   selectTotal,
-  selectLoading
+  selectLoading,
+  selectLoaded
 } from '../../store/clients/clients.selectors';
 import { loadClients, updatePage, createClient } from '../../store/clients/clients.actions';
 import { Client } from '../../store/clients/clients.models';
 import { selectSelectedCompanyId, selectCurrentCompany } from '../../store/user/user.selectors';
-import { loadUser } from '../../store/user/user.actions';
 import { CompanyRole } from '../../shared/models/company-role';
 import { ClientDialogComponent } from '../../shared/components/client-dialog/client-dialog.component';
 import { NotificationService } from '../../shared/services/notification.service';
@@ -37,6 +37,7 @@ export class ClientsComponent implements OnInit, OnDestroy {
   readonly clients$ = this._store.select(selectClients);
   readonly total$ = this._store.select(selectTotal);
   readonly loading$ = this._store.select(selectLoading);
+  readonly loaded$ = this._store.select(selectLoaded);
 
   private companyId: string | null = null;
   private isOwner = false;
@@ -93,9 +94,6 @@ export class ClientsComponent implements OnInit, OnDestroy {
   ];
 
   ngOnInit(): void {
-    // Load user if not already loaded
-    this._store.dispatch(loadUser());
-
     // Check if user is owner
     this.currentCompany$
       .pipe(takeUntil(this.destroy$))
@@ -103,23 +101,27 @@ export class ClientsComponent implements OnInit, OnDestroy {
         this.isOwner = company?.role === CompanyRole.OWNER;
       });
 
-    // Wait for company ID to be available, then load clients
+    // Wait for company ID, then load only if not already loaded
     this.selectedCompanyId$
       .pipe(
         filter(id => id !== null),
+        distinctUntilChanged(),  // only react when company ID actually changes
         takeUntil(this.destroy$)
       )
       .subscribe(companyId => {
         this.companyId = companyId;
 
-        // Initial load
-        this._store.dispatch(
-          loadClients({
-            companyId: companyId,
-            page: 0,
-            size: 20
-          })
-        );
+        this.loaded$.pipe(take(1)).subscribe(loaded => {
+          if (!loaded) {
+            this._store.dispatch(
+              loadClients({
+                companyId: companyId,
+                page: 0,
+                size: 20
+              })
+            );
+          }
+        });
       });
   }
 

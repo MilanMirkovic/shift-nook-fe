@@ -21,6 +21,9 @@ export const selectSize =
 export const selectLoading =
   createSelector(selectClientsState, s => s.loading);
 
+export const selectLoaded =
+  createSelector(selectClientsState, s => s.loaded);
+
 export const selectError =
   createSelector(selectClientsState, s => s.error);
 

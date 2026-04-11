@@ -27,6 +27,7 @@ export const initialState: CompanyMembersState = {
   },
 
   loading: false,
+  loaded: false,
   error: null,
 
   selectedMember: null,
@@ -39,7 +40,7 @@ export const reducer = createReducer(
 
   on(loadMembers, state => ({
     ...state,
-    items: [],              // clear table while loading
+    // Keep existing items visible while refreshing (no blank flash)
     loading: true,
     error: null
   })),
@@ -51,6 +52,7 @@ export const reducer = createReducer(
     page: response.page,
     size: response.size,
     loading: false,
+    loaded: true,
     error: null             // clear previous error on success
   })),
 

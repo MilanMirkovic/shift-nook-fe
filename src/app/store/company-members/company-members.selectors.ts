@@ -24,6 +24,9 @@ export const selectFilters =
 export const selectLoading =
   createSelector(selectCompanyMembersState, s => s.loading);
 
+export const selectLoaded =
+  createSelector(selectCompanyMembersState, s => s.loaded);
+
 export const selectError =
   createSelector(selectCompanyMembersState, s => s.error);
 

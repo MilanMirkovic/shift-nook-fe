@@ -25,6 +25,7 @@ export const initialState: ClientsState = {
   size: 20,
 
   loading: false,
+  loaded: false,
   error: null
 };
 
@@ -33,7 +34,7 @@ export const reducer = createReducer(
 
   on(loadClients, (state) => ({
     ...state,
-    items: [],
+    // Keep existing items visible while refreshing (no blank flash)
     loading: true,
     error: null
   })),
@@ -45,6 +46,7 @@ export const reducer = createReducer(
     page: response.page,
     size: response.size,
     loading: false,
+    loaded: true,
     error: null
   })),
 

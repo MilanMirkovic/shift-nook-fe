@@ -6,6 +6,7 @@ export const initialState: JobsitesState = {
   jobsites: [],
   total: 0,
   loading: false,
+  loaded: false,
   error: null,
   filters: {
     page: 0,
@@ -32,6 +33,7 @@ export const reducer = createReducer(
     jobsites,
     total,
     loading: false,
+    loaded: true,
     error: null
   })),
   on(JobsitesActions.loadJobsitesFailure, (state, { error }) => ({

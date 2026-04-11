@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Subject, takeUntil, filter } from 'rxjs';
+import { Subject, takeUntil, filter, distinctUntilChanged, take } from 'rxjs';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -13,7 +13,8 @@ import { NotificationService } from '../../shared/services/notification.service'
 import {
   selectMembers,
   selectTotal,
-  selectLoading
+  selectLoading,
+  selectLoaded
 } from '../../store/company-members/company-members.selectors';
 import {
   loadMembers,
@@ -23,7 +24,6 @@ import {
 } from '../../store/company-members/company-members.actions';
 import { CompanyMember } from '../../store/company-members/company-members.models';
 import { selectSelectedCompanyId } from '../../store/user/user.selectors';
-import { loadUser } from '../../store/user/user.actions';
 
 
 @Component({
@@ -44,6 +44,7 @@ export class WorkersComponent implements OnInit, OnDestroy {
   readonly members$ = this._store.select(selectMembers);
   readonly total$ = this._store.select(selectTotal);
   readonly loading$ = this._store.select(selectLoading);
+  readonly loaded$ = this._store.select(selectLoaded);
 
   private companyId: string | null = null;
   private currentQuery: string | null = null;
@@ -91,29 +92,31 @@ export class WorkersComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit(): void {
-    // Load user if not already loaded
-    this._store.dispatch(loadUser());
-
-    // Wait for company ID to be available, then load members
+    // Wait for company ID to be available, then load members only if not already loaded
     this.selectedCompanyId$
       .pipe(
         filter(id => id !== null),
+        distinctUntilChanged(),  // only react when company ID actually changes
         takeUntil(this.destroy$)
       )
       .subscribe(companyId => {
         this.companyId = companyId;
 
-        // Initial load (always WORKER)
-        this._store.dispatch(updateFilters({ role: CompanyRole.WORKER, q: null }));
-        this._store.dispatch(
-          loadMembers({
-            companyId: companyId,
-            page: 0,
-            size: 20,
-            role: CompanyRole.WORKER,
-            q: null
-          })
-        );
+        // Skip API call if data is already loaded for this session
+        this.loaded$.pipe(take(1)).subscribe(loaded => {
+          if (!loaded) {
+            this._store.dispatch(updateFilters({ role: CompanyRole.WORKER, q: null }));
+            this._store.dispatch(
+              loadMembers({
+                companyId: companyId,
+                page: 0,
+                size: 20,
+                role: CompanyRole.WORKER,
+                q: null
+              })
+            );
+          }
+        });
       });
   }
 

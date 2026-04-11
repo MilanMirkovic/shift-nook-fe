@@ -22,6 +22,7 @@ import {CompanyRole} from '../../shared/models/company-role';
     };
 
     loading: boolean;
+    loaded: boolean;
     error: string | null;
 
     // Single member detail

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Subject, takeUntil, filter } from 'rxjs';
+import { Subject, takeUntil, filter, distinctUntilChanged, take } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { Actions, ofType } from '@ngrx/effects';
 import { Router } from '@angular/router';
@@ -9,12 +9,12 @@ import { DataTableColumn, DataTableAction } from '../../layout/data-table/data-t
 import {
   selectJobsites,
   selectTotal,
-  selectLoading
+  selectLoading,
+  selectLoaded
 } from '../../store/jobsites/jobsites.selectors';
 import { loadJobsites, updatePage, createJobsite, createJobsiteSuccess, deleteJobsite, updateJobsite, updateJobsiteSuccess, updateJobsiteFailure } from '../../store/jobsites/jobsites.actions';
 import { Jobsite } from '../../store/jobsites/jobsites.models';
 import { selectSelectedCompanyId, selectCurrentCompany } from '../../store/user/user.selectors';
-import { loadUser } from '../../store/user/user.actions';
 import { CompanyRole } from '../../shared/models/company-role';
 import { JobsiteDialogComponent } from '../../shared/components/jobsite-dialog/jobsite-dialog.component';
 import { NotificationService } from '../../shared/services/notification.service';
@@ -40,6 +40,7 @@ export class JobsitesComponent implements OnInit, OnDestroy {
   readonly jobsites$ = this._store.select(selectJobsites);
   readonly total$ = this._store.select(selectTotal);
   readonly loading$ = this._store.select(selectLoading);
+  readonly loaded$ = this._store.select(selectLoaded);
 
   private companyId: string | null = null;
   private isOwner = false;
@@ -84,9 +85,6 @@ export class JobsitesComponent implements OnInit, OnDestroy {
   ];
 
   ngOnInit(): void {
-    // Load user if not already loaded
-    this._store.dispatch(loadUser());
-
     // Check if user is owner or accountant
     this.currentCompany$
       .pipe(takeUntil(this.destroy$))
@@ -95,15 +93,21 @@ export class JobsitesComponent implements OnInit, OnDestroy {
         this.canManageJobsites = company?.role === CompanyRole.OWNER || company?.role === CompanyRole.ACCOUNTANT;
       });
 
-    // Wait for company ID to be available, then load jobsites
+    // Wait for company ID, then load only if not already loaded
     this.selectedCompanyId$
       .pipe(
         filter(id => id !== null),
+        distinctUntilChanged(),  // only react when company ID actually changes
         takeUntil(this.destroy$)
       )
       .subscribe(companyId => {
         this.companyId = companyId;
-        this.loadJobsitesList();
+
+        this.loaded$.pipe(take(1)).subscribe(loaded => {
+          if (!loaded) {
+            this.loadJobsitesList();
+          }
+        });
       });
 
     // Reload jobsites after successful creation to ensure clientName is populated

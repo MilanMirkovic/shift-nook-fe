@@ -42,6 +42,7 @@ export interface JobsitesState {
   jobsites: Jobsite[];
   total: number;
   loading: boolean;
+  loaded: boolean;
   error: string | null;
   filters: {
     page: number;
