@@ -216,9 +216,22 @@ export class DocumentUploadDialogComponent implements OnInit, OnDestroy {
   }
 
   onSave(): void {
-    if (!this.form || this.form.invalid) {
-      this.form?.markAllAsTouched();
-      return;
+    if (!this.form) return;
+
+    // Debug: log any remaining invalid controls
+    if (this.form.invalid) {
+      console.warn('[DocumentUploadDialog] Form invalid. Control errors:');
+      Object.keys(this.form.controls).forEach(key => {
+        const ctrl = this.form!.get(key);
+        if (ctrl?.invalid) console.warn(` - ${key}:`, ctrl.errors, 'value:', ctrl.value);
+      });
+      this.lineItems.controls.forEach((grp, i) => {
+        const g = grp as FormGroup;
+        Object.keys(g.controls).forEach(key => {
+          const ctrl = g.get(key);
+          if (ctrl?.invalid) console.warn(` - lineItems[${i}].${key}:`, ctrl.errors, 'value:', ctrl.value);
+        });
+      });
     }
 
     const formValue = this.form.value;
