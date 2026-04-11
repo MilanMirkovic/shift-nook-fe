@@ -139,6 +139,12 @@ export class DocumentUploadDialogComponent implements OnInit, OnDestroy {
       });
   }
 
+  private parseSafeDate(value: string | null): Date {
+    if (!value) return new Date();
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? new Date() : d;
+  }
+
   private initializeForm(data: ParsedDocumentData): void {
     this.form = this.fb.group({
       title: [
@@ -148,10 +154,10 @@ export class DocumentUploadDialogComponent implements OnInit, OnDestroy {
         [Validators.required, Validators.maxLength(255)],
       ],
       documentDate: [
-        data.documentDate ? new Date(data.documentDate) : new Date(),
+        this.parseSafeDate(data.documentDate),
         Validators.required,
       ],
-      dueDate: [data.dueDate ? new Date(data.dueDate) : null],
+      dueDate: [data.dueDate ? this.parseSafeDate(data.dueDate) : null],
       notes: [data.notes ?? '', Validators.maxLength(2000)],
       lineItems: this.fb.array([]),
     });
@@ -161,10 +167,7 @@ export class DocumentUploadDialogComponent implements OnInit, OnDestroy {
         const item = this.fb.group({
           sortOrder: [this.lineItems.length],
           service: [li.service ?? '', Validators.maxLength(500)],
-          description: [
-            li.description ?? '',
-            [Validators.required, Validators.maxLength(1000)],
-          ],
+          description: [li.description ?? '', Validators.maxLength(1000)],
           quantity: [li.quantity != null && li.quantity > 0 ? li.quantity : 1, [Validators.required, Validators.min(0.01)]],
           rate: [li.rate ?? 0, [Validators.required, Validators.min(0)]],
         });
@@ -192,7 +195,7 @@ export class DocumentUploadDialogComponent implements OnInit, OnDestroy {
     const item = this.fb.group({
       sortOrder: [this.lineItems.length],
       service: ['', Validators.maxLength(500)],
-      description: ['', [Validators.required, Validators.maxLength(1000)]],
+      description: ['', Validators.maxLength(1000)],
       quantity: [1, [Validators.required, Validators.min(0.01)]],
       rate: [0, [Validators.required, Validators.min(0)]],
     });

@@ -208,7 +208,7 @@
       mat-raised-button
       color="primary"
       (click)="onSave()"
-      [disabled]="!form || form.invalid || uploading"
+      [disabled]="!form || uploading"
       *ngIf="parsedData"
     >
       Create {{ documentType === 'ESTIMATE' ? 'Estimate' : 'Invoice' }}
