@@ -14,9 +14,15 @@ import { MatDialog } from '@angular/material/dialog';
 import { Invoice, InvoiceStatus } from '../../../../store/invoices/invoices.models';
 import {
   loadInvoices,
+  createInvoice, createInvoiceSuccess, createInvoiceFailure,
+  updateInvoice, updateInvoiceSuccess, updateInvoiceFailure,
   updateInvoiceStatus, updateInvoiceStatusSuccess, updateInvoiceStatusFailure,
   deleteInvoice, deleteInvoiceSuccess, deleteInvoiceFailure,
 } from '../../../../store/invoices/invoices.actions';
+import {
+  InvoiceDialogComponent,
+  InvoiceDialogResult,
+} from '../../../../shared/components/invoice-dialog/invoice-dialog.component';
 import {
   selectInvoicesByClientId,
   selectInvoicesLoading,
@@ -25,6 +31,10 @@ import {
 import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { InvoicesApiService } from '../../../../store/invoices/invoices.api';
+import {
+  DocumentUploadDialogComponent,
+  DocumentUploadDialogResult,
+} from '../../../../shared/components/document-upload-dialog/document-upload-dialog.component';
 
 @Component({
   selector: 'app-client-invoices',
@@ -42,6 +52,7 @@ import { InvoicesApiService } from '../../../../store/invoices/invoices.api';
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    InvoiceDialogComponent,
   ],
 })
 export class ClientInvoicesComponent implements OnInit, OnDestroy {
@@ -81,11 +92,84 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
   }
 
   protected onAddInvoice(): void {
-    this.notificationService.success('Invoice creation coming soon!');
+    const dialogRef = this.dialog.open(InvoiceDialogComponent, {
+      width: '700px',
+      maxWidth: '95vw',
+      maxHeight: '92vh',
+      disableClose: false,
+      autoFocus: true,
+      panelClass: 'invoice-dialog-container',
+      data: { clientId: this.clientId, clientName: this.clientName },
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: InvoiceDialogResult | undefined) => {
+      if (!result || result.mode !== 'create') return;
+      this.store.dispatch(createInvoice({ companyId: this.companyId, invoice: result.payload }));
+      this.actions$.pipe(
+        ofType(createInvoiceSuccess, createInvoiceFailure),
+        take(1),
+        takeUntil(this.destroy$),
+      ).subscribe(action => {
+        if (action.type === createInvoiceSuccess.type) {
+          this.notificationService.success('Invoice created successfully!');
+          this.store.dispatch(loadInvoices({ companyId: this.companyId, clientId: this.clientId, page: 0, size: 100 }));
+        } else {
+          this.notificationService.error('Failed to create invoice. Please try again.');
+        }
+      });
+    });
+  }
+
+  protected onUploadDocument(): void {
+    const dialogRef = this.dialog.open(DocumentUploadDialogComponent, {
+      width: '720px',
+      maxWidth: '96vw',
+      maxHeight: '94vh',
+      disableClose: false,
+      autoFocus: false,
+      panelClass: 'document-upload-dialog-container',
+      backdropClass: 'document-upload-dialog-backdrop',
+      data: {
+        companyId: this.companyId,
+        clientId: this.clientId,
+        clientName: this.clientName,
+        documentType: 'INVOICE' as const,
+      },
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: DocumentUploadDialogResult | undefined) => {
+      if (!result) return;
+      // Invoice creation from upload — handled when backend support is added
+      this.notificationService.info('Invoice upload coming soon!');
+    });
   }
 
   protected onEditInvoice(invoice: Invoice): void {
-    this.notificationService.success(`Editing invoice #${invoice.invoiceNumber} coming soon!`);
+    const dialogRef = this.dialog.open(InvoiceDialogComponent, {
+      width: '700px',
+      maxWidth: '95vw',
+      maxHeight: '92vh',
+      disableClose: false,
+      autoFocus: true,
+      panelClass: 'invoice-dialog-container',
+      data: { clientId: this.clientId, clientName: this.clientName, invoice },
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: InvoiceDialogResult | undefined) => {
+      if (!result || result.mode !== 'edit') return;
+      this.store.dispatch(updateInvoice({ companyId: this.companyId, invoiceId: invoice.id, invoice: result.payload }));
+      this.actions$.pipe(
+        ofType(updateInvoiceSuccess, updateInvoiceFailure),
+        take(1),
+        takeUntil(this.destroy$),
+      ).subscribe(action => {
+        if (action.type === updateInvoiceSuccess.type) {
+          this.notificationService.success('Invoice updated successfully!');
+        } else {
+          this.notificationService.error('Failed to update invoice. Please try again.');
+        }
+      });
+    });
   }
 
   protected onDeleteInvoice(invoice: Invoice): void {

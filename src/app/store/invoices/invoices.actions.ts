@@ -1,5 +1,19 @@
 import { createAction, props } from '@ngrx/store';
-import { Invoice, UpdateInvoiceInput, UpdateInvoiceStatusInput } from './invoices.models';
+import { Invoice, CreateInvoiceInput, UpdateInvoiceInput, UpdateInvoiceStatusInput } from './invoices.models';
+
+// Create invoice
+export const createInvoice = createAction(
+  '[Invoices] Create Invoice',
+  props<{ companyId: string; invoice: CreateInvoiceInput }>()
+);
+export const createInvoiceSuccess = createAction(
+  '[Invoices] Create Invoice Success',
+  props<{ invoice: Invoice }>()
+);
+export const createInvoiceFailure = createAction(
+  '[Invoices] Create Invoice Failure',
+  props<{ error: string }>()
+);
 
 // Load all invoices (optional clientId filter)
 export const loadInvoices = createAction(

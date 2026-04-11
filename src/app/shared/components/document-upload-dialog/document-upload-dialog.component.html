@@ -1,59 +1,91 @@
-<div class="dialog-container">
-  <h2 mat-dialog-title>
-    {{ parsedData ? 'Review Document' : 'Upload Document' }}
-  </h2>
+<div class="dialog-wrapper">
 
+  <!-- ── Header ───────────────────────────────────────────── -->
+  <div class="dialog-header">
+    <div class="dialog-header__icon">
+      <mat-icon>{{ parsedData ? 'rate_review' : 'upload_file' }}</mat-icon>
+    </div>
+    <div class="dialog-header__text">
+      <h2 class="dialog-header__title">
+        {{ parsedData ? 'Review & Confirm' : 'Upload Document' }}
+      </h2>
+      <p class="dialog-header__subtitle">
+        <span *ngIf="!parsedData">For <strong>{{ data.clientName }}</strong></span>
+        <span *ngIf="parsedData">
+          {{ documentType === 'ESTIMATE' ? 'Estimate' : 'Invoice' }} for
+          <strong>{{ data.clientName }}</strong>
+        </span>
+      </p>
+    </div>
+    <button mat-icon-button class="dialog-header__close" (click)="onCancel()" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- ── Content ──────────────────────────────────────────── -->
   <mat-dialog-content>
+
     <!-- Upload State -->
     <div *ngIf="!parsedData && !uploading" class="upload-section">
-      <div class="document-type-selector">
+      <div class="document-type-selector" *ngIf="!lockDocumentType">
         <label class="section-label">Document Type</label>
         <mat-radio-group [(ngModel)]="documentType" class="radio-group">
-          <mat-radio-button value="ESTIMATE">Estimate</mat-radio-button>
-          <mat-radio-button value="INVOICE">Invoice</mat-radio-button>
+          <mat-radio-button value="ESTIMATE">
+            <span class="radio-label">
+              <mat-icon>request_quote</mat-icon> Estimate
+            </span>
+          </mat-radio-button>
+          <mat-radio-button value="INVOICE">
+            <span class="radio-label">
+              <mat-icon>receipt_long</mat-icon> Invoice
+            </span>
+          </mat-radio-button>
         </mat-radio-group>
       </div>
 
-      <div class="file-upload">
-        <label class="section-label">Select PDF Document</label>
-        <div class="upload-zone">
-          <input
-            type="file"
-            accept="application/pdf"
-            (change)="onFileSelected($event)"
-            #fileInput
-            style="display: none"
-          />
-          <button
-            mat-raised-button
-            color="primary"
-            (click)="fileInput.click()"
-            type="button"
-          >
-            <mat-icon>upload_file</mat-icon>
-            Choose PDF File
-          </button>
-          <p class="upload-hint">Upload an invoice or estimate PDF to automatically extract data</p>
+      <div class="upload-zone">
+        <input
+          type="file"
+          accept="application/pdf"
+          (change)="onFileSelected($event)"
+          #fileInput
+          style="display: none"
+        />
+        <div class="upload-zone__icon">
+          <mat-icon>picture_as_pdf</mat-icon>
         </div>
-      </div>
-
-      <div class="client-info">
-        <mat-icon>info</mat-icon>
-        <span>Document will be created for: <strong>{{ data.clientName }}</strong></span>
+        <p class="upload-zone__title">Drop your PDF here or browse</p>
+        <p class="upload-zone__hint">Supports PDF documents · Data is extracted automatically</p>
+        <button
+          mat-flat-button
+          class="upload-zone__btn"
+          (click)="fileInput.click()"
+          type="button"
+        >
+          <mat-icon>upload</mat-icon>
+          Choose PDF File
+        </button>
       </div>
     </div>
 
     <!-- Loading State -->
     <div *ngIf="uploading" class="loading-section">
-      <mat-spinner diameter="48"></mat-spinner>
-      <p>Uploading and parsing document...</p>
+      <div class="loading-section__spinner">
+        <mat-spinner diameter="44" strokeWidth="3"></mat-spinner>
+      </div>
+      <p class="loading-section__title">Analysing document…</p>
+      <p class="loading-section__sub">Extracting line items and details from your PDF</p>
     </div>
 
-    <!-- Review/Edit Form State -->
+    <!-- Review / Edit Form -->
     <form *ngIf="parsedData && form" [formGroup]="form" class="review-form">
-      <!-- Basic Info -->
-      <div class="form-section">
-        <h3>Document Details</h3>
+
+      <!-- Document Details -->
+      <div class="form-card">
+        <div class="form-card__header">
+          <mat-icon class="form-card__icon">description</mat-icon>
+          <h3>Document Details</h3>
+        </div>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Title</mat-label>
@@ -64,30 +96,16 @@
         <div class="date-row">
           <mat-form-field appearance="outline">
             <mat-label>{{ documentType === 'ESTIMATE' ? 'Estimate Date' : 'Invoice Date' }}</mat-label>
-            <input
-              matInput
-              [matDatepicker]="datePicker"
-              formControlName="documentDate"
-            />
-            <mat-datepicker-toggle
-              matSuffix
-              [for]="datePicker"
-            ></mat-datepicker-toggle>
+            <input matInput [matDatepicker]="datePicker" formControlName="documentDate" />
+            <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
             <mat-datepicker #datePicker></mat-datepicker>
             <mat-error>{{ getErrorMessage('documentDate') }}</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline" *ngIf="documentType === 'INVOICE'">
             <mat-label>Due Date</mat-label>
-            <input
-              matInput
-              [matDatepicker]="dueDatePicker"
-              formControlName="dueDate"
-            />
-            <mat-datepicker-toggle
-              matSuffix
-              [for]="dueDatePicker"
-            ></mat-datepicker-toggle>
+            <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" />
+            <mat-datepicker-toggle matSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
             <mat-datepicker #dueDatePicker></mat-datepicker>
           </mat-form-field>
         </div>
@@ -99,24 +117,27 @@
             formControlName="notes"
             cdkTextareaAutosize
             cdkAutosizeMinRows="2"
-            cdkAutosizeMaxRows="6"
+            cdkAutosizeMaxRows="5"
           ></textarea>
           <mat-error>{{ getErrorMessage('notes') }}</mat-error>
         </mat-form-field>
       </div>
 
       <!-- Line Items -->
-      <div class="form-section">
-        <div class="section-header">
+      <div class="form-card">
+        <div class="form-card__header">
+          <mat-icon class="form-card__icon">format_list_bulleted</mat-icon>
           <h3>Line Items</h3>
+          <span class="item-count-badge">{{ lineItems.length }}</span>
           <button
-            mat-mini-fab
+            mat-icon-button
             color="primary"
             type="button"
             (click)="addLineItem()"
             matTooltip="Add line item"
+            class="add-item-btn"
           >
-            <mat-icon>add</mat-icon>
+            <mat-icon>add_circle</mat-icon>
           </button>
         </div>
 
@@ -126,92 +147,96 @@
             [formGroupName]="i"
             class="line-item"
           >
-            <div class="line-item-header">
-              <span class="item-number">#{{ i + 1 }}</span>
+            <div class="line-item__header">
+              <span class="line-item__number">{{ i + 1 }}</span>
               <button
                 mat-icon-button
                 type="button"
                 (click)="removeLineItem(i)"
                 [disabled]="lineItems.length === 1"
-                matTooltip="Remove item"
+                matTooltip="Remove"
+                class="line-item__remove"
               >
-                <mat-icon>delete</mat-icon>
+                <mat-icon>delete_outline</mat-icon>
               </button>
             </div>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Service <span class="optional">(optional)</span></mat-label>
-              <input matInput formControlName="service" placeholder="e.g. Plumbing" />
-              <mat-error>{{ getErrorMessage('service', i) }}</mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Description</mat-label>
-              <textarea
-                matInput
-                formControlName="description"
-                cdkTextareaAutosize
-                cdkAutosizeMinRows="2"
-                cdkAutosizeMaxRows="4"
-              ></textarea>
-              <mat-error>{{ getErrorMessage('description', i) }}</mat-error>
-            </mat-form-field>
-
-            <div class="item-row">
-              <mat-form-field appearance="outline">
-                <mat-label>Quantity</mat-label>
-                <input matInput type="number" formControlName="quantity" step="0.01" />
-                <mat-error>{{ getErrorMessage('quantity', i) }}</mat-error>
+            <div class="line-item__fields">
+              <mat-form-field appearance="outline" class="field-service">
+                <mat-label>Service <span class="optional">(optional)</span></mat-label>
+                <input matInput formControlName="service" placeholder="e.g. Plumbing" />
+                <mat-error>{{ getErrorMessage('service', i) }}</mat-error>
               </mat-form-field>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Rate</mat-label>
-                <span matPrefix>$&nbsp;</span>
-                <input matInput type="number" formControlName="rate" step="0.01" />
-                <mat-error>{{ getErrorMessage('rate', i) }}</mat-error>
+              <mat-form-field appearance="outline" class="field-description">
+                <mat-label>Description</mat-label>
+                <textarea
+                  matInput
+                  formControlName="description"
+                  cdkTextareaAutosize
+                  cdkAutosizeMinRows="1"
+                  cdkAutosizeMaxRows="3"
+                ></textarea>
+                <mat-error>{{ getErrorMessage('description', i) }}</mat-error>
               </mat-form-field>
 
-              <div class="item-total">
-                <span class="label">Amount</span>
-                <span class="amount">{{
-                  (item.get('quantity')?.value || 0) *
-                    (item.get('rate')?.value || 0) | currency
-                }}</span>
+              <div class="line-item__amounts">
+                <mat-form-field appearance="outline">
+                  <mat-label>Qty</mat-label>
+                  <input matInput type="number" formControlName="quantity" step="0.01" min="0.01" />
+                  <mat-error>{{ getErrorMessage('quantity', i) }}</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Rate</mat-label>
+                  <span matPrefix>$&nbsp;</span>
+                  <input matInput type="number" formControlName="rate" step="0.01" min="0" />
+                  <mat-error>{{ getErrorMessage('rate', i) }}</mat-error>
+                </mat-form-field>
+
+                <div class="line-item__subtotal">
+                  <span class="subtotal-label">Amount</span>
+                  <span class="subtotal-value">{{
+                    (item.get('quantity')?.value || 0) * (item.get('rate')?.value || 0) | currency
+                  }}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="total-section">
-          <div class="total-row">
-            <span class="label">Total</span>
-            <span class="amount">{{ total | currency }}</span>
-          </div>
+        <!-- Total -->
+        <div class="total-bar">
+          <span class="total-bar__label">Total</span>
+          <span class="total-bar__amount">{{ total | currency }}</span>
         </div>
       </div>
 
-      <!-- Parsed Info Alert -->
+      <!-- Detected Client Alert -->
       <div class="info-alert" *ngIf="parsedData.clientInfo.name">
-        <mat-icon>info</mat-icon>
+        <mat-icon>auto_awesome</mat-icon>
         <div>
-          <strong>Detected Client:</strong> {{ parsedData.clientInfo.name }}
-          <br />
-          <small>Document will be created for: {{ data.clientName }}</small>
+          <strong>Detected client:</strong> {{ parsedData.clientInfo.name }}
+          <small>Document will be saved for <strong>{{ data.clientName }}</strong></small>
         </div>
       </div>
     </form>
   </mat-dialog-content>
 
-  <mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()">Cancel</button>
+  <!-- ── Actions ──────────────────────────────────────────── -->
+  <div class="dialog-actions">
+    <button mat-button class="btn-cancel" (click)="onCancel()" type="button">Cancel</button>
     <button
-      mat-raised-button
-      color="primary"
+      mat-flat-button
+      class="btn-save"
       (click)="onSave()"
       [disabled]="!form || uploading"
       *ngIf="parsedData"
+      type="button"
     >
+      <mat-icon>check</mat-icon>
       Create {{ documentType === 'ESTIMATE' ? 'Estimate' : 'Invoice' }}
     </button>
-  </mat-dialog-actions>
+  </div>
+
 </div>

@@ -39,9 +39,20 @@ export interface InvoiceItemInput {
   unitPrice: number;
 }
 
+export interface CreateInvoiceInput {
+  clientId: string;
+  title: string;
+  notes?: string;
+  issuedAt: string;
+  dueAt?: string;
+  items: InvoiceItemInput[];
+}
+
 export interface UpdateInvoiceInput {
   title: string;
   notes?: string;
+  issuedAt?: string;
+  dueAt?: string;
   items: InvoiceItemInput[];
 }
 

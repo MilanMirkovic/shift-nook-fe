@@ -16,6 +16,13 @@ export const initialState: InvoicesState = {
 export const invoicesReducer = createReducer(
   initialState,
 
+  // Create invoice
+  on(InvoicesActions.createInvoice, (state) => ({ ...state, loading: true, error: null })),
+  on(InvoicesActions.createInvoiceSuccess, (state, { invoice }) => ({
+    ...state, invoices: [invoice, ...state.invoices], selectedInvoice: invoice, total: state.total + 1, loading: false, error: null,
+  })),
+  on(InvoicesActions.createInvoiceFailure, (state, { error }) => ({ ...state, loading: false, error })),
+
   // Load invoices
   on(InvoicesActions.loadInvoices, (state) => ({ ...state, loading: true, error: null })),
   on(InvoicesActions.loadInvoicesSuccess, (state, { invoices, total }) => ({ ...state, invoices, total, loading: false, error: null })),

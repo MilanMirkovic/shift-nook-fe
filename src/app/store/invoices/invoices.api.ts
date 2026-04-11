@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import {
   InvoicesPageResponse,
   Invoice,
+  CreateInvoiceInput,
   UpdateInvoiceInput,
   UpdateInvoiceStatusInput,
 } from './invoices.models';
@@ -36,6 +37,13 @@ export class InvoicesApiService {
   getInvoiceById(companyId: string, invoiceId: string): Observable<Invoice> {
     return this.http.get<Invoice>(
       `${this.apiUrl}/companies/${companyId}/invoices/${invoiceId}`
+    );
+  }
+
+  createInvoice(companyId: string, invoice: CreateInvoiceInput): Observable<Invoice> {
+    return this.http.post<Invoice>(
+      `${this.apiUrl}/companies/${companyId}/invoices`,
+      invoice
     );
   }
 

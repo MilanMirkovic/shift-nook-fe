@@ -410,11 +410,48 @@ html {
   transform: translate(-50%, -50%) !important;
 }
 
-.estimate-dialog-container .mat-mdc-dialog-container,
-.estimate-dialog-container .mdc-dialog__surface {
-  padding: 0 !important;
-  overflow: hidden;
-  border-radius: 20px !important;
+.estimate-dialog-container {
+  .mat-mdc-dialog-container {
+    border-radius: 20px !important;
+    box-shadow: var(--sn-shadow-modal) !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+
+    .mdc-dialog__surface {
+      border-radius: 20px !important;
+      overflow: hidden !important;
+      padding: 0 !important;
+    }
+  }
+}
+
+.cdk-overlay-pane.estimate-dialog-container {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.invoice-dialog-container {
+  .mat-mdc-dialog-container {
+    border-radius: 20px !important;
+    box-shadow: var(--sn-shadow-modal) !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+
+    .mdc-dialog__surface {
+      border-radius: 20px !important;
+      overflow: hidden !important;
+      padding: 0 !important;
+    }
+  }
+}
+
+.cdk-overlay-pane.invoice-dialog-container {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 
 /* ─── Centered dialog (viewport center regardless of sidebar) ─────────────── */
@@ -845,3 +882,36 @@ select:focus-visible {
 .cdk-global-overlay-wrapper:has(.sn-dialog) {
   align-items: center !important;
 }
+
+/* ─── Document Upload Dialog ────────────────────────────────────────────── */
+.document-upload-dialog-container {
+  .mat-mdc-dialog-container {
+    border-radius: 20px !important;
+    box-shadow: var(--sn-shadow-modal) !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+
+    .mdc-dialog__surface {
+      border-radius: 20px !important;
+      overflow: hidden !important;
+      padding: 0 !important;
+    }
+
+    .mat-mdc-dialog-content {
+      max-height: 68vh !important;
+    }
+  }
+}
+
+.cdk-overlay-pane.document-upload-dialog-container {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.document-upload-dialog-backdrop {
+  background: rgba(15, 23, 42, 0.45) !important;
+  backdrop-filter: blur(4px);
+}
+

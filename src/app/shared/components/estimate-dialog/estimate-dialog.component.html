@@ -2,20 +2,19 @@
 
   <!-- Header -->
   <div class="dialog-header">
-    <div class="header-icon-wrap">
+    <div class="dialog-header__icon">
       <mat-icon>request_quote</mat-icon>
     </div>
-    <div class="header-text">
-      <h2 mat-dialog-title>{{ isEditMode ? 'Edit Estimate' : 'New Estimate' }}</h2>
-      <p class="subtitle">
-        <mat-icon class="subtitle-icon">person_outline</mat-icon>
-        {{ data.clientName }}
+    <div class="dialog-header__text">
+      <h2 class="dialog-header__title">{{ isEditMode ? 'Edit Estimate' : 'New Estimate' }}</h2>
+      <p class="dialog-header__subtitle">
+        For <strong>{{ data.clientName }}</strong>
         <span *ngIf="isEditMode && +data.estimate?.revisionNumber! > 0" class="subtitle-revision">
           · Rev {{ data.estimate!.revisionNumber }}
         </span>
       </p>
     </div>
-    <button mat-icon-button class="close-btn" (click)="onCancel()" matTooltip="Close">
+    <button mat-icon-button class="dialog-header__close" (click)="onCancel()" type="button">
       <mat-icon>close</mat-icon>
     </button>
   </div>
@@ -23,172 +22,145 @@
   <mat-dialog-content>
     <form [formGroup]="form" class="estimate-form">
 
-      <!-- Top row: Title + Date side by side -->
-      <div class="form-row two-col">
-        <div class="form-field">
-          <label class="field-label">Estimate Title <span class="required">*</span></label>
-          <mat-form-field appearance="outline">
-            <input matInput formControlName="title" placeholder="e.g. Roof Repair Estimate" autocomplete="off">
-            @if (getErrorMessage('title')) {
-              <mat-error>{{ getErrorMessage('title') }}</mat-error>
-            }
-          </mat-form-field>
+      <!-- Estimate Details -->
+      <div class="form-card">
+        <div class="form-card__header">
+          <mat-icon class="form-card__icon">description</mat-icon>
+          <h3>Estimate Details</h3>
         </div>
 
-        <div class="form-field">
-          <label class="field-label">Estimate Date <span class="required">*</span></label>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Title</mat-label>
+          <input matInput formControlName="title" placeholder="e.g. Roof Repair Estimate" autocomplete="off" />
+          <mat-error>{{ getErrorMessage('title') }}</mat-error>
+        </mat-form-field>
+
+        <div class="date-row">
           <mat-form-field appearance="outline">
-            <input matInput [matDatepicker]="picker" formControlName="estimateDate" placeholder="MM/DD/YYYY" readonly>
+            <mat-label>Estimate Date</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="estimateDate" placeholder="MM/DD/YYYY" readonly />
             <mat-datepicker-toggle matSuffix [for]="picker">
               <mat-icon matDatepickerToggleIcon>calendar_today</mat-icon>
             </mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
+            <mat-error>{{ getErrorMessage('estimateDate') }}</mat-error>
           </mat-form-field>
         </div>
-      </div>
 
-      <!-- Notes -->
-      <div class="form-field">
-        <label class="field-label">Notes <span class="optional">(optional)</span></label>
-        <mat-form-field appearance="outline">
-          <textarea matInput formControlName="notes"
-            placeholder="Add any notes, scope details, or terms for this estimate…"
-            rows="4"
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notes (optional)</mat-label>
+          <textarea
+            matInput
+            formControlName="notes"
             cdkTextareaAutosize
-            cdkAutosizeMinRows="4">
-          </textarea>
-          @if (getErrorMessage('notes')) {
-            <mat-error>{{ getErrorMessage('notes') }}</mat-error>
-          }
+            cdkAutosizeMinRows="2"
+            cdkAutosizeMaxRows="5"
+            placeholder="Add any notes, scope details, or terms for this estimate…"
+          ></textarea>
+          <mat-error>{{ getErrorMessage('notes') }}</mat-error>
         </mat-form-field>
       </div>
 
       <!-- Line Items -->
-      <div class="line-items-section">
-        <div class="section-header">
-          <div class="section-title">
-            <mat-icon>list_alt</mat-icon>
-            <span>Line Items</span>
-          </div>
-          <button type="button" mat-button class="add-item-btn" (click)="addLineItem()">
-            <mat-icon>add_circle_outline</mat-icon>
-            Add line item
+      <div class="form-card">
+        <div class="form-card__header">
+          <mat-icon class="form-card__icon">format_list_bulleted</mat-icon>
+          <h3>Line Items</h3>
+          <span class="item-count-badge">{{ lineItems.length }}</span>
+          <button
+            mat-icon-button
+            color="primary"
+            type="button"
+            (click)="addLineItem()"
+            matTooltip="Add line item"
+            class="add-item-btn"
+          >
+            <mat-icon>add_circle</mat-icon>
           </button>
         </div>
 
-        <!-- Table header -->
-        <div class="items-table">
-          <div class="table-head">
-            <span class="th th-service">Service</span>
-            <span class="th th-desc">Description</span>
-            <span class="th th-qty">Qty</span>
-            <span class="th th-rate">Rate</span>
-            <span class="th th-amount">Amount</span>
-            <span class="th th-del"></span>
-          </div>
+        <div formArrayName="lineItems" class="line-items">
+          @for (item of lineItems.controls; track $index) {
+            <div [formGroupName]="$index" class="line-item">
+              <div class="line-item__header">
+                <span class="line-item__number">{{ $index + 1 }}</span>
+                <button
+                  mat-icon-button
+                  type="button"
+                  (click)="removeLineItem($index)"
+                  [disabled]="lineItems.length === 1"
+                  matTooltip="Remove"
+                  class="line-item__remove"
+                >
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </div>
 
-          <!-- Rows -->
-          <div formArrayName="lineItems" class="table-body">
-            @for (item of lineItems.controls; track $index) {
-              <div [formGroupName]="$index" class="table-row"
-                   [class.table-row--error]="item.invalid && item.touched">
+              <div class="line-item__fields">
+                <mat-form-field appearance="outline" class="field-service">
+                  <mat-label>Service <span class="optional">(optional)</span></mat-label>
+                  <input matInput formControlName="service" placeholder="e.g. Plumbing" autocomplete="off" />
+                </mat-form-field>
 
-                <div class="td td-service">
-                  <input
-                    class="cell-input cell-input--service"
-                    type="text"
-                    formControlName="service"
-                    placeholder="e.g. Plumbing"
-                    autocomplete="off">
-                </div>
-
-                <div class="td td-desc">
+                <mat-form-field appearance="outline" class="field-description">
+                  <mat-label>Description</mat-label>
                   <textarea
-                    class="cell-input cell-input--desc"
+                    matInput
                     formControlName="description"
-                    placeholder="Describe the item or service…"
-                    autocomplete="off"
                     cdkTextareaAutosize
                     cdkAutosizeMinRows="1"
-                    rows="1">
-                  </textarea>
-                </div>
+                    cdkAutosizeMaxRows="3"
+                    placeholder="Describe the item or service…"
+                  ></textarea>
+                  <mat-error>{{ getErrorMessage(['lineItems', $index, 'description']) }}</mat-error>
+                </mat-form-field>
 
-                <div class="td td-qty">
-                  <input
-                    class="cell-input cell-input--number"
-                    type="number"
-                    formControlName="quantity"
-                    min="0.01"
-                    step="1"
-                    placeholder="1">
-                </div>
+                <div class="line-item__amounts">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Qty</mat-label>
+                    <input matInput type="number" formControlName="quantity" step="0.01" min="0.01" />
+                    <mat-error>{{ getErrorMessage(['lineItems', $index, 'quantity']) }}</mat-error>
+                  </mat-form-field>
 
-                <div class="td td-rate">
-                  <div class="prefix-input">
-                    <span class="prefix">$</span>
-                    <input
-                      class="cell-input cell-input--number"
-                      type="number"
-                      formControlName="rate"
-                      min="0"
-                      step="0.01"
-                      placeholder="0.00">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Rate</mat-label>
+                    <span matPrefix>$&nbsp;</span>
+                    <input matInput type="number" formControlName="rate" step="0.01" min="0" />
+                    <mat-error>{{ getErrorMessage(['lineItems', $index, 'rate']) }}</mat-error>
+                  </mat-form-field>
+
+                  <div class="line-item__subtotal">
+                    <span class="subtotal-label">Amount</span>
+                    <span class="subtotal-value">{{ getLineItemAmount(item) | currency }}</span>
                   </div>
                 </div>
-
-                <div class="td td-amount">
-                  <span class="amount-value">{{ getLineItemAmount(item) | currency }}</span>
-                </div>
-
-                <div class="td td-del">
-                  <button
-                    type="button"
-                    class="delete-row-btn"
-                    [disabled]="lineItems.length === 1"
-                    matTooltip="Remove"
-                    (click)="removeLineItem($index)">
-                    <mat-icon>delete_outline</mat-icon>
-                  </button>
-                </div>
-
               </div>
-            }
-          </div>
-
-          <!-- Summary footer -->
-          <div class="table-footer">
-            <div class="subtotal-row">
-              <span class="subtotal-label">Subtotal</span>
-              <span class="subtotal-value">{{ total | currency }}</span>
             </div>
-            <div class="total-row">
-              <span class="total-label">Total</span>
-              <span class="total-value">{{ total | currency }}</span>
-            </div>
-          </div>
+          }
         </div>
 
+        <!-- Total -->
+        <div class="total-bar">
+          <span class="total-bar__label">Total</span>
+          <span class="total-bar__amount">{{ total | currency }}</span>
+        </div>
       </div>
+
     </form>
   </mat-dialog-content>
 
   <!-- Actions -->
-  <mat-dialog-actions>
-    <button mat-button class="btn-cancel" (click)="onCancel()" [disabled]="submitting">
-      Cancel
-    </button>
-    <button mat-flat-button class="btn-submit" (click)="onSubmit()" [disabled]="submitting || form.invalid">
+  <div class="dialog-actions">
+    <button mat-button class="btn-cancel" (click)="onCancel()" [disabled]="submitting" type="button">Cancel</button>
+    <button mat-flat-button class="btn-save" (click)="onSubmit()" [disabled]="submitting || form.invalid" type="button">
       @if (submitting) {
         <mat-spinner diameter="18"></mat-spinner>
         <span>{{ isEditMode ? 'Saving…' : 'Creating…' }}</span>
       } @else {
-        <ng-container>
-          <mat-icon>check</mat-icon>
-          <span>{{ isEditMode ? 'Save Changes' : 'Create Estimate' }}</span>
-        </ng-container>
+        <mat-icon>check</mat-icon>
+        <span>{{ isEditMode ? 'Save Changes' : 'Create Estimate' }}</span>
       }
     </button>
-  </mat-dialog-actions>
+  </div>
 
 </div>

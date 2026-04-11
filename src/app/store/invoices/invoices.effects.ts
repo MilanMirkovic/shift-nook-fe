@@ -11,6 +11,18 @@ export class InvoicesEffects {
   private readonly actions$ = inject(Actions);
   private readonly invoicesApi = inject(InvoicesApiService);
 
+  createInvoice$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(InvoicesActions.createInvoice),
+      switchMap(({ companyId, invoice }) =>
+        this.invoicesApi.createInvoice(companyId, invoice).pipe(
+          map((created) => InvoicesActions.createInvoiceSuccess({ invoice: created })),
+          catchError((error) => of(InvoicesActions.createInvoiceFailure({ error: error?.message || 'Failed to create invoice' })))
+        )
+      )
+    )
+  );
+
   loadInvoices$ = createEffect(() =>
     this.actions$.pipe(
       ofType(InvoicesActions.loadInvoices),

@@ -8,6 +8,16 @@
         {{ (vm.invoices?.length || 0) }} invoice{{ (vm.invoices?.length || 0) !== 1 ? 's' : '' }} for {{ clientName }}
       </p>
     </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="onUploadDocument()" matTooltip="Upload PDF invoice">
+        <mat-icon>upload_file</mat-icon>
+        Upload
+      </button>
+      <button mat-flat-button color="primary" (click)="onAddInvoice()">
+        <mat-icon>add</mat-icon>
+        New Invoice
+      </button>
+    </div>
   </div>
 
   <div *ngIf="vm.loading" class="loading-state">
@@ -24,11 +34,17 @@
   <div *ngIf="!vm.loading && !vm.error && vm.invoices?.length === 0" class="empty-state">
     <div class="empty-state__icon"><mat-icon>receipt_long</mat-icon></div>
     <h3 class="empty-state__title">No invoices yet</h3>
-    <p class="empty-state__description">Create your first invoice for {{ clientName }}</p>
-    <button mat-flat-button color="primary" (click)="onAddInvoice()">
-      <mat-icon>add</mat-icon>
-      New Invoice
-    </button>
+    <p class="empty-state__description">Upload a PDF or create your first invoice for {{ clientName }}</p>
+    <div class="empty-state__actions">
+      <button mat-stroked-button (click)="onUploadDocument()">
+        <mat-icon>upload_file</mat-icon>
+        Upload PDF
+      </button>
+      <button mat-flat-button color="primary" (click)="onAddInvoice()">
+        <mat-icon>add</mat-icon>
+        New Invoice
+      </button>
+    </div>
   </div>
 
   <div *ngIf="!vm.loading && !vm.error && vm.invoices && vm.invoices.length > 0" class="invoices-table-wrap">

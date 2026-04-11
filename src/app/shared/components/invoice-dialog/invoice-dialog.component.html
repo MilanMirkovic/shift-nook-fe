@@ -1,0 +1,196 @@
+<div class="dialog-wrapper">
+
+  <!-- ── Header ───────────────────────────────────────────── -->
+  <div class="dialog-header">
+    <div class="dialog-header__icon">
+      <mat-icon>receipt_long</mat-icon>
+    </div>
+    <div class="dialog-header__text">
+      <h2 class="dialog-header__title">
+        {{ isEditMode ? 'Edit Invoice' : 'New Invoice' }}
+      </h2>
+      <p class="dialog-header__subtitle">
+        <mat-icon class="dialog-header__subtitle-icon">person_outline</mat-icon>
+        {{ data.clientName }}
+      </p>
+    </div>
+    <button mat-icon-button class="dialog-header__close" (click)="onCancel()" type="button" matTooltip="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- ── Content ──────────────────────────────────────────── -->
+  <mat-dialog-content>
+    <form [formGroup]="form" class="invoice-form">
+
+      <!-- ── Document Details Card ── -->
+      <div class="form-card">
+        <div class="form-card__header">
+          <mat-icon class="form-card__icon">description</mat-icon>
+          <h3>Invoice Details</h3>
+        </div>
+
+        <!-- Title -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Invoice Title <span class="required-star">*</span></mat-label>
+          <input matInput formControlName="title" placeholder="e.g. Plumbing Work – April 2026" autocomplete="off" />
+          <mat-error>{{ getErrorMessage('title') }}</mat-error>
+        </mat-form-field>
+
+        <!-- Dates row -->
+        <div class="date-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Invoice Date <span class="required-star">*</span></mat-label>
+            <input matInput [matDatepicker]="issuedPicker" formControlName="issuedAt" placeholder="MM/DD/YYYY" readonly />
+            <mat-datepicker-toggle matSuffix [for]="issuedPicker">
+              <mat-icon matDatepickerToggleIcon>calendar_today</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #issuedPicker></mat-datepicker>
+            <mat-error>{{ getErrorMessage('issuedAt') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Due Date <span class="optional-hint">(optional)</span></mat-label>
+            <input matInput [matDatepicker]="duePicker" formControlName="dueAt" placeholder="MM/DD/YYYY" readonly />
+            <mat-datepicker-toggle matSuffix [for]="duePicker">
+              <mat-icon matDatepickerToggleIcon>calendar_today</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #duePicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <!-- Notes -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notes <span class="optional-hint">(optional)</span></mat-label>
+          <textarea
+            matInput
+            formControlName="notes"
+            placeholder="Add any notes, payment terms, or details for this invoice…"
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="2"
+            cdkAutosizeMaxRows="5">
+          </textarea>
+          <mat-error>{{ getErrorMessage('notes') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- ── Line Items Card ── -->
+      <div class="form-card">
+        <div class="form-card__header">
+          <mat-icon class="form-card__icon">format_list_bulleted</mat-icon>
+          <h3>Line Items</h3>
+          <span class="item-count-badge">{{ lineItems.length }}</span>
+          <button
+            mat-icon-button
+            color="primary"
+            type="button"
+            (click)="addLineItem()"
+            matTooltip="Add line item"
+            class="add-item-btn">
+            <mat-icon>add_circle</mat-icon>
+          </button>
+        </div>
+
+        <div formArrayName="lineItems" class="line-items">
+          @for (item of lineItems.controls; track $index) {
+            <div [formGroupName]="$index" class="line-item">
+
+              <div class="line-item__header">
+                <span class="line-item__number">{{ $index + 1 }}</span>
+                <button
+                  mat-icon-button
+                  type="button"
+                  (click)="removeLineItem($index)"
+                  [disabled]="lineItems.length === 1"
+                  matTooltip="Remove"
+                  class="line-item__remove">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </div>
+
+              <div class="line-item__fields">
+                <mat-form-field appearance="outline" class="field-service">
+                  <mat-label>Service <span class="optional-hint">(optional)</span></mat-label>
+                  <input matInput formControlName="service" placeholder="e.g. Plumbing" />
+                  @if (getLineItemError($index, 'service')) {
+                    <mat-error>{{ getLineItemError($index, 'service') }}</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="field-description">
+                  <mat-label>Description <span class="required-star">*</span></mat-label>
+                  <textarea
+                    matInput
+                    formControlName="description"
+                    placeholder="Describe the item or service…"
+                    cdkTextareaAutosize
+                    cdkAutosizeMinRows="1"
+                    cdkAutosizeMaxRows="3">
+                  </textarea>
+                  @if (getLineItemError($index, 'description')) {
+                    <mat-error>{{ getLineItemError($index, 'description') }}</mat-error>
+                  }
+                </mat-form-field>
+
+                <div class="line-item__amounts">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Qty</mat-label>
+                    <input matInput type="number" formControlName="quantity" step="0.01" min="0.01" />
+                    @if (getLineItemError($index, 'quantity')) {
+                      <mat-error>{{ getLineItemError($index, 'quantity') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Unit Price</mat-label>
+                    <span matPrefix>$&nbsp;</span>
+                    <input matInput type="number" formControlName="unitPrice" step="0.01" min="0" />
+                    @if (getLineItemError($index, 'unitPrice')) {
+                      <mat-error>{{ getLineItemError($index, 'unitPrice') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <div class="line-item__subtotal">
+                    <span class="subtotal-label">Amount</span>
+                    <span class="subtotal-value">{{ getLineItemAmount(item) | currency }}</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          }
+        </div>
+
+        <!-- Total -->
+        <div class="total-bar">
+          <span class="total-bar__label">Total</span>
+          <span class="total-bar__amount">{{ total | currency }}</span>
+        </div>
+      </div>
+
+    </form>
+  </mat-dialog-content>
+
+  <!-- ── Actions ──────────────────────────────────────────── -->
+  <div class="dialog-actions">
+    <button mat-button class="btn-cancel" (click)="onCancel()" type="button" [disabled]="submitting">
+      Cancel
+    </button>
+    <button
+      mat-flat-button
+      class="btn-save"
+      (click)="onSubmit()"
+      [disabled]="submitting || form.invalid"
+      type="button">
+      @if (submitting) {
+        <mat-spinner diameter="18"></mat-spinner>
+        <span>{{ isEditMode ? 'Saving…' : 'Creating…' }}</span>
+      } @else {
+        <mat-icon>check</mat-icon>
+        <span>{{ isEditMode ? 'Save Changes' : 'Create Invoice' }}</span>
+      }
+    </button>
+  </div>
+
+</div>
+

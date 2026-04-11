@@ -326,16 +326,18 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
 
   protected onUploadDocument(): void {
     const dialogRef = this.dialog.open(DocumentUploadDialogComponent, {
-      width: '700px',
-      maxWidth: '95vw',
-      maxHeight: '92vh',
+      width: '720px',
+      maxWidth: '96vw',
+      maxHeight: '94vh',
       disableClose: false,
-      autoFocus: true,
+      autoFocus: false,
       panelClass: 'document-upload-dialog-container',
+      backdropClass: 'document-upload-dialog-backdrop',
       data: {
         companyId: this.companyId,
         clientId: this.clientId,
         clientName: this.clientName,
+        documentType: 'ESTIMATE' as const,
       },
     });
 

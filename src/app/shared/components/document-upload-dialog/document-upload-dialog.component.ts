@@ -44,6 +44,8 @@ export interface DocumentUploadDialogData {
   companyId: string;
   clientId: string;
   clientName: string;
+  /** When provided, pre-selects the type and hides the type-selector radio group */
+  documentType?: DocumentType;
 }
 
 export type DocumentUploadDialogResult =
@@ -88,11 +90,18 @@ export class DocumentUploadDialogComponent implements OnInit, OnDestroy {
   protected parsedData: ParsedDocumentData | null = null;
   protected selectedFile: File | null = null;
   protected documentType: DocumentType = 'ESTIMATE';
+  /** True when the caller pre-selected the type — hides the radio selector */
+  protected lockDocumentType = false;
   protected form: FormGroup | null = null;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: DocumentUploadDialogData) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    if (this.data.documentType) {
+      this.documentType = this.data.documentType;
+      this.lockDocumentType = true;
+    }
+  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
