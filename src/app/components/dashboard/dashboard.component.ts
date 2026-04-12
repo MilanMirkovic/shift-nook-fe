@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Subject, takeUntil, combineLatest } from 'rxjs';
 
 import { UserStoreService } from '../../store/user/user-store.service';
@@ -16,7 +16,8 @@ import { CompanyMember } from '../../store/company-members/company-members.model
   selector: 'app-dashboard',
   standalone: false,
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrls: ['./dashboard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private readonly userStore = inject(UserStoreService);

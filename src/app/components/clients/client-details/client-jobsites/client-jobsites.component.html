@@ -64,7 +64,7 @@
 </div>
 
 <div *ngIf="!jobsitesLoading && !jobsitesError && filteredJobsites.length > 0" class="jobsites-grid">
-  <div *ngFor="let jobsite of filteredJobsites" class="jobsite-card" [routerLink]="['/jobsites', jobsite.id]">
+  <div *ngFor="let jobsite of filteredJobsites; trackBy: trackById" class="jobsite-card" [routerLink]="['/jobsites', jobsite.id]">
     <div class="jobsite-card__icon">
       <mat-icon>location_on</mat-icon>
     </div>

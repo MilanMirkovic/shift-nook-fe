@@ -55,6 +55,10 @@ export class JobsiteTasksComponent {
     return task.status === 'PENDING_REVIEW';
   }
 
+  trackById(index: number, item: JobsiteTask): string {
+    return item.id;
+  }
+
   onAddTask(): void {
     this.addTask.emit();
   }

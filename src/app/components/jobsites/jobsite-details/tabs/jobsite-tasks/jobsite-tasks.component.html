@@ -32,7 +32,7 @@
 
       <!-- Tasks List -->
       <div class="tasks-list" *ngIf="tasks.length > 0">
-        <div *ngFor="let task of tasks" class="activity-item" [ngClass]="getTaskCategoryClass(task.status)">
+        <div *ngFor="let task of tasks; trackBy: trackById" class="activity-item" [ngClass]="getTaskCategoryClass(task.status)">
           <div class="activity-item__icon">
             <mat-icon>{{ getTaskIcon(task.status) }}</mat-icon>
           </div>

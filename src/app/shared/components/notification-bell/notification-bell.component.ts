@@ -198,6 +198,10 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     return this.unreadCount.toString();
   }
 
+  protected trackById(index: number, item: Notification): string {
+    return item.id;
+  }
+
   private navigateToRelatedEntity(notification: Notification): void {
     if (!notification.relatedEntityId) {
       return;

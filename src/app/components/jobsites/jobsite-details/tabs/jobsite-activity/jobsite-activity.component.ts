@@ -62,6 +62,10 @@ export class JobsiteActivityComponent {
   getActivityIcon(type: string): string {
     return JobsiteDetailsHelpers.getActivityIcon(type);
   }
+
+  trackById(index: number, item: Activity): string {
+    return item.id;
+  }
 }
 
 

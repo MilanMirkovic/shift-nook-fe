@@ -54,7 +54,7 @@
     </div>
 
     <div *ngIf="activities.length > 0" class="activity-timeline">
-      <div *ngFor="let activity of activities" class="activity-item" [ngClass]="getCategoryClass(activity.category)">
+      <div *ngFor="let activity of activities; trackBy: trackById" class="activity-item" [ngClass]="getCategoryClass(activity.category)">
         <div class="activity-item__icon">
           <mat-icon>{{ getActivityIcon(activity.type) }}</mat-icon>
         </div>

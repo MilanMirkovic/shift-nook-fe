@@ -257,4 +257,8 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
       default:        return 'invoice-status--draft';
     }
   }
+
+  protected trackById(index: number, item: Invoice): string {
+    return item.id;
+  }
 }

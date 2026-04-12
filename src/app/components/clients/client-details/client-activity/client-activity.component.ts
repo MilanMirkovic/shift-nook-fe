@@ -181,4 +181,8 @@ export class ClientActivityComponent implements OnInit, OnDestroy {
     };
     return iconMap[type] || 'info';
   }
+
+  protected trackById(index: number, item: Activity): string {
+    return item.id;
+  }
 }

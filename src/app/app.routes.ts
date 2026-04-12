@@ -5,10 +5,36 @@ import { authGuard, publicGuard } from './core/auth/auth.guard';
 import { roleGuard } from './core/auth/role.guard';
 import { platformAdminGuard } from './core/auth/platform-admin.guard';
 import { CompanyRole } from './shared/models/company-role';
+
+// Feature stores and effects for lazy loading
+import { TIMESHEETS_FEATURE_KEY, reducer as timesheetsReducer } from './store/timesheets/timesheets.reducer';
+import { TimesheetsEffects } from './store/timesheets/timesheets.effects';
+import { JOBSITES_FEATURE_KEY, reducer as jobsitesReducer } from './store/jobsites/jobsites.reducer';
+import { JobsitesEffects } from './store/jobsites/jobsites.effects';
+import { JOBSITE_TASKS_FEATURE_KEY, reducer as jobsiteTasksReducer } from './store/jobsite-tasks/jobsite-tasks.reducer';
+import { JobsiteTasksEffects } from './store/jobsite-tasks/jobsite-tasks.effects';
+import { COMPANY_MEMBERS_FEATURE_KEY, reducer as companyMembersReducer } from './store/company-members/company-members.reducer';
+import { CompanyMembersEffects } from './store/company-members/company-members.effects';
+import { CLIENTS_FEATURE_KEY, reducer as clientsReducer } from './store/clients/clients.reducer';
+import { ClientsEffects } from './store/clients/clients.effects';
+import { ESTIMATES_FEATURE_KEY, estimatesReducer } from './store/estimates/estimates.reducer';
+import { EstimatesEffects } from './store/estimates/estimates.effects';
+import { INVOICES_FEATURE_KEY, invoicesReducer } from './store/invoices/invoices.reducer';
+import { InvoicesEffects } from './store/invoices/invoices.effects';
+import { NOTIFICATIONS_FEATURE_KEY, notificationsReducer } from './store/notifications/notifications.reducer';
+import { NotificationsEffects } from './store/notifications/notifications.effects';
+import { INVITATIONS_FEATURE_KEY, invitationsReducer } from './store/invitations/invitations.reducer';
+import { InvitationsEffects } from './store/invitations/invitations.effects';
+import { COMPANY_WORK_SESSIONS_FEATURE_KEY, companyWorkSessionsReducer } from './store/company-work-sessions/company-work-sessions.reducer';
+import { CompanyWorkSessionsEffects } from './store/company-work-sessions/company-work-sessions.effects';
 import { SUBCONTRACTORS_FEATURE_KEY, subcontractorsReducer } from './store/subcontractors/subcontractors.reducer';
 import { SubcontractorsEffects } from './store/subcontractors/subcontractors.effects';
 import { ADMIN_DASHBOARD_FEATURE_KEY, adminDashboardReducer } from './store/admin-dashboard/admin-dashboard.reducer';
 import { AdminDashboardEffects } from './store/admin-dashboard/admin-dashboard.effects';
+import { ADMIN_USERS_FEATURE_KEY, adminUsersReducer } from './store/admin-users/admin-users.reducer';
+import { AdminUsersEffects } from './store/admin-users/admin-users.effects';
+import { ADMIN_COMPANIES_FEATURE_KEY, adminCompaniesReducer } from './store/admin-companies/admin-companies.reducer';
+import { AdminCompaniesEffects } from './store/admin-companies/admin-companies.effects';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -59,23 +85,40 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     canActivate: [authGuard],
+    data: { preload: true },
+    providers: [
+      provideState(TIMESHEETS_FEATURE_KEY, timesheetsReducer),
+      provideState(JOBSITES_FEATURE_KEY, jobsitesReducer),
+      provideState(CLIENTS_FEATURE_KEY, clientsReducer),
+      provideState(COMPANY_MEMBERS_FEATURE_KEY, companyMembersReducer),
+      provideState(ESTIMATES_FEATURE_KEY, estimatesReducer),
+      provideState(INVOICES_FEATURE_KEY, invoicesReducer),
+      provideEffects(TimesheetsEffects, JobsitesEffects, ClientsEffects, CompanyMembersEffects, EstimatesEffects, InvoicesEffects),
+    ],
     loadChildren: () =>
       import('./components/dashboard/dashboard.module').then((m) => m.DashboardModule),
   },
   {
     path: 'shifts',
     canActivate: [authGuard],
+    data: { preload: true },
     loadComponent: () => import('./pages/shifts.page').then((m) => m.ShiftsPage),
   },
   {
     path: 'team',
     canActivate: [authGuard],
+    data: { preload: true },
+    providers: [
+      provideState(COMPANY_MEMBERS_FEATURE_KEY, companyMembersReducer),
+      provideEffects(CompanyMembersEffects),
+    ],
     loadChildren: () =>
       import('./components/team-members/team-members.module').then((m) => m.TeamMembersModule),
   },
   {
     path: 'settings',
     canActivate: [authGuard],
+    data: { preload: true },
     loadComponent: () => import('./pages/settings.page').then((m) => m.SettingsPage),
     children: [
       {
@@ -109,30 +152,54 @@ export const routes: Routes = [
   {
     path: 'work-time',
     canActivate: [authGuard, roleGuard(CompanyRole.ACCOUNTANT)],
+    providers: [
+      provideState(TIMESHEETS_FEATURE_KEY, timesheetsReducer),
+      provideState(COMPANY_WORK_SESSIONS_FEATURE_KEY, companyWorkSessionsReducer),
+      provideEffects(TimesheetsEffects, CompanyWorkSessionsEffects),
+    ],
     loadChildren: () =>
       import('./components/work-time/work-time.module').then((m) => m.WorkTimeModule),
   },
   {
     path: 'workers',
     canActivate: [authGuard],
+    providers: [
+      provideState(COMPANY_MEMBERS_FEATURE_KEY, companyMembersReducer),
+      provideEffects(CompanyMembersEffects),
+    ],
     loadChildren: () =>
       import('./components/workers/workers.module').then((m) => m.WorkersModule),
   },
   {
     path: 'jobsites',
     canActivate: [authGuard],
+    providers: [
+      provideState(JOBSITES_FEATURE_KEY, jobsitesReducer),
+      provideState(JOBSITE_TASKS_FEATURE_KEY, jobsiteTasksReducer),
+      provideEffects(JobsitesEffects, JobsiteTasksEffects),
+    ],
     loadChildren: () =>
       import('./components/jobsites/jobsites.module').then((m) => m.JobsitesModule),
   },
   {
     path: 'clients',
     canActivate: [authGuard],
+    providers: [
+      provideState(CLIENTS_FEATURE_KEY, clientsReducer),
+      provideState(ESTIMATES_FEATURE_KEY, estimatesReducer),
+      provideState(INVOICES_FEATURE_KEY, invoicesReducer),
+      provideEffects(ClientsEffects, EstimatesEffects, InvoicesEffects),
+    ],
     loadChildren: () =>
       import('./components/clients/clients.module').then((m) => m.ClientsModule),
   },
   {
     path: 'notifications',
     canActivate: [authGuard],
+    providers: [
+      provideState(NOTIFICATIONS_FEATURE_KEY, notificationsReducer),
+      provideEffects(NotificationsEffects),
+    ],
     loadComponent: () =>
       import('./components/notifications/notifications.component').then(
         (m) => m.NotificationsComponent,
@@ -141,6 +208,11 @@ export const routes: Routes = [
   {
     path: 'select-company',
     canActivate: [authGuard],
+    providers: [
+      provideState(INVITATIONS_FEATURE_KEY, invitationsReducer),
+      provideState(COMPANY_WORK_SESSIONS_FEATURE_KEY, companyWorkSessionsReducer),
+      provideEffects(InvitationsEffects, CompanyWorkSessionsEffects),
+    ],
     loadChildren: () =>
       import('./components/company-selection/company-selection.module').then(
         (m) => m.CompanySelectionModule,
@@ -211,6 +283,10 @@ export const routes: Routes = [
   {
     path: 'admin/companies',
     canActivate: [authGuard, platformAdminGuard],
+    providers: [
+      provideState(ADMIN_COMPANIES_FEATURE_KEY, adminCompaniesReducer),
+      provideEffects(AdminCompaniesEffects),
+    ],
     loadChildren: () =>
       import('./components/admin-companies/admin-companies-routing.module').then(
         (m) => m.ADMIN_COMPANIES_ROUTES,
@@ -219,6 +295,10 @@ export const routes: Routes = [
   {
     path: 'admin/users',
     canActivate: [authGuard, platformAdminGuard],
+    providers: [
+      provideState(ADMIN_USERS_FEATURE_KEY, adminUsersReducer),
+      provideEffects(AdminUsersEffects),
+    ],
     loadChildren: () =>
       import('./components/admin-users/admin-users-routing.module').then(
         (m) => m.ADMIN_USERS_ROUTES,

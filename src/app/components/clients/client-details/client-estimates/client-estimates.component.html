@@ -92,7 +92,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let estimate of vm.filtered" class="estimate-row">
+        <tr *ngFor="let estimate of vm.filtered; trackBy: trackById" class="estimate-row">
           <td class="col-num">
             <div class="est-num-cell">
               <span class="est-number">#{{ estimate.estimateNumber }}</span>

@@ -375,6 +375,10 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
     }
   }
 
+  protected trackById(index: number, item: Estimate): string {
+    return item.id;
+  }
+
   private reloadEstimates(): void {
     this.store.dispatch(loadEstimates({
       companyId: this.companyId,

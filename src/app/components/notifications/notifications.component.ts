@@ -169,6 +169,10 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     }
   }
 
+  protected trackById(index: number, item: Notification): string {
+    return item.id;
+  }
+
   private loadNotifications(): void {
     this.notificationsStore.loadNotifications(this.filterMode === 'unread', this.selectedCompanyId ?? undefined);
   }

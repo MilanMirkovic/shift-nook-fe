@@ -230,4 +230,8 @@ export class ClientJobsitesComponent implements OnInit, OnDestroy {
       j.name.toLowerCase().includes(q) || j.address.toLowerCase().includes(q)
     );
   }
+
+  protected trackById(index: number, item: Jobsite): string {
+    return item.id;
+  }
 }

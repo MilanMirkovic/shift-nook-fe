@@ -50,7 +50,7 @@
       <!-- Cards grid -->
       <div *ngIf="companies.length > 0" class="cs-grid">
         <button
-          *ngFor="let company of companies; let i = index"
+          *ngFor="let company of companies; let i = index; trackBy: trackByCompanyId"
           class="cs-card"
           [style.--i]="i"
           (click)="selectCompany(company)"

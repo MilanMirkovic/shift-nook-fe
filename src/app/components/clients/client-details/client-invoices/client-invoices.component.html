@@ -62,7 +62,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let invoice of vm.invoices" class="invoice-row">
+        <tr *ngFor="let invoice of vm.invoices; trackBy: trackById" class="invoice-row">
           <td class="col-num">
             <span class="inv-number">#{{ invoice.invoiceNumber }}</span>
           </td>

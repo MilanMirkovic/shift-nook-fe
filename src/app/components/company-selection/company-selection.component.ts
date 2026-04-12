@@ -135,4 +135,8 @@ export class CompanySelectionComponent implements OnInit, OnDestroy {
       month: 'long'
     }).format(date);
   }
+
+  trackByCompanyId(index: number, item: CompanyMembership): string {
+    return item.companyId;
+  }
 }
