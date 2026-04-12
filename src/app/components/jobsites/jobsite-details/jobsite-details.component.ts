@@ -291,7 +291,6 @@ export class JobsiteDetailsComponent implements OnInit, OnDestroy {
           disableClose: false,
           autoFocus: true,
           panelClass: 'jobsite-dialog-container',
-          position: { top: '15%' },
           data: {
             jobsite: {
               id: jobsite.id,

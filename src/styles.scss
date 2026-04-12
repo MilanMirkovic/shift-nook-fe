@@ -910,6 +910,28 @@ select:focus-visible {
   transform: translate(-50%, -50%) !important;
 }
 
+.jobsite-dialog-container {
+  .mat-mdc-dialog-container {
+    border-radius: 20px !important;
+    box-shadow: var(--sn-shadow-modal) !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+
+    .mdc-dialog__surface {
+      border-radius: 20px !important;
+      overflow: hidden !important;
+      padding: 0 !important;
+    }
+  }
+}
+
+.cdk-overlay-pane.jobsite-dialog-container {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
 .document-upload-dialog-backdrop {
   background: rgba(15, 23, 42, 0.45) !important;
   backdrop-filter: blur(4px);

@@ -226,9 +226,6 @@ export class JobsitesComponent implements OnInit, OnDestroy {
       disableClose: false,
       autoFocus: true,
       panelClass: 'jobsite-dialog-container',
-      position: {
-        top: '15%'
-      }
     });
 
     dialogRef.afterClosed().subscribe(result => {

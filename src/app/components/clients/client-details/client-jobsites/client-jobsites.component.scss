@@ -192,6 +192,7 @@
 .card-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   padding: 5px 10px;
   border: none;
@@ -202,11 +203,18 @@
   cursor: pointer;
   transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
   line-height: 1;
+  // Override global min-height/min-width touch-target rule for these compact card buttons
+  min-height: unset !important;
+  min-width: unset !important;
 
   mat-icon {
     font-size: 15px;
     width: 15px;
     height: 15px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &:active { transform: scale(0.95); }
