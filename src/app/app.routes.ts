@@ -7,34 +7,55 @@ import { platformAdminGuard } from './core/auth/platform-admin.guard';
 import { CompanyRole } from './shared/models/company-role';
 
 // Feature stores and effects for lazy loading
-import { TIMESHEETS_FEATURE_KEY, reducer as timesheetsReducer } from './store/timesheets/timesheets.reducer';
+// Import reducers
+import { reducer as timesheetsReducer } from './store/timesheets/timesheets.reducer';
+import { reducer as jobsitesReducer } from './store/jobsites/jobsites.reducer';
+import { reducer as jobsiteTasksReducer } from './store/jobsite-tasks/jobsite-tasks.reducer';
+import { reducer as companyMembersReducer } from './store/company-members/company-members.reducer';
+import { reducer as clientsReducer } from './store/clients/clients.reducer';
+import { estimatesReducer } from './store/estimates/estimates.reducer';
+import { invoicesReducer } from './store/invoices/invoices.reducer';
+import { notificationsReducer } from './store/notifications/notifications.reducer';
+import { invitationsReducer } from './store/invitations/invitations.reducer';
+import { companyWorkSessionsReducer } from './store/company-work-sessions/company-work-sessions.reducer';
+import { subcontractorsReducer } from './store/subcontractors/subcontractors.reducer';
+import { adminDashboardReducer } from './store/admin-dashboard/admin-dashboard.reducer';
+import { adminUsersReducer } from './store/admin-users/admin-users.reducer';
+import { adminCompaniesReducer } from './store/admin-companies/admin-companies.reducer';
+
+// Import feature keys from selectors
+import { TIMESHEETS_FEATURE_KEY } from './store/timesheets/timesheets.selectors';
+import { JOBSITES_FEATURE_KEY } from './store/jobsites/jobsites.selectors';
+import { JOBSITE_TASKS_FEATURE_KEY } from './store/jobsite-tasks/jobsite-tasks.selectors';
+import { COMPANY_MEMBERS_FEATURE_KEY } from './store/company-members/company-members.selectors';
+import { CLIENTS_FEATURE_KEY } from './store/clients/clients.selectors';
+import { ESTIMATES_FEATURE_KEY } from './store/estimates/estimates.selectors';
+import { INVOICES_FEATURE_KEY } from './store/invoices/invoices.selectors';
+import { NOTIFICATIONS_FEATURE_KEY } from './store/notifications/notifications.selectors';
+import { INVITATIONS_FEATURE_KEY } from './store/invitations/invitations.reducer';
+import { SUBCONTRACTORS_FEATURE_KEY } from './store/subcontractors/subcontractors.reducer';
+import { ADMIN_DASHBOARD_FEATURE_KEY } from './store/admin-dashboard/admin-dashboard.reducer';
+import { ADMIN_USERS_FEATURE_KEY } from './store/admin-users/admin-users.reducer';
+import { ADMIN_COMPANIES_FEATURE_KEY } from './store/admin-companies/admin-companies.reducer';
+
+// Import effects
 import { TimesheetsEffects } from './store/timesheets/timesheets.effects';
-import { JOBSITES_FEATURE_KEY, reducer as jobsitesReducer } from './store/jobsites/jobsites.reducer';
 import { JobsitesEffects } from './store/jobsites/jobsites.effects';
-import { JOBSITE_TASKS_FEATURE_KEY, reducer as jobsiteTasksReducer } from './store/jobsite-tasks/jobsite-tasks.reducer';
 import { JobsiteTasksEffects } from './store/jobsite-tasks/jobsite-tasks.effects';
-import { COMPANY_MEMBERS_FEATURE_KEY, reducer as companyMembersReducer } from './store/company-members/company-members.reducer';
 import { CompanyMembersEffects } from './store/company-members/company-members.effects';
-import { CLIENTS_FEATURE_KEY, reducer as clientsReducer } from './store/clients/clients.reducer';
 import { ClientsEffects } from './store/clients/clients.effects';
-import { ESTIMATES_FEATURE_KEY, estimatesReducer } from './store/estimates/estimates.reducer';
 import { EstimatesEffects } from './store/estimates/estimates.effects';
-import { INVOICES_FEATURE_KEY, invoicesReducer } from './store/invoices/invoices.reducer';
 import { InvoicesEffects } from './store/invoices/invoices.effects';
-import { NOTIFICATIONS_FEATURE_KEY, notificationsReducer } from './store/notifications/notifications.reducer';
 import { NotificationsEffects } from './store/notifications/notifications.effects';
-import { INVITATIONS_FEATURE_KEY, invitationsReducer } from './store/invitations/invitations.reducer';
 import { InvitationsEffects } from './store/invitations/invitations.effects';
-import { COMPANY_WORK_SESSIONS_FEATURE_KEY, companyWorkSessionsReducer } from './store/company-work-sessions/company-work-sessions.reducer';
 import { CompanyWorkSessionsEffects } from './store/company-work-sessions/company-work-sessions.effects';
-import { SUBCONTRACTORS_FEATURE_KEY, subcontractorsReducer } from './store/subcontractors/subcontractors.reducer';
 import { SubcontractorsEffects } from './store/subcontractors/subcontractors.effects';
-import { ADMIN_DASHBOARD_FEATURE_KEY, adminDashboardReducer } from './store/admin-dashboard/admin-dashboard.reducer';
 import { AdminDashboardEffects } from './store/admin-dashboard/admin-dashboard.effects';
-import { ADMIN_USERS_FEATURE_KEY, adminUsersReducer } from './store/admin-users/admin-users.reducer';
 import { AdminUsersEffects } from './store/admin-users/admin-users.effects';
-import { ADMIN_COMPANIES_FEATURE_KEY, adminCompaniesReducer } from './store/admin-companies/admin-companies.reducer';
 import { AdminCompaniesEffects } from './store/admin-companies/admin-companies.effects';
+
+// Define COMPANY_WORK_SESSIONS_FEATURE_KEY if not exported from elsewhere
+export const COMPANY_WORK_SESSIONS_FEATURE_KEY = 'companyWorkSessions';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
