@@ -173,6 +173,7 @@ export const routes: Routes = [
   {
     path: 'work-time',
     canActivate: [authGuard, roleGuard(CompanyRole.ACCOUNTANT)],
+    data: { preload: true },
     providers: [
       provideState(TIMESHEETS_FEATURE_KEY, timesheetsReducer),
       provideState(COMPANY_WORK_SESSIONS_FEATURE_KEY, companyWorkSessionsReducer),
@@ -184,6 +185,7 @@ export const routes: Routes = [
   {
     path: 'workers',
     canActivate: [authGuard],
+    data: { preload: true },
     providers: [
       provideState(COMPANY_MEMBERS_FEATURE_KEY, companyMembersReducer),
       provideEffects(CompanyMembersEffects),
@@ -194,6 +196,7 @@ export const routes: Routes = [
   {
     path: 'jobsites',
     canActivate: [authGuard],
+    data: { preload: true },
     providers: [
       provideState(JOBSITES_FEATURE_KEY, jobsitesReducer),
       provideState(JOBSITE_TASKS_FEATURE_KEY, jobsiteTasksReducer),
@@ -205,6 +208,7 @@ export const routes: Routes = [
   {
     path: 'clients',
     canActivate: [authGuard],
+    data: { preload: true },
     providers: [
       provideState(CLIENTS_FEATURE_KEY, clientsReducer),
       provideState(ESTIMATES_FEATURE_KEY, estimatesReducer),
@@ -217,6 +221,7 @@ export const routes: Routes = [
   {
     path: 'notifications',
     canActivate: [authGuard],
+    data: { preload: true },
     providers: [
       provideState(NOTIFICATIONS_FEATURE_KEY, notificationsReducer),
       provideEffects(NotificationsEffects),
