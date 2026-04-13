@@ -1,9 +1,15 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { Subject, combineLatest, map } from 'rxjs';
+import { Subject, combineLatest, map, takeUntil } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
 import {
   CompanyWorkSessionsStoreService
 } from '../../../store/company-work-sessions/company-work-sessions-store.service';
+import { CompanyWorkSessionsApiService } from '../../../store/company-work-sessions/company-work-sessions.api';
+import {
+  ExportTimesheetDialogComponent,
+  ExportTimesheetDialogResult
+} from '../export-timesheet-dialog/export-timesheet-dialog.component';
 
 type PeriodType = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
@@ -15,8 +21,12 @@ type PeriodType = 'daily' | 'weekly' | 'monthly' | 'yearly';
 })
 export class WorkSessionStatisticsComponent implements OnInit, OnDestroy {
   private readonly workSessionStore = inject(CompanyWorkSessionsStoreService);
+  private readonly workSessionApi = inject(CompanyWorkSessionsApiService);
+  private readonly dialog = inject(MatDialog);
   private readonly destroy$ = new Subject<void>();
   private readonly selectedCompanyId$ = new BehaviorSubject<string | null>(null);
+
+  exportingPdf = false;
 
   statistics$ = this.workSessionStore.getStatistics();
   loading$ = this.workSessionStore.getStatisticsLoading();
@@ -251,5 +261,65 @@ export class WorkSessionStatisticsComponent implements OnInit, OnDestroy {
 
   trackByCompanyId(index: number, company: any): string {
     return company.companyId;
+  }
+
+  onExportTimesheet(): void {
+    const dialogRef = this.dialog.open(ExportTimesheetDialogComponent, {
+      width: '500px',
+      maxWidth: '90vw',
+      disableClose: false,
+      autoFocus: true,
+      restoreFocus: true,
+      hasBackdrop: true
+    });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((result: ExportTimesheetDialogResult | null) => {
+        if (result) {
+          this.exportTimesheet(result.from, result.to);
+        }
+      });
+  }
+
+  private exportTimesheet(from: Date, to: Date): void {
+    if (this.exportingPdf) return;
+
+    this.exportingPdf = true;
+
+    // Convert dates to ISO 8601 format with UTC timezone
+    const fromISO = this.toISOString(from);
+    const toISO = this.toISOString(to);
+
+    this.workSessionApi.exportTimesheetPdf(fromISO, toISO)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (blob) => {
+          // Create download link
+          const url = URL.createObjectURL(blob);
+          const anchor = document.createElement('a');
+          anchor.href = url;
+          anchor.download = `accountant-timesheet-${this.formatDate(from)}-to-${this.formatDate(to)}.pdf`;
+          anchor.click();
+          URL.revokeObjectURL(url);
+          this.exportingPdf = false;
+        },
+        error: (error) => {
+          console.error('Failed to export timesheet:', error);
+          this.exportingPdf = false;
+          // You could add a notification service here
+        },
+      });
+  }
+
+  private toISOString(date: Date): string {
+    // Convert to ISO 8601 format: YYYY-MM-DDTHH:MM:SSZ
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
   }
 }

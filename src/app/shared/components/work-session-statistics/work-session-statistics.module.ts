@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatDialogModule } from '@angular/material/dialog';
 import { WorkSessionStatisticsComponent } from './work-session-statistics.component';
 
 @NgModule({
@@ -9,7 +10,8 @@ import { WorkSessionStatisticsComponent } from './work-session-statistics.compon
   ],
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    MatDialogModule
   ],
   exports: [
     WorkSessionStatisticsComponent

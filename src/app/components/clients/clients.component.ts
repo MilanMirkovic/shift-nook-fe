@@ -78,13 +78,6 @@ export class ClientsComponent implements OnInit, OnDestroy {
       handler: (client) => this.onClientClick(client)
     },
     {
-      icon: 'edit',
-      label: 'Edit',
-      color: 'primary',
-      handler: (client) => this.onEdit(client),
-      visible: () => this.isOwner
-    },
-    {
       icon: 'delete',
       label: 'Delete',
       color: 'warn',

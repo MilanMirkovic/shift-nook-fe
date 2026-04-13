@@ -67,16 +67,6 @@
           <mat-icon class="form-card__icon">format_list_bulleted</mat-icon>
           <h3>Line Items</h3>
           <span class="item-count-badge">{{ lineItems.length }}</span>
-          <button
-            mat-icon-button
-            color="primary"
-            type="button"
-            (click)="addLineItem()"
-            matTooltip="Add line item"
-            class="add-item-btn"
-          >
-            <mat-icon>add_circle</mat-icon>
-          </button>
         </div>
 
         <div formArrayName="lineItems" class="line-items">
@@ -138,12 +128,27 @@
             </div>
           }
         </div>
-
+        <div class="form-card__header">
+          <h3>Add Item</h3>
+          <span class="item-count-badge">Items lenght: {{ lineItems.length }}</span>
+          <button
+            mat-icon-button
+            color="primary"
+            type="button"
+            (click)="addLineItem()"
+            matTooltip="Add line item"
+            class="add-item-btn"
+          >
+            <mat-icon>add_circle</mat-icon>
+          </button>
+        </div>
         <!-- Total -->
         <div class="total-bar">
           <span class="total-bar__label">Total</span>
           <span class="total-bar__amount">{{ total | currency }}</span>
         </div>
+
+
       </div>
 
     </form>

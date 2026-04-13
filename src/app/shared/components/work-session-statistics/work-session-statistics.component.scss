@@ -178,6 +178,40 @@
   }
 }
 
+.export-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, var(--sn-primary-start), var(--sn-primary-end));
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(var(--sn-primary-start), 0.4);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 // ===== COMPANY FILTER =====
 .filter-section {
   margin-bottom: 2rem;
@@ -751,6 +785,12 @@
       order: -1;
       margin-bottom: 0.75rem;
     }
+
+    .export-button {
+      flex-basis: 100%;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
   }
 
   .metrics-grid {
@@ -804,6 +844,17 @@
 
     .metric-value {
       font-size: 1.75rem;
+    }
+  }
+
+  .date-navigation {
+    gap: 0.5rem;
+    padding: 1rem;
+
+    .today-button,
+    .export-button {
+      padding: 0.5rem 1rem;
+      font-size: 0.813rem;
     }
   }
 }

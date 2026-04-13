@@ -78,4 +78,20 @@ export class CompanyWorkSessionsApiService {
     }
     return this.http.get<WorkSessionStatistics>(`${this.baseUrl}/statistics/yearly`, { params });
   }
+
+  /**
+   * Export accountant timesheet as PDF for a date range
+   * @param from Start date in ISO 8601 format (e.g., "2026-01-01T00:00:00Z")
+   * @param to End date in ISO 8601 format (e.g., "2026-01-31T23:59:59Z")
+   * @returns PDF blob
+   */
+  exportTimesheetPdf(from: string, to: string): Observable<Blob> {
+    const params = new HttpParams()
+      .set('from', from)
+      .set('to', to);
+    return this.http.get(`${this.baseUrl}/export/pdf`, {
+      params,
+      responseType: 'blob'
+    });
+  }
 }

@@ -69,13 +69,6 @@ export class JobsitesComponent implements OnInit, OnDestroy {
       handler: (jobsite) => this.onView(jobsite)
     },
     {
-      icon: 'edit',
-      label: 'Edit',
-      color: 'primary',
-      handler: (jobsite) => this.onEdit(jobsite),
-      visible: () => this.isOwner
-    },
-    {
       icon: 'delete',
       label: 'Delete',
       color: 'warn',
