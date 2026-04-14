@@ -13,7 +13,12 @@
     <div class="export-dialog__fields">
       <mat-form-field appearance="outline">
         <mat-label>Date From</mat-label>
-        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" placeholder="MM/DD/YYYY" readonly>
+        <input
+          matInput
+          [matDatepicker]="fromPicker"
+          [(ngModel)]="fromDate"
+          placeholder="MM/DD/YYYY"
+          readonly>
         <mat-datepicker-toggle matSuffix [for]="fromPicker">
           <mat-icon matDatepickerToggleIcon>calendar_today</mat-icon>
         </mat-datepicker-toggle>
@@ -22,7 +27,13 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Date To</mat-label>
-        <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" [min]="fromDate" placeholder="MM/DD/YYYY" readonly>
+        <input
+          matInput
+          [matDatepicker]="toPicker"
+          [(ngModel)]="toDate"
+          [min]="fromDate"
+          placeholder="MM/DD/YYYY"
+          readonly>
         <mat-datepicker-toggle matSuffix [for]="toPicker">
           <mat-icon matDatepickerToggleIcon>calendar_today</mat-icon>
         </mat-datepicker-toggle>
@@ -51,4 +62,3 @@
     </button>
   </mat-dialog-actions>
 </div>
-

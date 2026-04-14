@@ -270,7 +270,8 @@ export class WorkSessionStatisticsComponent implements OnInit, OnDestroy {
       disableClose: false,
       autoFocus: true,
       restoreFocus: true,
-      hasBackdrop: true
+      hasBackdrop: true,
+      panelClass: 'export-timesheet-dialog-container'
     });
 
     dialogRef.afterClosed()

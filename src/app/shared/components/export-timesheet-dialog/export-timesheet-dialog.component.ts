@@ -7,8 +7,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 export interface ExportTimesheetDialogResult {
   from: Date;
@@ -27,8 +25,6 @@ export interface ExportTimesheetDialogResult {
     MatFormFieldModule,
     MatInputModule,
     MatDatepickerModule,
-    MatNativeDateModule,
-    MatProgressSpinnerModule,
   ],
   templateUrl: './export-timesheet-dialog.component.html',
   styleUrls: ['./export-timesheet-dialog.component.scss'],
