@@ -24,7 +24,10 @@ export class WorkSessionStatisticsComponent implements OnInit, OnDestroy {
   private readonly workSessionApi = inject(CompanyWorkSessionsApiService);
   private readonly dialog = inject(MatDialog);
   private readonly destroy$ = new Subject<void>();
-  private readonly selectedCompanyId$ = new BehaviorSubject<string | null>(null);
+  private readonly STORAGE_KEY = 'work-session-statistics-selected-company';
+  private readonly selectedCompanyId$ = new BehaviorSubject<string | null>(
+    this.loadSelectedCompanyFromStorage()
+  );
 
   exportingPdf = false;
 
@@ -42,6 +45,7 @@ export class WorkSessionStatisticsComponent implements OnInit, OnDestroy {
 
   set selectedCompanyId(value: string | null) {
     this.selectedCompanyId$.next(value);
+    this.saveSelectedCompanyToStorage(value);
   }
 
   // Filtered statistics based on selected company
@@ -322,5 +326,27 @@ export class WorkSessionStatisticsComponent implements OnInit, OnDestroy {
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const seconds = String(date.getSeconds()).padStart(2, '0');
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
+  }
+
+  private loadSelectedCompanyFromStorage(): string | null {
+    try {
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      return stored;
+    } catch (error) {
+      console.warn('Failed to load selected company from storage:', error);
+      return null;
+    }
+  }
+
+  private saveSelectedCompanyToStorage(companyId: string | null): void {
+    try {
+      if (companyId) {
+        localStorage.setItem(this.STORAGE_KEY, companyId);
+      } else {
+        localStorage.removeItem(this.STORAGE_KEY);
+      }
+    } catch (error) {
+      console.warn('Failed to save selected company to storage:', error);
+    }
   }
 }

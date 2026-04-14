@@ -14,6 +14,8 @@ import { CustomPreloadStrategy } from './core/routing/custom-preload-strategy';
 // Import only essential reducers and effects (loaded at app level)
 import { reducer as userReducer } from './store/user/user.reducer';
 import { UserEffects } from './store/user/user.effects';
+import { companyWorkSessionsReducer } from './store/company-work-sessions/company-work-sessions.reducer';
+import { CompanyWorkSessionsEffects } from './store/company-work-sessions/company-work-sessions.effects';
 
 // Import feature keys
 import { USER_FEATURE_KEY } from './store/user/user.selectors';
@@ -27,9 +29,11 @@ export const appConfig: ApplicationConfig = {
     provideNativeDateAdapter(),
     provideStore({
       [USER_FEATURE_KEY]: userReducer,
+      companyWorkSessions: companyWorkSessionsReducer,
     }),
     provideEffects([
       UserEffects,
+      CompanyWorkSessionsEffects,
     ]),
     provideStoreDevtools({
       maxAge: 25,
