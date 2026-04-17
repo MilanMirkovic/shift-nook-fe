@@ -133,6 +133,7 @@
 .action-btn {
   width: 32px; height: 32px; line-height: 32px;
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  &.action-btn--status mat-icon { color: #0ea5e9; }
   &.action-btn--edit mat-icon   { color: #2563eb; }
   &.action-btn--pdf mat-icon    { color: #7c3aed; }
   &.action-btn--delete mat-icon { color: #ef4444; }

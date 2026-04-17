@@ -12,6 +12,7 @@ import { NotificationService } from '../../shared/services/notification.service'
 
 import {
   selectMembers,
+  selectMembersFilteredByRole,
   selectTotal,
   selectLoading,
   selectLoaded
@@ -41,7 +42,7 @@ export class WorkersComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   readonly selectedCompanyId$ = this._store.select(selectSelectedCompanyId);
-  readonly members$ = this._store.select(selectMembers);
+  readonly members$ = this._store.select(selectMembersFilteredByRole);
   readonly total$ = this._store.select(selectTotal);
   readonly loading$ = this._store.select(selectLoading);
   readonly loaded$ = this._store.select(selectLoaded);

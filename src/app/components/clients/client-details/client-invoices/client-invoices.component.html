@@ -83,6 +83,10 @@
           </td>
           <td class="col-actions">
             <div class="row-actions">
+              <button mat-icon-button class="action-btn action-btn--status" matTooltip="Change status"
+                (click)="onUpdateInvoiceStatus(invoice)">
+                <mat-icon>swap_horiz</mat-icon>
+              </button>
               <button mat-icon-button class="action-btn action-btn--edit" matTooltip="Edit invoice" (click)="onEditInvoice(invoice)">
                 <mat-icon>edit</mat-icon>
               </button>
@@ -105,3 +109,5 @@
   </div>
 
 </ng-container>
+
+

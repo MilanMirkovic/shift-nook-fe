@@ -115,7 +115,9 @@
                   <mat-form-field appearance="outline">
                     <mat-label>Rate</mat-label>
                     <span matPrefix>$&nbsp;</span>
-                    <input matInput type="number" formControlName="rate" step="0.01" min="0" />
+                    <input matInput type="number" formControlName="rate" step="0.01" min="0"
+                      (focus)="onRateFocus($index)"
+                      (blur)="onRateBlur($index)" />
                     <mat-error>{{ getErrorMessage(['lineItems', $index, 'rate']) }}</mat-error>
                   </mat-form-field>
 
@@ -128,20 +130,18 @@
             </div>
           }
         </div>
-        <div class="form-card__header">
-          <h3>Add Item</h3>
-          <span class="item-count-badge">Items lenght: {{ lineItems.length }}</span>
-          <button
-            mat-icon-button
-            color="primary"
-            type="button"
-            (click)="addLineItem()"
-            matTooltip="Add line item"
-            class="add-item-btn"
-          >
-            <mat-icon>add_circle</mat-icon>
-          </button>
-        </div>
+
+        <!-- Add line item -->
+        <button
+          mat-stroked-button
+          color="primary"
+          type="button"
+          (click)="addLineItem()"
+          class="add-item-btn">
+          <mat-icon>add</mat-icon>
+          Add Line Item
+        </button>
+
         <!-- Total -->
         <div class="total-bar">
           <span class="total-bar__label">Total</span>

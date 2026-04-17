@@ -35,6 +35,10 @@ import {
   DocumentUploadDialogComponent,
   DocumentUploadDialogResult,
 } from '../../../../shared/components/document-upload-dialog/document-upload-dialog.component';
+import {
+  InvoiceStatusDialogComponent,
+  InvoiceStatusDialogData,
+} from '../../../../shared/components/invoice-status-dialog/invoice-status-dialog.component';
 
 @Component({
   selector: 'app-client-invoices',
@@ -139,7 +143,6 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: DocumentUploadDialogResult | undefined) => {
       if (!result) return;
-      // Invoice creation from upload — handled when backend support is added
       this.notificationService.info('Invoice upload coming soon!');
     });
   }
@@ -187,9 +190,7 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(confirmed => {
       if (!confirmed) return;
-
       this.store.dispatch(deleteInvoice({ companyId: this.companyId, invoiceId: invoice.id }));
-
       this.actions$.pipe(
         ofType(deleteInvoiceSuccess, deleteInvoiceFailure),
         take(1),
@@ -204,23 +205,39 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
     });
   }
 
-  protected onUpdateInvoiceStatus(invoice: Invoice, status: InvoiceStatus): void {
-    this.store.dispatch(updateInvoiceStatus({
-      companyId: this.companyId,
-      invoiceId: invoice.id,
-      statusUpdate: { status },
-    }));
+  protected onUpdateInvoiceStatus(invoice: Invoice): void {
+    const dialogRef = this.dialog.open(InvoiceStatusDialogComponent, {
+      width: '480px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      disableClose: false,
+      autoFocus: false,
+      panelClass: 'centered-dialog',
+      data: {
+        invoiceTitle: invoice.title,
+        invoiceNumber: invoice.invoiceNumber,
+        currentStatus: invoice.status,
+      } satisfies InvoiceStatusDialogData,
+    });
 
-    this.actions$.pipe(
-      ofType(updateInvoiceStatusSuccess, updateInvoiceStatusFailure),
-      take(1),
-      takeUntil(this.destroy$),
-    ).subscribe(result => {
-      if (result.type === updateInvoiceStatusSuccess.type) {
-        this.notificationService.success(`Invoice marked as ${status.toLowerCase()}.`);
-      } else {
-        this.notificationService.error('Failed to update invoice status.');
-      }
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((newStatus: InvoiceStatus | null) => {
+      if (!newStatus) return;
+      this.store.dispatch(updateInvoiceStatus({
+        companyId: this.companyId,
+        invoiceId: invoice.id,
+        statusUpdate: { status: newStatus },
+      }));
+      this.actions$.pipe(
+        ofType(updateInvoiceStatusSuccess, updateInvoiceStatusFailure),
+        take(1),
+        takeUntil(this.destroy$),
+      ).subscribe(result => {
+        if (result.type === updateInvoiceStatusSuccess.type) {
+          this.notificationService.success(`Invoice marked as ${newStatus.toLowerCase()}.`);
+        } else {
+          this.notificationService.error('Failed to update invoice status.');
+        }
+      });
     });
   }
 
@@ -258,7 +275,7 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected trackById(index: number, item: Invoice): string {
+  protected trackById(_index: number, item: Invoice): string {
     return item.id;
   }
 }

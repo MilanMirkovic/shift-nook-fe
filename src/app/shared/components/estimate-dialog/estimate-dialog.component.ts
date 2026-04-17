@@ -184,6 +184,20 @@ export class EstimateDialogComponent implements OnInit, OnDestroy {
     }
   }
 
+  onRateFocus(index: number): void {
+    const ctrl = this.lineItems.at(index)?.get('rate');
+    if (ctrl && (ctrl.value === 0 || ctrl.value === '0')) {
+      ctrl.setValue(null, { emitEvent: false });
+    }
+  }
+
+  onRateBlur(index: number): void {
+    const ctrl = this.lineItems.at(index)?.get('rate');
+    if (ctrl && (ctrl.value === null || ctrl.value === '' || ctrl.value === undefined)) {
+      ctrl.setValue(0, { emitEvent: false });
+    }
+  }
+
   onCancel(): void {
     this.dialogRef.close();
   }

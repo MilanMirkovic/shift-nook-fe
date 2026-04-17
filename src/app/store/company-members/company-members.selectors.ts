@@ -1,5 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { CompanyMembersState } from './company-members.models';
+import { CompanyRole } from '../../shared/models/company-role';
 
 export const COMPANY_MEMBERS_FEATURE_KEY = 'companyMembers';
 
@@ -8,6 +9,18 @@ export const selectCompanyMembersState =
 
 export const selectMembers =
   createSelector(selectCompanyMembersState, s => s.items);
+
+export const selectMembersFilteredByRole =
+  createSelector(
+    selectCompanyMembersState,
+    s => {
+      // If a role filter is set, apply client-side filtering as a fallback
+      if (s.filters.role) {
+        return s.items.filter(member => member.role === s.filters.role);
+      }
+      return s.items;
+    }
+  );
 
 export const selectTotal =
   createSelector(selectCompanyMembersState, s => s.total);

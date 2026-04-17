@@ -37,7 +37,8 @@
           <mat-error>{{ getErrorMessage('title') }}</mat-error>
         </mat-form-field>
 
-        <!-- Dates row -->
+        <!-- Dates row (edit mode only) -->
+        @if (isEditMode) {
         <div class="date-row">
           <mat-form-field appearance="outline">
             <mat-label>Invoice Date <span class="required-star">*</span></mat-label>
@@ -58,6 +59,7 @@
             <mat-datepicker #duePicker></mat-datepicker>
           </mat-form-field>
         </div>
+        }
 
         <!-- Notes -->
         <mat-form-field appearance="outline" class="full-width">
@@ -80,15 +82,6 @@
           <mat-icon class="form-card__icon">format_list_bulleted</mat-icon>
           <h3>Line Items</h3>
           <span class="item-count-badge">{{ lineItems.length }}</span>
-          <button
-            mat-icon-button
-            color="primary"
-            type="button"
-            (click)="addLineItem()"
-            matTooltip="Add line item"
-            class="add-item-btn">
-            <mat-icon>add_circle</mat-icon>
-          </button>
         </div>
 
         <div formArrayName="lineItems" class="line-items">
@@ -144,7 +137,9 @@
                   <mat-form-field appearance="outline">
                     <mat-label>Unit Price</mat-label>
                     <span matPrefix>$&nbsp;</span>
-                    <input matInput type="number" formControlName="unitPrice" step="0.01" min="0" />
+                    <input matInput type="number" formControlName="unitPrice" step="0.01" min="0"
+                      (focus)="onUnitPriceFocus($index)"
+                      (blur)="onUnitPriceBlur($index)" />
                     @if (getLineItemError($index, 'unitPrice')) {
                       <mat-error>{{ getLineItemError($index, 'unitPrice') }}</mat-error>
                     }
@@ -160,6 +155,17 @@
             </div>
           }
         </div>
+
+        <!-- Add line item -->
+        <button
+          mat-stroked-button
+          color="primary"
+          type="button"
+          (click)="addLineItem()"
+          class="add-item-btn">
+          <mat-icon>add</mat-icon>
+          Add Line Item
+        </button>
 
         <!-- Total -->
         <div class="total-bar">

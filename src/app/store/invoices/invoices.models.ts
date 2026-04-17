@@ -43,8 +43,6 @@ export interface CreateInvoiceInput {
   clientId: string;
   title: string;
   notes?: string;
-  issuedAt: string;
-  dueAt?: string;
   items: InvoiceItemInput[];
 }
 

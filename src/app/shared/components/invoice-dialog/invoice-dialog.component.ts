@@ -80,11 +80,13 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
         data.invoice?.title ?? '',
         [Validators.required, Validators.maxLength(255)],
       ],
-      issuedAt: [
-        data.invoice ? new Date(data.invoice.issuedAt) : new Date(),
-        Validators.required,
-      ],
-      dueAt: [data.invoice?.dueAt ? new Date(data.invoice.dueAt) : null],
+      ...(this.isEditMode ? {
+        issuedAt: [
+          data.invoice ? new Date(data.invoice.issuedAt) : new Date(),
+          Validators.required,
+        ],
+        dueAt: [data.invoice?.dueAt ? new Date(data.invoice.dueAt) : null],
+      } : {}),
       notes: [data.invoice?.notes ?? '', Validators.maxLength(2000)],
       lineItems: this.fb.array([]),
     });
@@ -215,12 +217,24 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
           clientId: this.data.clientId,
           title: raw.title.trim(),
           notes: raw.notes?.trim() || undefined,
-          issuedAt: this.formatDate(raw.issuedAt)!,
-          dueAt: this.formatDate(raw.dueAt),
           items,
         },
       };
       this.dialogRef.close(result);
+    }
+  }
+
+  onUnitPriceFocus(index: number): void {
+    const ctrl = this.lineItems.at(index)?.get('unitPrice');
+    if (ctrl && (ctrl.value === 0 || ctrl.value === '0')) {
+      ctrl.setValue(null, { emitEvent: false });
+    }
+  }
+
+  onUnitPriceBlur(index: number): void {
+    const ctrl = this.lineItems.at(index)?.get('unitPrice');
+    if (ctrl && (ctrl.value === null || ctrl.value === '' || ctrl.value === undefined)) {
+      ctrl.setValue(0, { emitEvent: false });
     }
   }
 
