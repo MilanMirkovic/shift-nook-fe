@@ -22,7 +22,8 @@ export class EstimatesApiService {
     page: number = 0,
     size: number = 20,
     sort?: string,
-    clientId?: string
+    clientId?: string,
+    jobsiteId?: string
   ): Observable<EstimatesPageResponse> {
     let params = new HttpParams()
       .set('page', page.toString())
@@ -33,6 +34,9 @@ export class EstimatesApiService {
     }
     if (clientId) {
       params = params.set('clientId', clientId);
+    }
+    if (jobsiteId) {
+      params = params.set('jobsiteId', jobsiteId);
     }
 
     return this.http.get<EstimatesPageResponse>(

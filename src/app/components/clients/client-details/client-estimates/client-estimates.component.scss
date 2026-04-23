@@ -23,13 +23,9 @@
   button { flex-shrink: 0; }
 }
 
+// ─── Search bar ───────────────────────────────────────────────────────────────
 .estimates-search {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
   margin-bottom: 1.25rem;
-  flex-wrap: wrap;
 }
 
 .estimates-search__wrap {
@@ -40,9 +36,7 @@
   border-radius: 10px;
   border: 1px solid #e2e8f0;
   background: #f8f9fc;
-  width: min(400px, 100%);
-  flex: 1 1 200px;
-  min-width: 0;
+  width: min(500px, 100%);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 
   &:focus-within {
@@ -98,13 +92,6 @@
     background: #f1f5f9;
     color: #0f172a;
   }
-}
-
-.estimates-search__count {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #94a3b8;
-  flex-shrink: 0;
 }
 
 .estimates-table-wrap {
@@ -244,6 +231,7 @@
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
   &.action-btn--promote mat-icon { color: #10b981; }
   &.action-btn--edit mat-icon   { color: #2563eb; }
+  &.action-btn--duplicate mat-icon { color: #059669; }
   &.action-btn--status mat-icon { color: #f59e0b; }
   &.action-btn--pdf mat-icon    { color: #7c3aed; }
   &.action-btn--delete mat-icon { color: #ef4444; }

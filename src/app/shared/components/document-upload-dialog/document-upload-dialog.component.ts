@@ -38,6 +38,7 @@ import {
   ParsedDocumentData,
 } from '../../models/document-upload.models';
 import { CreateEstimateInput } from '../../../store/estimates/estimates.models';
+import { CreateInvoiceInput } from '../../../store/invoices/invoices.models';
 import { NotificationService } from '../../services/notification.service';
 
 export interface DocumentUploadDialogData {
@@ -50,7 +51,7 @@ export interface DocumentUploadDialogData {
 
 export type DocumentUploadDialogResult =
   | { mode: 'estimate'; payload: CreateEstimateInput }
-  | { mode: 'invoice'; payload: any };
+  | { mode: 'invoice'; payload: CreateInvoiceInput };
 
 @Component({
   selector: 'app-document-upload-dialog',
@@ -227,7 +228,44 @@ export class DocumentUploadDialogComponent implements OnInit, OnDestroy {
   onSave(): void {
     if (!this.form) return;
 
+    // Validate that there is at least one line item
+    if (this.lineItems.length === 0) {
+      alert(`Please add at least one line item before creating the ${this.documentType.toLowerCase()}.`);
+      return;
+    }
+
+    // Validate that at least one line item has valid data
+    const hasValidLineItem = this.lineItems.controls.some(ctrl => {
+      const description = ctrl.get('description')?.value?.trim();
+      const quantity = parseFloat(ctrl.get('quantity')?.value);
+      const rate = parseFloat(ctrl.get('rate')?.value);
+      return description && quantity > 0 && rate >= 0;
+    });
+
+    if (!hasValidLineItem) {
+      alert('Please fill in at least one complete line item with a description, quantity, and rate.');
+      return;
+    }
+
     const v = this.form.getRawValue();
+
+    // Validate due date is not before document date
+    if (v.documentDate && v.dueDate) {
+      const docDate = v.documentDate instanceof Date ? v.documentDate : new Date(v.documentDate);
+      const dueDate = v.dueDate instanceof Date ? v.dueDate : new Date(v.dueDate);
+
+      if (dueDate < docDate) {
+        alert('Due date cannot be before the document date.');
+        return;
+      }
+    }
+
+    // Validate that total is greater than 0
+    if (this.total <= 0) {
+      alert(`${this.documentType} total must be greater than $0. Please add items with valid quantities and rates.`);
+      return;
+    }
+
     const docDate: Date = v.documentDate instanceof Date ? v.documentDate : new Date();
 
     if (this.documentType === 'ESTIMATE') {
@@ -246,7 +284,19 @@ export class DocumentUploadDialogComponent implements OnInit, OnDestroy {
       };
       this.dialogRef.close({ mode: 'estimate', payload });
     } else {
-      this.notificationService.info('Invoice creation from upload coming soon');
+      const payload: CreateInvoiceInput = {
+        clientId: this.data.clientId,
+        title: (v.title ?? this.documentType).trim().substring(0, 255) || this.documentType,
+        notes: v.notes?.trim().substring(0, 2000) || undefined,
+        items: (v.lineItems ?? []).map((item: any, index: number) => ({
+          sortOrder: index,
+          service: item.service?.trim().substring(0, 500) || undefined,
+          description: (item.description ?? '').trim().substring(0, 1000),
+          quantity: parseFloat(item.quantity) || 1,
+          unitPrice: parseFloat(item.rate) || 0,
+        })),
+      };
+      this.dialogRef.close({ mode: 'invoice', payload });
     }
   }
 

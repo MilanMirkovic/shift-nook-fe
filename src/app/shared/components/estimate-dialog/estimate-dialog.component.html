@@ -35,6 +35,17 @@
           <mat-error>{{ getErrorMessage('title') }}</mat-error>
         </mat-form-field>
 
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Jobsite (optional)</mat-label>
+          <mat-select formControlName="jobsiteId" placeholder="Select a jobsite">
+            <mat-option value="">None</mat-option>
+            <mat-option *ngFor="let jobsite of jobsites$ | async" [value]="jobsite.id">
+              {{ jobsite.name }}
+              <span *ngIf="jobsite.clientName" class="jobsite-client-hint"> — {{ jobsite.clientName }}</span>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
         <div class="date-row">
           <mat-form-field appearance="outline">
             <mat-label>Estimate Date</mat-label>

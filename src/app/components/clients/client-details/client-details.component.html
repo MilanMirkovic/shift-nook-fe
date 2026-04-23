@@ -59,7 +59,7 @@
 
     <!-- Premium Tabs Navigation -->
     <div class="tabs-container">
-      <mat-tab-group class="modern-tabs" [(selectedIndex)]="selectedTabIndex" animationDuration="400ms">
+      <mat-tab-group class="modern-tabs" [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)" animationDuration="400ms">
 
         <!-- Invoices Tab -->
         <mat-tab>

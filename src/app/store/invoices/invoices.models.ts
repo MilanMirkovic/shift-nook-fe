@@ -15,6 +15,9 @@ export interface Invoice {
   companyId: string;
   clientId: string;
   estimateId: string | null;
+  jobsiteId?: string;
+  jobsiteName?: string;
+  jobsiteAddress?: string;
   invoiceNumber: string;
   title: string;
   status: InvoiceStatus;
@@ -41,12 +44,14 @@ export interface InvoiceItemInput {
 
 export interface CreateInvoiceInput {
   clientId: string;
+  jobsiteId?: string;
   title: string;
   notes?: string;
   items: InvoiceItemInput[];
 }
 
 export interface UpdateInvoiceInput {
+  jobsiteId?: string;
   title: string;
   notes?: string;
   issuedAt?: string;

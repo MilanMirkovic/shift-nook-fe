@@ -12,6 +12,9 @@ export interface Estimate {
   id: string;
   companyId: string;
   clientId: string;
+  jobsiteId?: string;
+  jobsiteName?: string;
+  jobsiteAddress?: string;
   estimateNumber: number;
   title: string;
   status: EstimateStatus;
@@ -26,6 +29,7 @@ export interface Estimate {
 
 export interface CreateEstimateInput {
   clientId: string;
+  jobsiteId?: string;
   title: string;
   notes?: string;
   estimateDate: string;
@@ -33,6 +37,7 @@ export interface CreateEstimateInput {
 }
 
 export interface UpdateEstimateInput {
+  jobsiteId?: string;
   title: string;
   notes?: string;
   estimateDate: string;

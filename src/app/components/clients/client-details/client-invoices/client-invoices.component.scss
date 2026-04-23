@@ -17,6 +17,129 @@
   button { flex-shrink: 0; }
 }
 
+// ─── Filter Indicator ─────────────────────────────────────────────────────────
+.filter-indicator {
+  margin-bottom: 1.5rem;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 8px 16px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(124, 58, 237, 0.08));
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 12px;
+  color: #2563eb;
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  strong {
+    font-weight: 600;
+    color: #1e40af;
+  }
+
+  .clear-filter-btn {
+    width: 24px;
+    height: 24px;
+    margin-left: 4px;
+
+    &.mat-mdc-icon-button {
+      --mdc-icon-button-state-layer-size: 24px;
+      --mdc-icon-button-icon-size: 16px;
+      padding: 0;
+    }
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      color: #64748b;
+    }
+
+    &:hover mat-icon {
+      color: #2563eb;
+    }
+  }
+}
+
+// ─── Search bar ───────────────────────────────────────────────────────────────
+.invoices-search {
+  margin-bottom: 1.25rem;
+}
+
+.invoices-search__wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8f9fc;
+  width: min(500px, 100%);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+
+  &:focus-within {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    background: #ffffff;
+  }
+
+  &:hover:not(:focus-within) {
+    border-color: #c7d2fe;
+    background: #ffffff;
+  }
+}
+
+.invoices-search__icon {
+  color: #94a3b8;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+
+  .invoices-search__wrap:focus-within & { color: #2563eb; }
+}
+
+.invoices-search__input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font: inherit;
+  font-size: max(0.9375rem, 16px);
+  color: #0f172a;
+
+  &::placeholder { color: #94a3b8; }
+}
+
+.invoices-search__clear {
+  width: 28px;
+  height: 28px;
+  color: #94a3b8;
+  flex-shrink: 0;
+  border-radius: 6px;
+  transition: background 0.2s ease, color 0.2s ease;
+
+  &.mat-mdc-icon-button {
+    --mdc-icon-button-state-layer-size: 28px;
+    --mdc-icon-button-icon-size: 18px;
+    padding: 0;
+  }
+
+  &:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+  }
+}
+
 .invoices-table-wrap {
   border: 1px solid #e8eaf0;
   border-radius: 14px;
@@ -135,6 +258,7 @@
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
   &.action-btn--status mat-icon { color: #0ea5e9; }
   &.action-btn--edit mat-icon   { color: #2563eb; }
+  &.action-btn--duplicate mat-icon { color: #059669; }
   &.action-btn--pdf mat-icon    { color: #7c3aed; }
   &.action-btn--delete mat-icon { color: #ef4444; }
 }

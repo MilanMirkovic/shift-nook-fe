@@ -11,10 +11,14 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Subject } from 'rxjs';
+import { MatSelectModule } from '@angular/material/select';
+import { Subject, takeUntil } from 'rxjs';
 import { CreateEstimateInput, Estimate, UpdateEstimateInput } from '../../../store/estimates/estimates.models';
+import { JobsitesStoreService } from '../../../store/jobsites/jobsites-store.service';
+import { Jobsite } from '../../../store/jobsites/jobsites.models';
 
 export interface EstimateDialogData {
+  companyId: string;
   clientId: string;
   clientName: string;
   /** When provided, the dialog operates in "edit" mode. */
@@ -41,7 +45,8 @@ export type EstimateDialogResult =
     MatNativeDateModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatSelectModule
   ],
   templateUrl: './estimate-dialog.component.html',
   styleUrls: ['./estimate-dialog.component.scss'],
@@ -51,17 +56,20 @@ export class EstimateDialogComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<EstimateDialogComponent>);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly jobsitesStore = inject(JobsitesStoreService);
   private readonly destroy$ = new Subject<void>();
 
   protected submitting = false;
   protected readonly form: FormGroup;
   protected readonly isEditMode: boolean;
+  protected jobsites$ = this.jobsitesStore.jobsites$;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: EstimateDialogData) {
     this.isEditMode = !!data.estimate;
 
     this.form = this.fb.group({
       title: [data.estimate?.title ?? '', [Validators.required, Validators.maxLength(255)]],
+      jobsiteId: [data.estimate?.jobsiteId ?? ''],
       estimateDate: [data.estimate ? new Date(data.estimate.estimateDate) : new Date(), Validators.required],
       notes: [data.estimate?.notes ?? '', Validators.maxLength(2000)],
       lineItems: this.fb.array([])
@@ -69,6 +77,9 @@ export class EstimateDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Load jobsites for the dropdown
+    this.jobsitesStore.loadJobsites(this.data.companyId, 0, 100);
+
     if (this.data.estimate && this.data.estimate.lineItems.length > 0) {
       for (const li of this.data.estimate.lineItems) {
         const item = this.fb.group({
@@ -145,6 +156,31 @@ export class EstimateDialogComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Validate that there is at least one line item
+    if (this.lineItems.length === 0) {
+      alert('Please add at least one line item before creating the estimate.');
+      return;
+    }
+
+    // Validate that at least one line item has valid data
+    const hasValidLineItem = this.lineItems.controls.some(ctrl => {
+      const description = ctrl.get('description')?.value?.trim();
+      const quantity = parseFloat(ctrl.get('quantity')?.value);
+      const rate = parseFloat(ctrl.get('rate')?.value);
+      return description && quantity > 0 && rate >= 0;
+    });
+
+    if (!hasValidLineItem) {
+      alert('Please fill in at least one complete line item with a description, quantity, and rate.');
+      return;
+    }
+
+    // Validate that total is greater than 0
+    if (this.total <= 0) {
+      alert('Estimate total must be greater than $0. Please add items with valid quantities and rates.');
+      return;
+    }
+
     const raw = this.form.getRawValue();
     const estimateDate = raw.estimateDate instanceof Date
       ? raw.estimateDate.toISOString().split('T')[0]
@@ -162,6 +198,7 @@ export class EstimateDialogComponent implements OnInit, OnDestroy {
       const result: EstimateDialogResult = {
         mode: 'edit',
         payload: {
+          jobsiteId: raw.jobsiteId || undefined,
           title: raw.title.trim(),
           notes: raw.notes?.trim() || undefined,
           estimateDate,
@@ -174,6 +211,7 @@ export class EstimateDialogComponent implements OnInit, OnDestroy {
         mode: 'create',
         payload: {
           clientId: this.data.clientId,
+          jobsiteId: raw.jobsiteId || undefined,
           title: raw.title.trim(),
           notes: raw.notes?.trim() || undefined,
           estimateDate,

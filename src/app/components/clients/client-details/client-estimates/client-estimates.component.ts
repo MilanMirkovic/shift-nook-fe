@@ -1,6 +1,6 @@
 import { Component, inject, Input, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subject, combineLatest, BehaviorSubject } from 'rxjs';
+import { Observable, Subject, combineLatest } from 'rxjs';
 import { filter, map, take, takeUntil } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 
@@ -69,34 +69,43 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   protected estimates$!: Observable<Estimate[]>;
-  protected filteredEstimates$!: Observable<Estimate[]>;
   protected estimatesLoading$!: Observable<boolean>;
   protected estimatesError$!: Observable<string | null>;
 
   protected searchQuery = '';
-  private readonly searchQuery$ = new BehaviorSubject<string>('');
+  private readonly searchQuery$ = new Subject<string>();
 
   ngOnInit(): void {
-    this.estimates$ = this.store.select(selectEstimatesByClientId(this.clientId));
+    const allEstimates$ = this.store.select(selectEstimatesByClientId(this.clientId));
+
+    // Apply search query filtering
+    this.estimates$ = combineLatest([
+      allEstimates$,
+      this.searchQuery$.pipe(takeUntil(this.destroy$))
+    ]).pipe(
+      map(([estimates, searchQuery]) => {
+        // Apply search query
+        if (searchQuery && searchQuery.trim()) {
+          const query = searchQuery.trim().toLowerCase();
+          return estimates.filter(est =>
+            est.estimateNumber.toString().includes(query) ||
+            est.title.toLowerCase().includes(query) ||
+            est.status.toLowerCase().includes(query) ||
+            est.total.toString().includes(query) ||
+            (est.jobsiteAddress && est.jobsiteAddress.toLowerCase().includes(query)) ||
+            (est.notes && est.notes.toLowerCase().includes(query))
+          );
+        }
+
+        return estimates;
+      })
+    );
+
+    // Initialize search query stream
+    this.searchQuery$.next('');
+
     this.estimatesLoading$ = this.store.select(selectEstimatesLoading);
     this.estimatesError$ = this.store.select(selectEstimatesError);
-
-    this.filteredEstimates$ = combineLatest([
-      this.estimates$,
-      this.searchQuery$,
-    ]).pipe(
-      map(([estimates, query]) => {
-        if (!query.trim()) return estimates;
-        const q = query.toLowerCase().trim();
-        return estimates.filter(e =>
-          e.title.toLowerCase().includes(q) ||
-          (e.notes && e.notes.toLowerCase().includes(q)) ||
-          String(e.estimateNumber).includes(q) ||
-          e.status.toLowerCase().includes(q) ||
-          String(e.total).includes(q)
-        );
-      }),
-    );
 
     this.store.dispatch(loadEstimates({
       companyId: this.companyId,
@@ -129,7 +138,7 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
       disableClose: false,
       autoFocus: true,
       panelClass: 'estimate-dialog-container',
-      data: { clientId: this.clientId, clientName: this.clientName },
+      data: { companyId: this.companyId, clientId: this.clientId, clientName: this.clientName },
     });
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: EstimateDialogResult | undefined) => {
@@ -161,6 +170,7 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
       autoFocus: true,
       panelClass: 'estimate-dialog-container',
       data: {
+        companyId: this.companyId,
         clientId: this.clientId,
         clientName: this.clientName,
         estimate,
@@ -190,6 +200,49 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
       });
     });
   }
+
+  protected onDuplicateEstimate(estimate: Estimate): void {
+    // Create a copy of the estimate without the id to duplicate it
+    const estimateCopy: Partial<Estimate> = {
+      ...estimate,
+      title: `${estimate.title} (Copy)`,
+      status: 'DRAFT' as const,
+    };
+    delete (estimateCopy as any).id;
+    delete (estimateCopy as any).estimateNumber;
+    delete (estimateCopy as any).createdAt;
+    delete (estimateCopy as any).updatedAt;
+    delete (estimateCopy as any).pdfFileId;
+
+    const dialogRef = this.dialog.open(EstimateDialogComponent, {
+      width: '700px',
+      maxWidth: '95vw',
+      maxHeight: '92vh',
+      disableClose: false,
+      autoFocus: true,
+      panelClass: 'estimate-dialog-container',
+      data: { companyId: this.companyId, clientId: this.clientId, clientName: this.clientName, estimate: estimateCopy as Estimate },
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: EstimateDialogResult | undefined) => {
+      if (!result || result.mode !== 'edit') return;
+      // Even though mode is 'edit', we're creating a new estimate
+      this.store.dispatch(createEstimate({ companyId: this.companyId, estimate: result.payload as any }));
+      this.actions$.pipe(
+        ofType(createEstimateSuccess, createEstimateFailure),
+        take(1),
+        takeUntil(this.destroy$),
+      ).subscribe(action => {
+        if (action.type === createEstimateSuccess.type) {
+          this.notificationService.success('Estimate duplicated successfully!');
+          this.reloadEstimates();
+        } else {
+          this.notificationService.error('Failed to duplicate estimate. Please try again.');
+        }
+      });
+    });
+  }
+
 
   protected onChangeEstimateStatus(estimate: Estimate): void {
     const dialogRef = this.dialog.open(EstimateStatusDialogComponent, {

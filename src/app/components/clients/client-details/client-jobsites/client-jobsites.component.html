@@ -70,6 +70,22 @@
     </div>
     <h3 class="jobsite-card__name">{{ jobsite.name }}</h3>
     <p class="jobsite-card__address">{{ jobsite.address }}</p>
+    <div *ngIf="hasInvoices(jobsite.id)" class="jobsite-card__invoices">
+      <div class="invoice-status-badges">
+        <ng-container *ngFor="let entry of getInvoiceStatusCounts(jobsite.id) | keyvalue">
+          <button class="invoice-status-badge"
+                  (click)="onInvoiceStatusClick($event, jobsite.id, entry.key)"
+                  [class.badge-draft]="entry.key === InvoiceStatusEnum.DRAFT"
+                  [class.badge-sent]="entry.key === InvoiceStatusEnum.SENT"
+                  [class.badge-paid]="entry.key === InvoiceStatusEnum.PAID"
+                  [class.badge-overdue]="entry.key === InvoiceStatusEnum.OVERDUE"
+                  [class.badge-void]="entry.key === InvoiceStatusEnum.VOID"
+                  matTooltip="Click to view {{ entry.key.toLowerCase() }} invoices for this jobsite">
+            {{ entry.value }} {{ entry.key }}
+          </button>
+        </ng-container>
+      </div>
+    </div>
     <div class="jobsite-card__footer" (click)="$event.stopPropagation()">
       <button *ngIf="jobsite.latitude != null && jobsite.longitude != null"
               class="card-btn card-btn--map" matTooltip="View on Google Maps"

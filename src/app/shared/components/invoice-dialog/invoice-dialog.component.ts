@@ -26,10 +26,14 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Subject } from 'rxjs';
+import { MatSelectModule } from '@angular/material/select';
+import { Subject, takeUntil } from 'rxjs';
 import { CreateInvoiceInput, Invoice, UpdateInvoiceInput } from '../../../store/invoices/invoices.models';
+import { JobsitesStoreService } from '../../../store/jobsites/jobsites-store.service';
+import { Jobsite } from '../../../store/jobsites/jobsites.models';
 
 export interface InvoiceDialogData {
+  companyId: string;
   clientId: string;
   clientName: string;
   /** When provided, the dialog operates in "edit" mode. */
@@ -57,6 +61,7 @@ export type InvoiceDialogResult =
     MatProgressSpinnerModule,
     MatIconModule,
     MatTooltipModule,
+    MatSelectModule,
   ],
   templateUrl: './invoice-dialog.component.html',
   styleUrls: ['./invoice-dialog.component.scss'],
@@ -66,11 +71,13 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<InvoiceDialogComponent>);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly jobsitesStore = inject(JobsitesStoreService);
   private readonly destroy$ = new Subject<void>();
 
   protected submitting = false;
   protected readonly form: FormGroup;
   protected readonly isEditMode: boolean;
+  protected jobsites$ = this.jobsitesStore.jobsites$;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: InvoiceDialogData) {
     this.isEditMode = !!data.invoice;
@@ -80,6 +87,7 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
         data.invoice?.title ?? '',
         [Validators.required, Validators.maxLength(255)],
       ],
+      jobsiteId: [data.invoice?.jobsiteId ?? ''],
       ...(this.isEditMode ? {
         issuedAt: [
           data.invoice ? new Date(data.invoice.issuedAt) : new Date(),
@@ -93,6 +101,9 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Load jobsites for the dropdown
+    this.jobsitesStore.loadJobsites(this.data.companyId, 0, 100);
+
     if (this.data.invoice && this.data.invoice.items.length > 0) {
       for (const item of this.data.invoice.items) {
         const group = this.fb.group({
@@ -188,7 +199,43 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Validate that there is at least one line item
+    if (this.lineItems.length === 0) {
+      alert('Please add at least one line item before creating the invoice.');
+      return;
+    }
+
+    // Validate that at least one line item has valid data
+    const hasValidLineItem = this.lineItems.controls.some(ctrl => {
+      const description = ctrl.get('description')?.value?.trim();
+      const quantity = parseFloat(ctrl.get('quantity')?.value);
+      const unitPrice = parseFloat(ctrl.get('unitPrice')?.value);
+      return description && quantity > 0 && unitPrice >= 0;
+    });
+
+    if (!hasValidLineItem) {
+      alert('Please fill in at least one complete line item with a description, quantity, and price.');
+      return;
+    }
+
     const raw = this.form.getRawValue();
+
+    // Validate due date is not before issue date (only in edit mode where we have both dates)
+    if (this.isEditMode && raw.issuedAt && raw.dueAt) {
+      const issuedDate = raw.issuedAt instanceof Date ? raw.issuedAt : new Date(raw.issuedAt);
+      const dueDate = raw.dueAt instanceof Date ? raw.dueAt : new Date(raw.dueAt);
+
+      if (dueDate < issuedDate) {
+        alert('Due date cannot be before the issue date.');
+        return;
+      }
+    }
+
+    // Validate that total is greater than 0
+    if (this.total <= 0) {
+      alert('Invoice total must be greater than $0. Please add items with valid quantities and prices.');
+      return;
+    }
 
     const items = raw.lineItems.map((item: any, i: number) => ({
       sortOrder: i,
@@ -202,6 +249,7 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
       const result: InvoiceDialogResult = {
         mode: 'edit',
         payload: {
+          jobsiteId: raw.jobsiteId || undefined,
           title: raw.title.trim(),
           notes: raw.notes?.trim() || undefined,
           issuedAt: this.formatDate(raw.issuedAt),
@@ -215,6 +263,7 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
         mode: 'create',
         payload: {
           clientId: this.data.clientId,
+          jobsiteId: raw.jobsiteId || undefined,
           title: raw.title.trim(),
           notes: raw.notes?.trim() || undefined,
           items,

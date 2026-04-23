@@ -1,4 +1,4 @@
-<ng-container *ngIf="{ invoices: invoices$ | async, loading: invoicesLoading$ | async, error: invoicesError$ | async } as vm">
+<ng-container *ngIf="{ invoices: invoices$ | async, loading: invoicesLoading$ | async, error: invoicesError$ | async, filter: activeFilter$ | async } as vm">
 
   <!-- Header -->
   <div class="invoices-header">
@@ -16,6 +16,49 @@
       <button mat-flat-button color="primary" (click)="onAddInvoice()">
         <mat-icon>add</mat-icon>
         New Invoice
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Indicator -->
+  <div *ngIf="vm.filter" class="filter-indicator">
+    <div class="filter-chip">
+      <mat-icon>filter_list</mat-icon>
+      <span>Filtered by:
+        <ng-container *ngIf="vm.filter.status">
+          <strong>{{ vm.filter.status }}</strong>
+        </ng-container>
+        <ng-container *ngIf="vm.filter.jobsiteId && vm.filter.status"> at </ng-container>
+        <ng-container *ngIf="vm.filter.jobsiteId">
+          <strong>specific jobsite</strong>
+        </ng-container>
+      </span>
+      <button mat-icon-button class="clear-filter-btn" (click)="clearFilter()" matTooltip="Clear filter">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div *ngIf="!vm.loading && !vm.error && vm.invoices && vm.invoices.length > 0" class="invoices-search">
+    <div class="invoices-search__wrap">
+      <mat-icon class="invoices-search__icon">search</mat-icon>
+      <input
+        class="invoices-search__input"
+        type="text"
+        placeholder="Search by invoice #, title, status, amount, or jobsite…"
+        [ngModel]="searchQuery"
+        (ngModelChange)="onSearchChange($event)"
+      />
+      <button
+        *ngIf="searchQuery"
+        mat-icon-button
+        type="button"
+        class="invoices-search__clear"
+        aria-label="Clear search"
+        (click)="clearSearch()"
+      >
+        <mat-icon>close</mat-icon>
       </button>
     </div>
   </div>
@@ -53,6 +96,7 @@
         <tr>
           <th class="col-num">#</th>
           <th class="col-title">Title</th>
+          <th class="col-jobsite-address">Jobsite Address</th>
           <th class="col-date">Date</th>
           <th class="col-due">Due</th>
           <th class="col-items">Items</th>
@@ -72,6 +116,7 @@
               <span *ngIf="invoice.notes" class="inv-notes">{{ invoice.notes }}</span>
             </div>
           </td>
+          <td class="col-jobsite-address">{{ invoice.jobsiteAddress}}</td>
           <td class="col-date">{{ invoice.issuedAt | date:'MMM d, yyyy' }}</td>
           <td class="col-due">{{ invoice.dueAt | date:'MMM d, yyyy' }}</td>
           <td class="col-items">{{ invoice.items.length }} item{{ invoice.items.length !== 1 ? 's' : '' }}</td>
@@ -89,6 +134,9 @@
               </button>
               <button mat-icon-button class="action-btn action-btn--edit" matTooltip="Edit invoice" (click)="onEditInvoice(invoice)">
                 <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn action-btn--duplicate" matTooltip="Duplicate invoice" (click)="onDuplicateInvoice(invoice)">
+                <mat-icon>content_copy</mat-icon>
               </button>
               <button mat-icon-button class="action-btn action-btn--pdf" matTooltip="Download PDF"
                 [disabled]="pdfDownloading.has(invoice.id)" (click)="onDownloadInvoicePdf(invoice)">

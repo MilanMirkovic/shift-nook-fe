@@ -1,4 +1,4 @@
-<ng-container *ngIf="{ estimates: estimates$ | async, filtered: filteredEstimates$ | async, loading: estimatesLoading$ | async, error: estimatesError$ | async } as vm">
+<ng-container *ngIf="{ estimates: estimates$ | async, loading: estimatesLoading$ | async, error: estimatesError$ | async } as vm">
 
   <!-- Header -->
   <div class="estimates-header">
@@ -23,11 +23,11 @@
   <!-- Search Bar -->
   <div *ngIf="!vm.loading && !vm.error && vm.estimates && vm.estimates.length > 0" class="estimates-search">
     <div class="estimates-search__wrap">
-      <mat-icon class="estimates-search__icon" aria-hidden="true">search</mat-icon>
+      <mat-icon class="estimates-search__icon">search</mat-icon>
       <input
         class="estimates-search__input"
         type="text"
-        placeholder="Search estimates by title, notes, number, or status…"
+        placeholder="Search by estimate #, title, status, amount, jobsite, or notes…"
         [ngModel]="searchQuery"
         (ngModelChange)="onSearchChange($event)"
       />
@@ -41,9 +41,6 @@
       >
         <mat-icon>close</mat-icon>
       </button>
-    </div>
-    <div class="estimates-search__count">
-      {{ vm.filtered?.length }} of {{ vm.estimates?.length }} result{{ vm.estimates?.length !== 1 ? 's' : '' }}
     </div>
   </div>
 
@@ -68,22 +65,13 @@
     </button>
   </div>
 
-  <!-- No search results -->
-  <div *ngIf="!vm.loading && !vm.error && vm.estimates && vm.estimates.length > 0 && vm.filtered?.length === 0" class="empty-state">
-    <div class="empty-state__icon"><mat-icon>search_off</mat-icon></div>
-    <h3 class="empty-state__title">No matching estimates</h3>
-    <p class="empty-state__description">Try adjusting your search query</p>
-    <button mat-flat-button (click)="clearSearch()">
-      Clear Search
-    </button>
-  </div>
-
-  <div *ngIf="!vm.loading && !vm.error && vm.filtered && vm.filtered.length > 0" class="estimates-table-wrap">
+  <div *ngIf="!vm.loading && !vm.error && vm.estimates && vm.estimates.length > 0" class="estimates-table-wrap">
     <table class="estimates-table">
       <thead>
         <tr>
           <th class="col-num">#</th>
           <th class="col-title">Title</th>
+          <th class="col-jobsite-address">Jobsite Address</th>
           <th class="col-date">Date</th>
           <th class="col-items">Items</th>
           <th class="col-total">Total</th>
@@ -92,7 +80,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let estimate of vm.filtered; trackBy: trackById" class="estimate-row">
+        <tr *ngFor="let estimate of vm.estimates; trackBy: trackById" class="estimate-row">
           <td class="col-num">
             <div class="est-num-cell">
               <span class="est-number">#{{ estimate.estimateNumber }}</span>
@@ -107,6 +95,7 @@
               <span *ngIf="estimate.notes" class="est-notes">{{ estimate.notes }}</span>
             </div>
           </td>
+          <td class="col-jobsite-address">{{ estimate.jobsiteAddress }}</td>
           <td class="col-date">{{ estimate.estimateDate | date:'MMM d, yyyy' }}</td>
           <td class="col-items">{{ estimate.lineItems.length }} item{{ estimate.lineItems.length !== 1 ? 's' : '' }}</td>
           <td class="col-total"><span class="est-total">{{ estimate.total | currency }}</span></td>
@@ -124,6 +113,9 @@
               </button>
               <button mat-icon-button class="action-btn action-btn--edit" matTooltip="Edit estimate" (click)="onEditEstimate(estimate)">
                 <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn action-btn--duplicate" matTooltip="Duplicate estimate" (click)="onDuplicateEstimate(estimate)">
+                <mat-icon>content_copy</mat-icon>
               </button>
               <button mat-icon-button class="action-btn action-btn--status" matTooltip="Change status" (click)="onChangeEstimateStatus(estimate)">
                 <mat-icon>swap_horiz</mat-icon>
@@ -144,7 +136,7 @@
       </tbody>
     </table>
     <div class="estimates-table-footer">
-      <span>{{ vm.filtered.length }} estimate{{ vm.filtered.length !== 1 ? 's' : '' }}</span>
+      <span>{{ vm.estimates.length }} estimate{{ vm.estimates.length !== 1 ? 's' : '' }}</span>
     </div>
   </div>
 

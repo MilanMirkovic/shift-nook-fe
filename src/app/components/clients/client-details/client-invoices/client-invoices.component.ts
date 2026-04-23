@@ -1,10 +1,11 @@
 import { Component, inject, Input, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subject } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
+import { Observable, Subject, combineLatest } from 'rxjs';
+import { take, takeUntil, map } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 
 import { AsyncPipe, CurrencyPipe, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -39,6 +40,7 @@ import {
   InvoiceStatusDialogComponent,
   InvoiceStatusDialogData,
 } from '../../../../shared/components/invoice-status-dialog/invoice-status-dialog.component';
+import { ClientDetailsNavigationService } from '../client-details-navigation.service';
 
 @Component({
   selector: 'app-client-invoices',
@@ -52,6 +54,7 @@ import {
     NgIf,
     NgFor,
     NgClass,
+    FormsModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
@@ -69,16 +72,60 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
   private readonly notificationService = inject(NotificationService);
   private readonly invoicesApi = inject(InvoicesApiService);
   private readonly actions$ = inject(Actions);
+  private readonly navigationService = inject(ClientDetailsNavigationService);
   private readonly destroy$ = new Subject<void>();
 
   protected invoices$!: Observable<Invoice[]>;
   protected invoicesLoading$!: Observable<boolean>;
   protected invoicesError$!: Observable<string | null>;
+  protected activeFilter$ = this.navigationService.invoiceFilter$;
+  protected searchQuery = '';
+  private readonly searchQuery$ = new Subject<string>();
 
   protected pdfDownloading = new Set<string>();
 
   ngOnInit(): void {
-    this.invoices$ = this.store.select(selectInvoicesByClientId(this.clientId));
+    const allInvoices$ = this.store.select(selectInvoicesByClientId(this.clientId));
+
+    // Apply filtering based on navigation service filter and search query
+    this.invoices$ = combineLatest([
+      allInvoices$,
+      this.navigationService.invoiceFilter$,
+      this.searchQuery$.pipe(takeUntil(this.destroy$))
+    ]).pipe(
+      map(([invoices, filter, searchQuery]) => {
+        let filtered = invoices;
+
+        // Apply navigation filter (from jobsite badges)
+        if (filter) {
+          if (filter.jobsiteId) {
+            filtered = filtered.filter(inv => inv.jobsiteId === filter.jobsiteId);
+          }
+          if (filter.status) {
+            filtered = filtered.filter(inv => inv.status === filter.status);
+          }
+        }
+
+        // Apply search query
+        if (searchQuery && searchQuery.trim()) {
+          const query = searchQuery.trim().toLowerCase();
+          filtered = filtered.filter(inv =>
+            inv.invoiceNumber.toLowerCase().includes(query) ||
+            inv.title.toLowerCase().includes(query) ||
+            inv.status.toLowerCase().includes(query) ||
+            inv.totalAmount.toString().includes(query) ||
+            (inv.jobsiteName && inv.jobsiteName.toLowerCase().includes(query)) ||
+            (inv.notes && inv.notes.toLowerCase().includes(query))
+          );
+        }
+
+        return filtered;
+      })
+    );
+
+    // Initialize search query stream
+    this.searchQuery$.next('');
+
     this.invoicesLoading$ = this.store.select(selectInvoicesLoading);
     this.invoicesError$ = this.store.select(selectInvoicesError);
 
@@ -103,7 +150,7 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
       disableClose: false,
       autoFocus: true,
       panelClass: 'invoice-dialog-container',
-      data: { clientId: this.clientId, clientName: this.clientName },
+      data: { companyId: this.companyId, clientId: this.clientId, clientName: this.clientName },
     });
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: InvoiceDialogResult | undefined) => {
@@ -143,7 +190,24 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: DocumentUploadDialogResult | undefined) => {
       if (!result) return;
-      this.notificationService.info('Invoice upload coming soon!');
+
+      if (result.mode === 'invoice') {
+        this.store.dispatch(createInvoice({ companyId: this.companyId, invoice: result.payload }));
+        this.actions$.pipe(
+          ofType(createInvoiceSuccess, createInvoiceFailure),
+          take(1),
+          takeUntil(this.destroy$),
+        ).subscribe(action => {
+          if (action.type === createInvoiceSuccess.type) {
+            this.notificationService.success('Invoice created successfully from PDF!');
+            this.store.dispatch(loadInvoices({ companyId: this.companyId, clientId: this.clientId, page: 0, size: 100 }));
+          } else {
+            this.notificationService.error('Failed to create invoice. Please try again.');
+          }
+        });
+      } else {
+        this.notificationService.info('Only invoice documents are supported in this view.');
+      }
     });
   }
 
@@ -155,7 +219,7 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
       disableClose: false,
       autoFocus: true,
       panelClass: 'invoice-dialog-container',
-      data: { clientId: this.clientId, clientName: this.clientName, invoice },
+      data: { companyId: this.companyId, clientId: this.clientId, clientName: this.clientName, invoice },
     });
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: InvoiceDialogResult | undefined) => {
@@ -170,6 +234,48 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
           this.notificationService.success('Invoice updated successfully!');
         } else {
           this.notificationService.error('Failed to update invoice. Please try again.');
+        }
+      });
+    });
+  }
+
+  protected onDuplicateInvoice(invoice: Invoice): void {
+    // Create a copy of the invoice without the id to duplicate it
+    const invoiceCopy: Partial<Invoice> = {
+      ...invoice,
+      title: `${invoice.title} (Copy)`,
+      status: 'DRAFT' as const,
+    };
+    delete (invoiceCopy as any).id;
+    delete (invoiceCopy as any).invoiceNumber;
+    delete (invoiceCopy as any).createdAt;
+    delete (invoiceCopy as any).updatedAt;
+    delete (invoiceCopy as any).pdfFileId;
+
+    const dialogRef = this.dialog.open(InvoiceDialogComponent, {
+      width: '700px',
+      maxWidth: '95vw',
+      maxHeight: '92vh',
+      disableClose: false,
+      autoFocus: true,
+      panelClass: 'invoice-dialog-container',
+      data: { companyId: this.companyId, clientId: this.clientId, clientName: this.clientName, invoice: invoiceCopy as Invoice },
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: InvoiceDialogResult | undefined) => {
+      if (!result || result.mode !== 'edit') return;
+      // Even though mode is 'edit', we're creating a new invoice
+      this.store.dispatch(createInvoice({ companyId: this.companyId, invoice: result.payload as any }));
+      this.actions$.pipe(
+        ofType(createInvoiceSuccess, createInvoiceFailure),
+        take(1),
+        takeUntil(this.destroy$),
+      ).subscribe(action => {
+        if (action.type === createInvoiceSuccess.type) {
+          this.notificationService.success('Invoice duplicated successfully!');
+          this.store.dispatch(loadInvoices({ companyId: this.companyId, clientId: this.clientId, page: 0, size: 100 }));
+        } else {
+          this.notificationService.error('Failed to duplicate invoice. Please try again.');
         }
       });
     });
@@ -277,5 +383,19 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
 
   protected trackById(_index: number, item: Invoice): string {
     return item.id;
+  }
+
+  protected clearFilter(): void {
+    this.navigationService.clearInvoiceFilter();
+  }
+
+  protected onSearchChange(query: string): void {
+    this.searchQuery = query;
+    this.searchQuery$.next(query);
+  }
+
+  protected clearSearch(): void {
+    this.searchQuery = '';
+    this.searchQuery$.next('');
   }
 }

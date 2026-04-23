@@ -20,11 +20,14 @@ import { ClientActivityComponent } from './client-activity/client-activity.compo
 import { ClientInvoicesComponent } from './client-invoices/client-invoices.component';
 import { ClientDetailsInfoComponent } from './client-details-info/client-details-info.component';
 import { EditClientDialogComponent, EditClientDialogData } from './edit-client-dialog/edit-client-dialog.component';
+import { ClientDetailsNavigationService } from './client-details-navigation.service';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-client-details',
   standalone: true,
   templateUrl: './client-details.component.html',
+  providers: [ClientDetailsNavigationService],
   imports: [
     AsyncPipe,
     DatePipe,
@@ -46,6 +49,7 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
+  private readonly navigationService = inject(ClientDetailsNavigationService);
   private readonly destroy$ = new Subject<void>();
 
   private readonly clientSubject$ = new BehaviorSubject<Client | null>(null);
@@ -77,6 +81,17 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
         this.currentCompanyId = companyId;
         this.store.dispatch(loadClientById({ companyId, clientId }));
       });
+
+    // Subscribe to tab navigation from child components
+    this.navigationService.selectedTabIndex$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(index => {
+        this.selectedTabIndex = index;
+      });
+  }
+
+  protected onTabChange(index: number): void {
+    this.navigationService.setTabIndex(index);
   }
 
   ngOnDestroy(): void {

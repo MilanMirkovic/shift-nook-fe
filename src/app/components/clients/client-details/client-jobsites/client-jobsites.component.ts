@@ -4,7 +4,7 @@ import { take, takeUntil } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf, KeyValuePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,9 +20,18 @@ import {
   updateJobsite, updateJobsiteFailure, updateJobsiteSuccess,
 } from '../../../../store/jobsites/jobsites.actions';
 import { ApiService } from '../../../../api/api.service';
+import { InvoicesApiService } from '../../../../store/invoices/invoices.api';
+import { Invoice, InvoiceStatus } from '../../../../store/invoices/invoices.models';
+import {
+  updateInvoiceStatusSuccess,
+  updateInvoiceSuccess,
+  createInvoiceSuccess,
+  deleteInvoiceSuccess,
+} from '../../../../store/invoices/invoices.actions';
 import { JobsiteDialogComponent } from '../../../../shared/components/jobsite-dialog/jobsite-dialog.component';
 import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { NotificationService } from '../../../../shared/services/notification.service';
+import { ClientDetailsNavigationService } from '../client-details-navigation.service';
 
 @Component({
   selector: 'app-client-jobsites',
@@ -33,6 +42,7 @@ import { NotificationService } from '../../../../shared/services/notification.se
     FormsModule,
     NgIf,
     NgFor,
+    KeyValuePipe,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
@@ -48,8 +58,10 @@ export class ClientJobsitesComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly dialog = inject(MatDialog);
   private readonly apiService = inject(ApiService);
+  private readonly invoicesApi = inject(InvoicesApiService);
   private readonly notificationService = inject(NotificationService);
   private readonly actions$ = inject(Actions);
+  private readonly navigationService = inject(ClientDetailsNavigationService);
   private readonly destroy$ = new Subject<void>();
 
   protected jobsites: Jobsite[] = [];
@@ -58,9 +70,11 @@ export class ClientJobsitesComponent implements OnInit, OnDestroy {
   protected jobsitesError: string | null = null;
   protected totalJobsites = 0;
   protected searchQuery = '';
+  protected jobsiteInvoices: Map<string, Invoice[]> = new Map();
 
   ngOnInit(): void {
     this.loadJobsites();
+    this.subscribeToInvoiceUpdates();
   }
 
   ngOnDestroy(): void {
@@ -212,10 +226,48 @@ export class ClientJobsitesComponent implements OnInit, OnDestroy {
           this.totalJobsites = response.totalElements;
           this.jobsitesLoading = false;
           this.filterJobsites();
+          this.loadInvoicesForJobsites();
         },
         error: () => {
           this.jobsitesError = 'Failed to load jobsites';
           this.jobsitesLoading = false;
+        },
+      });
+  }
+
+  private subscribeToInvoiceUpdates(): void {
+    // Listen for invoice changes and reload jobsite invoices
+    this.actions$.pipe(
+      ofType(
+        updateInvoiceStatusSuccess,
+        updateInvoiceSuccess,
+        createInvoiceSuccess,
+        deleteInvoiceSuccess
+      ),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.loadInvoicesForJobsites();
+    });
+  }
+
+  private loadInvoicesForJobsites(): void {
+    // Load all invoices for this client
+    this.invoicesApi.loadInvoices(this.companyId, 0, 1000, undefined, this.clientId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          // Group invoices by jobsiteId
+          this.jobsiteInvoices.clear();
+          response.content.forEach(invoice => {
+            if (invoice.jobsiteId) {
+              const existing = this.jobsiteInvoices.get(invoice.jobsiteId) || [];
+              existing.push(invoice);
+              this.jobsiteInvoices.set(invoice.jobsiteId, existing);
+            }
+          });
+        },
+        error: () => {
+          // Silently fail - invoices are optional information
         },
       });
   }
@@ -233,5 +285,40 @@ export class ClientJobsitesComponent implements OnInit, OnDestroy {
 
   protected trackById(index: number, item: Jobsite): string {
     return item.id;
+  }
+
+  protected getJobsiteInvoices(jobsiteId: string): Invoice[] {
+    return this.jobsiteInvoices.get(jobsiteId) || [];
+  }
+
+  protected hasInvoices(jobsiteId: string): boolean {
+    const invoices = this.jobsiteInvoices.get(jobsiteId);
+    return invoices !== undefined && invoices.length > 0;
+  }
+
+  protected getInvoiceStatusCounts(jobsiteId: string): Map<InvoiceStatus, number> {
+    const invoices = this.getJobsiteInvoices(jobsiteId);
+    const counts = new Map<InvoiceStatus, number>();
+
+    invoices.forEach(invoice => {
+      const currentCount = counts.get(invoice.status) || 0;
+      counts.set(invoice.status, currentCount + 1);
+    });
+
+    return counts;
+  }
+
+  protected readonly InvoiceStatusEnum = {
+    DRAFT: 'DRAFT' as const,
+    SENT: 'SENT' as const,
+    PAID: 'PAID' as const,
+    OVERDUE: 'OVERDUE' as const,
+    VOID: 'VOID' as const,
+  };
+
+  protected onInvoiceStatusClick(event: Event, jobsiteId: string, status: InvoiceStatus): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.navigationService.navigateToInvoicesTab({ jobsiteId, status });
   }
 }
