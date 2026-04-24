@@ -1,0 +1,184 @@
+<app-page-layout
+  title="Financial Dashboard"
+  subtitle="Overview of invoices, estimates, and revenue"
+>
+  <ng-container *ngIf="stats$ | async as stats">
+    <!-- Key Financial Metrics -->
+    <div class="financial-stats-grid">
+      <!-- Total Revenue Card -->
+      <div class="financial-stat-card revenue-card">
+        <div class="stat-header">
+          <mat-icon>payments</mat-icon>
+          <span class="stat-label">Total Revenue (Paid)</span>
+        </div>
+        <div class="stat-value">{{ stats.totalRevenue | currency }}</div>
+        <div class="stat-detail">{{ stats.paidInvoices }} paid invoice{{ stats.paidInvoices !== 1 ? 's' : '' }}</div>
+      </div>
+
+      <!-- Unpaid Invoices Card -->
+      <div class="financial-stat-card unpaid-card">
+        <div class="stat-header">
+          <mat-icon>schedule</mat-icon>
+          <span class="stat-label">Pending</span>
+        </div>
+        <div class="stat-value">{{ stats.unpaidInvoices }}</div>
+        <div class="stat-detail">Unpaid invoice{{ stats.unpaidInvoices !== 1 ? 's' : '' }}</div>
+      </div>
+
+      <!-- Overdue Invoices Card -->
+      <div class="financial-stat-card overdue-card">
+        <div class="stat-header">
+          <mat-icon>warning</mat-icon>
+          <span class="stat-label">Overdue</span>
+        </div>
+        <div class="stat-value">{{ stats.overdueInvoices }}</div>
+        <div class="stat-detail">Overdue invoice{{ stats.overdueInvoices !== 1 ? 's' : '' }}</div>
+      </div>
+
+      <!-- Accepted Estimates Card -->
+      <div class="financial-stat-card estimates-card">
+        <div class="stat-header">
+          <mat-icon>request_quote</mat-icon>
+          <span class="stat-label">Potential Revenue</span>
+        </div>
+        <div class="stat-value">{{ stats.totalEstimatedValue | currency }}</div>
+        <div class="stat-detail">{{ stats.acceptedEstimates }} accepted estimate{{ stats.acceptedEstimates !== 1 ? 's' : '' }}</div>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-section">
+      <div class="sn-card summary-card">
+        <div class="summary-card-header">
+          <mat-icon>receipt_long</mat-icon>
+          <h3>Invoices Summary</h3>
+        </div>
+        <div class="summary-card-body">
+          <div class="summary-row">
+            <span class="summary-label">Total Invoices</span>
+            <span class="summary-value">{{ stats.totalInvoicesCount }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Paid</span>
+            <span class="summary-value success">{{ stats.paidInvoices }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Sent (Unpaid)</span>
+            <span class="summary-value warning">{{ stats.unpaidInvoices }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Overdue</span>
+            <span class="summary-value danger">{{ stats.overdueInvoices }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Draft</span>
+            <span class="summary-value muted">{{ stats.draftInvoices }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Void</span>
+            <span class="summary-value muted">{{ stats.voidInvoices }}</span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-row">
+            <span class="summary-label">Average Invoice Amount</span>
+            <span class="summary-value">{{ stats.averageInvoiceAmount | currency }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sn-card summary-card">
+        <div class="summary-card-header">
+          <mat-icon>request_quote</mat-icon>
+          <h3>Estimates Summary</h3>
+        </div>
+        <div class="summary-card-body">
+          <div class="summary-row">
+            <span class="summary-label">Total Estimates</span>
+            <span class="summary-value">{{ stats.totalEstimatesCount }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Accepted</span>
+            <span class="summary-value success">{{ stats.acceptedEstimates }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Pending</span>
+            <span class="summary-value warning">{{ stats.pendingEstimates }}</span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-row">
+            <span class="summary-label">Total Estimated Value</span>
+            <span class="summary-value">{{ stats.totalEstimatedValue | currency }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Average Estimate Amount</span>
+            <span class="summary-value">{{ stats.averageEstimateAmount | currency }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overdue Invoices Alert Section -->
+    <div class="alert-section" *ngIf="(overdueInvoices$ | async) as overdueInvoices">
+      <div class="sn-card alert-card" *ngIf="overdueInvoices.length > 0">
+        <div class="alert-card-header">
+          <mat-icon>warning</mat-icon>
+          <h3>Overdue Invoices ({{ overdueInvoices.length }})</h3>
+        </div>
+        <div class="alert-card-body">
+          <div class="overdue-table">
+            <div class="overdue-row" *ngFor="let invoice of overdueInvoices; trackBy: trackById">
+              <div class="overdue-info">
+                <span class="invoice-number">#{{ invoice.invoiceNumber }}</span>
+                <span class="invoice-title">{{ invoice.title }}</span>
+                <span class="invoice-due">Due: {{ invoice.dueAt | date:'MMM d, yyyy' }}</span>
+              </div>
+              <div class="overdue-amount">
+                <span class="amount">{{ invoice.totalAmount | currency }}</span>
+                <button mat-icon-button matTooltip="View Invoice" (click)="navigateToInvoice(invoice)">
+                  <mat-icon>arrow_forward</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Invoices Section -->
+    <div class="recent-section" *ngIf="(recentInvoices$ | async) as recentInvoices">
+      <div class="sn-card recent-card">
+        <div class="recent-card-header">
+          <mat-icon>history</mat-icon>
+          <h3>Recent Invoices</h3>
+          <a routerLink="/clients" class="view-all-link">View All</a>
+        </div>
+        <div class="recent-card-body">
+          <div class="empty-state" *ngIf="recentInvoices.length === 0">
+            <mat-icon>receipt_long</mat-icon>
+            <p>No invoices yet</p>
+          </div>
+          <div class="invoices-list" *ngIf="recentInvoices.length > 0">
+            <div class="invoice-item" *ngFor="let invoice of recentInvoices; trackBy: trackById" (click)="navigateToInvoice(invoice)">
+              <div class="invoice-item-info">
+                <span class="invoice-number">#{{ invoice.invoiceNumber }}</span>
+                <span class="invoice-title">{{ invoice.title }}</span>
+                <span class="invoice-date">{{ invoice.issuedAt | date:'MMM d, yyyy' }}</span>
+              </div>
+              <div class="invoice-item-right">
+                <span class="invoice-amount">{{ invoice.totalAmount | currency }}</span>
+                <span class="invoice-status" [ngClass]="getInvoiceStatusClass(invoice.status)">
+                  {{ invoice.status }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <div class="loading-state" *ngIf="loading$ | async">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading financial data...</p>
+  </div>
+</app-page-layout>

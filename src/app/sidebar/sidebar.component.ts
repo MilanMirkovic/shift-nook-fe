@@ -44,6 +44,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   protected canSeeWorkers = true; // Only show Workers menu if user is not a WORKER
   protected canSeeClients = false; // Only show Clients menu for OWNER and ACCOUNTANT
   protected canSeeDashboard = false; // Only show Dashboard for OWNER and ACCOUNTANT
+  protected canSeeFinancials = false; // Only show Financials for OWNER and ACCOUNTANT
   protected isWorker = false; // Show Check In button only for WORKER role
   protected isAuthenticated = false;
   protected canSeeSubcontractors = false;   // OWNER or ADMIN of a company
@@ -113,6 +114,19 @@ export class SidebarComponent implements OnInit, OnDestroy {
       )
       .subscribe(canSee => {
         this.canSeeDashboard = canSee;
+      });
+
+    // Determine if user can see Financials (only OWNER and ACCOUNTANT)
+    this.userStore.currentCompany$
+      .pipe(
+        map(company => {
+          if (!company) return false;
+          return company.role === CompanyRole.OWNER || company.role === CompanyRole.ACCOUNTANT;
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(canSee => {
+        this.canSeeFinancials = canSee;
       });
 
     // Subcontractors tab — OWNER or ADMIN of current company

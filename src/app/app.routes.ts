@@ -219,6 +219,18 @@ export const routes: Routes = [
       import('./components/clients/clients.module').then((m) => m.ClientsModule),
   },
   {
+    path: 'financials',
+    canActivate: [authGuard, roleGuard(CompanyRole.ACCOUNTANT)],
+    data: { preload: true },
+    providers: [
+      provideState(INVOICES_FEATURE_KEY, invoicesReducer),
+      provideState(ESTIMATES_FEATURE_KEY, estimatesReducer),
+      provideEffects(InvoicesEffects, EstimatesEffects),
+    ],
+    loadComponent: () =>
+      import('./components/financials/financials.component').then((m) => m.FinancialsComponent),
+  },
+  {
     path: 'notifications',
     canActivate: [authGuard],
     data: { preload: true },

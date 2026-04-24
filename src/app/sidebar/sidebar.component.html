@@ -64,6 +64,12 @@
           <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Jobsites</span>
         </a>
       }
+      @if (canSeeFinancials) {
+        <a mat-list-item routerLink="/financials" routerLinkActive="active" (click)="onLinkClicked()">
+          <mat-icon matListItemIcon>account_balance_wallet</mat-icon>
+          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Financials</span>
+        </a>
+      }
       @if (canSeeWorkTime) {
         <a mat-list-item routerLink="/work-time" routerLinkActive="active" (click)="onLinkClicked()">
           <mat-icon matListItemIcon>schedule</mat-icon>
