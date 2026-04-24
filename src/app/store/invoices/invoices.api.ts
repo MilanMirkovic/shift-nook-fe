@@ -8,6 +8,8 @@ import {
   CreateInvoiceInput,
   UpdateInvoiceInput,
   UpdateInvoiceStatusInput,
+  Payment,
+  CreatePaymentInput,
 } from './invoices.models';
 
 @Injectable({ providedIn: 'root' })
@@ -86,6 +88,26 @@ export class InvoicesApiService {
   getPdfUrl(companyId: string, invoiceId: string): Observable<{ url: string }> {
     return this.http.get<{ url: string }>(
       `${this.apiUrl}/companies/${companyId}/invoices/${invoiceId}/pdf/url`
+    );
+  }
+
+  // Payment methods
+  createPayment(companyId: string, invoiceId: string, payment: CreatePaymentInput): Observable<Payment> {
+    return this.http.post<Payment>(
+      `${this.apiUrl}/companies/${companyId}/invoices/${invoiceId}/payments`,
+      payment
+    );
+  }
+
+  listPayments(companyId: string, invoiceId: string): Observable<Payment[]> {
+    return this.http.get<Payment[]>(
+      `${this.apiUrl}/companies/${companyId}/invoices/${invoiceId}/payments`
+    );
+  }
+
+  deletePayment(companyId: string, paymentId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/companies/${companyId}/invoices/payments/${paymentId}`
     );
   }
 }

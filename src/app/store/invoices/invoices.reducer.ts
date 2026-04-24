@@ -86,4 +86,67 @@ export const invoicesReducer = createReducer(
   on(InvoicesActions.getInvoicePdfUrl, (state) => ({ ...state, loading: true, error: null })),
   on(InvoicesActions.getInvoicePdfUrlSuccess, (state) => ({ ...state, loading: false, error: null })),
   on(InvoicesActions.getInvoicePdfUrlFailure, (state, { error }) => ({ ...state, loading: false, error })),
+
+  // Create payment
+  on(InvoicesActions.createPayment, (state) => ({ ...state, error: null })),
+  on(InvoicesActions.createPaymentSuccess, (state, { payment, invoiceId }) => ({
+    ...state,
+    invoices: state.invoices.map(inv =>
+      inv.id === invoiceId
+        ? {
+            ...inv,
+            payments: [...inv.payments, payment],
+            paidAmount: inv.paidAmount + payment.amount,
+            remainingAmount: inv.remainingAmount - payment.amount,
+            paymentPercentage: Math.round(((inv.paidAmount + payment.amount) / inv.totalAmount) * 100),
+          }
+        : inv
+    ),
+    selectedInvoice: state.selectedInvoice?.id === invoiceId
+      ? {
+          ...state.selectedInvoice,
+          payments: [...state.selectedInvoice.payments, payment],
+          paidAmount: state.selectedInvoice.paidAmount + payment.amount,
+          remainingAmount: state.selectedInvoice.remainingAmount - payment.amount,
+          paymentPercentage: Math.round(((state.selectedInvoice.paidAmount + payment.amount) / state.selectedInvoice.totalAmount) * 100),
+        }
+      : state.selectedInvoice,
+    error: null,
+  })),
+  on(InvoicesActions.createPaymentFailure, (state, { error }) => ({ ...state, error })),
+
+  // Delete payment
+  on(InvoicesActions.deletePayment, (state) => ({ ...state, error: null })),
+  on(InvoicesActions.deletePaymentSuccess, (state, { paymentId, invoiceId }) => ({
+    ...state,
+    invoices: state.invoices.map(inv => {
+      if (inv.id !== invoiceId) return inv;
+      const deletedPayment = inv.payments.find(p => p.id === paymentId);
+      if (!deletedPayment) return inv;
+      const newPaidAmount = inv.paidAmount - deletedPayment.amount;
+      return {
+        ...inv,
+        payments: inv.payments.filter(p => p.id !== paymentId),
+        paidAmount: newPaidAmount,
+        remainingAmount: inv.totalAmount - newPaidAmount,
+        paymentPercentage: Math.round((newPaidAmount / inv.totalAmount) * 100),
+      };
+    }),
+    selectedInvoice: state.selectedInvoice?.id === invoiceId
+      ? (() => {
+          const deletedPayment = state.selectedInvoice.payments.find(p => p.id === paymentId);
+          if (!deletedPayment) return state.selectedInvoice;
+          const newPaidAmount = state.selectedInvoice.paidAmount - deletedPayment.amount;
+          return {
+            ...state.selectedInvoice,
+            payments: state.selectedInvoice.payments.filter(p => p.id !== paymentId),
+            paidAmount: newPaidAmount,
+            remainingAmount: state.selectedInvoice.totalAmount - newPaidAmount,
+            paymentPercentage: Math.round((newPaidAmount / state.selectedInvoice.totalAmount) * 100),
+          };
+        })()
+      : state.selectedInvoice,
+    error: null,
+  })),
+  on(InvoicesActions.deletePaymentFailure, (state, { error }) => ({ ...state, error })),
 );

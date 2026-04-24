@@ -123,4 +123,28 @@ export class InvoicesEffects {
       )
     )
   );
+
+  createPayment$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(InvoicesActions.createPayment),
+      switchMap(({ companyId, invoiceId, payment }) =>
+        this.invoicesApi.createPayment(companyId, invoiceId, payment).pipe(
+          map((created) => InvoicesActions.createPaymentSuccess({ payment: created, invoiceId })),
+          catchError((error) => of(InvoicesActions.createPaymentFailure({ error: error?.message || 'Failed to create payment' })))
+        )
+      )
+    )
+  );
+
+  deletePayment$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(InvoicesActions.deletePayment),
+      switchMap(({ companyId, paymentId, invoiceId }) =>
+        this.invoicesApi.deletePayment(companyId, paymentId).pipe(
+          map(() => InvoicesActions.deletePaymentSuccess({ paymentId, invoiceId })),
+          catchError((error) => of(InvoicesActions.deletePaymentFailure({ error: error?.message || 'Failed to delete payment' })))
+        )
+      )
+    )
+  );
 }

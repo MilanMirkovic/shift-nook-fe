@@ -1,5 +1,30 @@
 export type InvoiceStatus = 'DRAFT' | 'SENT' | 'PAID' | 'OVERDUE' | 'VOID';
 
+export type PaymentMethod =
+  | 'CASH'
+  | 'CHECK'
+  | 'CREDIT_CARD'
+  | 'DEBIT_CARD'
+  | 'BANK_TRANSFER'
+  | 'ACH'
+  | 'WIRE_TRANSFER'
+  | 'PAYPAL'
+  | 'VENMO'
+  | 'ZELLE'
+  | 'OTHER';
+
+export interface Payment {
+  id: string;
+  invoiceId: string;
+  amount: number;
+  paymentDate: string;
+  paymentMethod: PaymentMethod;
+  referenceNumber?: string;
+  notes?: string;
+  createdAt: string;
+  createdBy: string;
+}
+
 export interface InvoiceItem {
   id: string;
   sortOrder: number;
@@ -25,10 +50,14 @@ export interface Invoice {
   subtotalAmount: number;
   taxAmount: number;
   totalAmount: number;
+  paidAmount: number;
+  remainingAmount: number;
+  paymentPercentage: number;
   notes: string | null;
   issuedAt: string;
   dueAt: string;
   items: InvoiceItem[];
+  payments: Payment[];
   createdAt: string;
   updatedAt: string;
   pdfFileId: string | null;
@@ -61,6 +90,14 @@ export interface UpdateInvoiceInput {
 
 export interface UpdateInvoiceStatusInput {
   status: InvoiceStatus;
+}
+
+export interface CreatePaymentInput {
+  amount: number;
+  paymentDate: string;
+  paymentMethod: PaymentMethod;
+  referenceNumber?: string;
+  notes?: string;
 }
 
 export interface InvoicesPageResponse {

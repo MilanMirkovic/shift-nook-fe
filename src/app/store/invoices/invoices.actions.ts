@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Invoice, CreateInvoiceInput, UpdateInvoiceInput, UpdateInvoiceStatusInput } from './invoices.models';
+import { Invoice, CreateInvoiceInput, UpdateInvoiceInput, UpdateInvoiceStatusInput, Payment, CreatePaymentInput } from './invoices.models';
 
 // Create invoice
 export const createInvoice = createAction(
@@ -124,5 +124,32 @@ export const getInvoicePdfUrlSuccess = createAction(
 );
 export const getInvoicePdfUrlFailure = createAction(
   '[Invoices] Get Invoice PDF URL Failure',
+  props<{ error: string }>()
+);
+
+// Payment actions
+export const createPayment = createAction(
+  '[Invoices] Create Payment',
+  props<{ companyId: string; invoiceId: string; payment: CreatePaymentInput }>()
+);
+export const createPaymentSuccess = createAction(
+  '[Invoices] Create Payment Success',
+  props<{ payment: Payment; invoiceId: string }>()
+);
+export const createPaymentFailure = createAction(
+  '[Invoices] Create Payment Failure',
+  props<{ error: string }>()
+);
+
+export const deletePayment = createAction(
+  '[Invoices] Delete Payment',
+  props<{ companyId: string; paymentId: string; invoiceId: string }>()
+);
+export const deletePaymentSuccess = createAction(
+  '[Invoices] Delete Payment Success',
+  props<{ paymentId: string; invoiceId: string }>()
+);
+export const deletePaymentFailure = createAction(
+  '[Invoices] Delete Payment Failure',
   props<{ error: string }>()
 );
