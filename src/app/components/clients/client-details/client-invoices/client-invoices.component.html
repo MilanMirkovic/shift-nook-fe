@@ -39,6 +39,51 @@
     </div>
   </div>
 
+  <!-- Financial Summary -->
+  <div *ngIf="!vm.loading && !vm.error && vm.invoices && vm.invoices.length > 0" class="financial-summary">
+    <ng-container *ngIf="invoiceSummary$ | async as summary">
+      <div class="summary-card summary-card--total">
+        <div class="summary-icon">
+          <mat-icon>receipt_long</mat-icon>
+        </div>
+        <div class="summary-content">
+          <div class="summary-label">Total Value</div>
+          <div class="summary-value">{{ summary.totalValue | currency }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card summary-card--paid">
+        <div class="summary-icon">
+          <mat-icon>paid</mat-icon>
+        </div>
+        <div class="summary-content">
+          <div class="summary-label">Total Paid</div>
+          <div class="summary-value">{{ summary.totalPaid | currency }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card summary-card--unpaid" [class.summary-card--warning]="summary.totalUnpaid > 0">
+        <div class="summary-icon">
+          <mat-icon>schedule</mat-icon>
+        </div>
+        <div class="summary-content">
+          <div class="summary-label">Unpaid</div>
+          <div class="summary-value">{{ summary.totalUnpaid | currency }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card summary-card--overdue" [class.summary-card--danger]="summary.overdueAmount > 0">
+        <div class="summary-icon">
+          <mat-icon>warning</mat-icon>
+        </div>
+        <div class="summary-content">
+          <div class="summary-label">Overdue</div>
+          <div class="summary-value">{{ summary.overdueAmount | currency }}</div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
   <!-- Search Bar -->
   <div *ngIf="!vm.loading && !vm.error && vm.invoices && vm.invoices.length > 0" class="invoices-search">
     <div class="invoices-search__wrap">
@@ -101,6 +146,7 @@
           <th class="col-due">Due</th>
           <th class="col-items">Items</th>
           <th class="col-total">Total</th>
+          <th class="col-payment">Payment</th>
           <th class="col-status">Status</th>
           <th class="col-actions"></th>
         </tr>
@@ -120,7 +166,29 @@
           <td class="col-date">{{ invoice.issuedAt | date:'MMM d, yyyy' }}</td>
           <td class="col-due">{{ invoice.dueAt | date:'MMM d, yyyy' }}</td>
           <td class="col-items">{{ invoice.items.length }} item{{ invoice.items.length !== 1 ? 's' : '' }}</td>
-          <td class="col-total"><span class="inv-total">{{ invoice.totalAmount | currency }}</span></td>
+          <td class="col-total">
+            <div class="total-cell">
+              <span class="inv-total">{{ invoice.totalAmount | currency }}</span>
+              <span class="inv-paid" *ngIf="invoice.paidAmount > 0">Paid: {{ invoice.paidAmount | currency }}</span>
+            </div>
+          </td>
+          <td class="col-payment">
+            <div class="payment-progress">
+              <div class="progress-bar-container">
+                <div class="progress-bar" [style.width.%]="invoice.paymentPercentage">
+                  <span class="progress-text" *ngIf="invoice.paymentPercentage > 0">{{ invoice.paymentPercentage }}%</span>
+                </div>
+              </div>
+              <div class="payment-info">
+                <span class="remaining-amount" *ngIf="invoice.remainingAmount > 0">
+                  {{ invoice.remainingAmount | currency }} remaining
+                </span>
+                <span class="fully-paid" *ngIf="invoice.paymentPercentage === 100">
+                  Fully Paid
+                </span>
+              </div>
+            </div>
+          </td>
           <td class="col-status">
             <span class="invoice-status-badge" [ngClass]="getInvoiceStatusClass(invoice.status)">
               {{ invoice.status }}
@@ -128,6 +196,22 @@
           </td>
           <td class="col-actions">
             <div class="row-actions">
+              <button
+                mat-icon-button
+                class="action-btn action-btn--payment"
+                matTooltip="Record Payment"
+                *ngIf="invoice.status !== 'PAID' && invoice.status !== 'VOID' && invoice.remainingAmount > 0"
+                (click)="onRecordPayment(invoice)">
+                <mat-icon>payment</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                class="action-btn action-btn--history"
+                matTooltip="View Payment History"
+                *ngIf="invoice.payments && invoice.payments.length > 0"
+                (click)="onViewPaymentHistory(invoice)">
+                <mat-icon>history</mat-icon>
+              </button>
               <button mat-icon-button class="action-btn action-btn--status" matTooltip="Change status"
                 (click)="onUpdateInvoiceStatus(invoice)">
                 <mat-icon>swap_horiz</mat-icon>

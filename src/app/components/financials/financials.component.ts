@@ -85,10 +85,12 @@ export class FinancialsComponent implements OnInit, OnDestroy {
   );
 
   protected overdueInvoices$ = this.store.select(selectInvoices).pipe(
-    map(invoices =>
-      invoices.filter(inv => inv.status === 'OVERDUE')
-        .sort((a, b) => new Date(a.dueAt || 0).getTime() - new Date(b.dueAt || 0).getTime())
-    ),
+    map(invoices => {
+      const now = new Date();
+      return invoices
+        .filter(inv => inv.status === 'ISSUED' && inv.dueAt && new Date(inv.dueAt) < now)
+        .sort((a, b) => new Date(a.dueAt || 0).getTime() - new Date(b.dueAt || 0).getTime());
+    }),
     takeUntil(this.destroy$)
   );
 
@@ -118,13 +120,13 @@ export class FinancialsComponent implements OnInit, OnDestroy {
 
     // Invoice stats
     const paidInvoices = invoices.filter(inv => inv.status === 'PAID');
-    const unpaidInvoices = invoices.filter(inv => inv.status === 'SENT');
-    const overdueInvoices = invoices.filter(inv => inv.status === 'OVERDUE');
+    const unpaidInvoices = invoices.filter(inv => inv.status === 'ISSUED');
+    const overdueInvoices = invoices.filter(inv => inv.status === 'ISSUED' && inv.dueAt && new Date(inv.dueAt) < now);
     const draftInvoices = invoices.filter(inv => inv.status === 'DRAFT');
     const voidInvoices = invoices.filter(inv => inv.status === 'VOID');
 
     const totalRevenue = paidInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
-    const totalOutstanding = [...unpaidInvoices, ...overdueInvoices].reduce((sum, inv) => sum + inv.totalAmount, 0);
+    const totalOutstanding = unpaidInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
 
     // Estimate stats
     const acceptedEstimates = estimates.filter(est => est.status === 'ACCEPTED');
@@ -158,12 +160,11 @@ export class FinancialsComponent implements OnInit, OnDestroy {
 
   protected getInvoiceStatusClass(status: InvoiceStatus): string {
     switch (status) {
-      case 'PAID':    return 'status-badge--paid';
-      case 'SENT':    return 'status-badge--sent';
-      case 'DRAFT':   return 'status-badge--draft';
-      case 'OVERDUE': return 'status-badge--overdue';
-      case 'VOID':    return 'status-badge--void';
-      default:        return 'status-badge--draft';
+      case 'PAID':   return 'status-badge--paid';
+      case 'ISSUED': return 'status-badge--issued';
+      case 'DRAFT':  return 'status-badge--draft';
+      case 'VOID':   return 'status-badge--void';
+      default:       return 'status-badge--draft';
     }
   }
 

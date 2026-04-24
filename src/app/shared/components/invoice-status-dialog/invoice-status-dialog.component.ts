@@ -32,11 +32,10 @@ export class InvoiceStatusDialogComponent {
   selectedStatus: InvoiceStatus;
 
   readonly statusOptions: StatusOption[] = [
-    { value: 'DRAFT',   label: 'Draft',   icon: 'edit_note',     colorClass: 'status--draft',   description: 'Work in progress, not yet sent' },
-    { value: 'SENT',    label: 'Sent',    icon: 'send',          colorClass: 'status--sent',    description: 'Sent to the client for payment' },
-    { value: 'PAID',    label: 'Paid',    icon: 'check_circle',  colorClass: 'status--paid',    description: 'Payment has been received' },
-    { value: 'OVERDUE', label: 'Overdue', icon: 'schedule',      colorClass: 'status--overdue', description: 'Payment is past the due date' },
-    { value: 'VOID',    label: 'Void',    icon: 'block',         colorClass: 'status--void',    description: 'Invoice is no longer valid' },
+    { value: 'DRAFT',  label: 'Draft',  icon: 'edit_note',    colorClass: 'status--draft',  description: 'Work in progress, not yet issued' },
+    { value: 'ISSUED', label: 'Issued', icon: 'send',         colorClass: 'status--issued', description: 'Issued to the client for payment' },
+    { value: 'PAID',   label: 'Paid',   icon: 'check_circle', colorClass: 'status--paid',   description: 'Payment has been received' },
+    { value: 'VOID',   label: 'Void',   icon: 'block',        colorClass: 'status--void',   description: 'Invoice is no longer valid' },
   ];
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: InvoiceStatusDialogData) {

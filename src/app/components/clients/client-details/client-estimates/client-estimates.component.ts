@@ -74,6 +74,13 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
 
   protected searchQuery = '';
   private readonly searchQuery$ = new BehaviorSubject<string>('');
+  protected estimateSummary$!: Observable<{
+    totalValue: number;
+    acceptedValue: number;
+    pendingValue: number;
+    rejectedValue: number;
+    count: number;
+  }>;
 
   ngOnInit(): void {
     const allEstimates$ = this.store.select(selectEstimatesByClientId(this.clientId));
@@ -103,6 +110,30 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
 
     this.estimatesLoading$ = this.store.select(selectEstimatesLoading);
     this.estimatesError$ = this.store.select(selectEstimatesError);
+
+    // Calculate estimate summary statistics
+    this.estimateSummary$ = this.estimates$.pipe(
+      map(estimates => {
+        const totalValue = estimates.reduce((sum, est) => sum + est.total, 0);
+        const acceptedValue = estimates
+          .filter(est => est.status === 'ACCEPTED')
+          .reduce((sum, est) => sum + est.total, 0);
+        const pendingValue = estimates
+          .filter(est => est.status === 'DRAFT' || est.status === 'SENT')
+          .reduce((sum, est) => sum + est.total, 0);
+        const rejectedValue = estimates
+          .filter(est => est.status === 'DECLINED' || est.status === 'VOID')
+          .reduce((sum, est) => sum + est.total, 0);
+
+        return {
+          totalValue,
+          acceptedValue,
+          pendingValue,
+          rejectedValue,
+          count: estimates.length,
+        };
+      })
+    );
 
     this.store.dispatch(loadEstimates({
       companyId: this.companyId,

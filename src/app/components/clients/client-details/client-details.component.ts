@@ -1,15 +1,15 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { filter, take, shareReplay, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, combineLatest } from 'rxjs';
+import { filter, take, shareReplay, tap, map } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 
 import { loadClientById } from '../../../store/clients/clients.actions';
 import { selectClientById } from '../../../store/clients/clients.selectors';
 import { selectSelectedCompanyId } from '../../../store/user/user.selectors';
 import { Client } from '../../../store/clients/clients.models';
-import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
+import { AsyncPipe, CurrencyPipe, DatePipe, NgIf } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -22,6 +22,14 @@ import { ClientDetailsInfoComponent } from './client-details-info/client-details
 import { EditClientDialogComponent, EditClientDialogData } from './edit-client-dialog/edit-client-dialog.component';
 import { ClientDetailsNavigationService } from './client-details-navigation.service';
 import { takeUntil } from 'rxjs/operators';
+import { selectInvoicesByClientId } from '../../../store/invoices/invoices.selectors';
+import { loadInvoices } from '../../../store/invoices/invoices.actions';
+
+interface ClientFinancialStats {
+  outstandingBalance: number;
+  overdueAmount: number;
+  totalPaid: number;
+}
 
 @Component({
   selector: 'app-client-details',
@@ -30,6 +38,7 @@ import { takeUntil } from 'rxjs/operators';
   providers: [ClientDetailsNavigationService],
   imports: [
     AsyncPipe,
+    CurrencyPipe,
     DatePipe,
     NgIf,
     MatTabsModule,
@@ -58,6 +67,7 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
   protected currentClientId: string | null = null;
   protected currentCompanyId: string | null = null;
   protected selectedTabIndex = 0;
+  protected financialStats$!: Observable<ClientFinancialStats>;
 
   ngOnInit(): void {
     const clientId = this.route.snapshot.paramMap.get('id');
@@ -80,7 +90,31 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
       .subscribe((companyId) => {
         this.currentCompanyId = companyId;
         this.store.dispatch(loadClientById({ companyId, clientId }));
+        this.store.dispatch(loadInvoices({ companyId, clientId, page: 0, size: 1000 }));
       });
+
+    // Calculate financial statistics from invoices
+    this.financialStats$ = this.store.select(selectInvoicesByClientId(clientId)).pipe(
+      map(invoices => {
+        const now = new Date();
+        const outstandingBalance = invoices
+          .filter(inv => inv.status !== 'PAID' && inv.status !== 'VOID')
+          .reduce((sum, inv) => sum + inv.remainingAmount, 0);
+
+        const overdueAmount = invoices
+          .filter(inv => inv.status === 'ISSUED' && inv.dueAt && new Date(inv.dueAt) < now)
+          .reduce((sum, inv) => sum + inv.remainingAmount, 0);
+
+        const totalPaid = invoices
+          .reduce((sum, inv) => sum + inv.paidAmount, 0);
+
+        return {
+          outstandingBalance,
+          overdueAmount,
+          totalPaid,
+        };
+      })
+    );
 
     // Subscribe to tab navigation from child components
     this.navigationService.selectedTabIndex$

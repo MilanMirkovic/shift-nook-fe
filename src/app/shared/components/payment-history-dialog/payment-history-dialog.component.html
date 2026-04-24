@@ -1,0 +1,107 @@
+<div class="payment-history-dialog">
+  <div class="dialog-header">
+    <div class="header-content">
+      <h2 mat-dialog-title>Payment History</h2>
+      <p class="invoice-info">#{{ data.invoiceNumber }} - {{ data.invoiceTitle }}</p>
+    </div>
+    <button mat-icon-button mat-dialog-close class="close-button" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <!-- Payment Summary -->
+    <div class="payment-summary">
+      <div class="summary-row">
+        <span class="summary-label">Total Amount:</span>
+        <span class="summary-value">{{ data.totalAmount | currency }}</span>
+      </div>
+      <div class="summary-row highlight">
+        <span class="summary-label">Total Paid:</span>
+        <span class="summary-value paid">{{ data.paidAmount | currency }}</span>
+      </div>
+      <div class="summary-row" [class.remaining]="data.remainingAmount > 0">
+        <span class="summary-label">Remaining:</span>
+        <span class="summary-value" [class.remaining-amt]="data.remainingAmount > 0">
+          {{ data.remainingAmount | currency }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Payments List -->
+    <div class="payments-section">
+      <h3 class="section-title">Payments ({{ data.payments.length }})</h3>
+
+      <div *ngIf="data.payments.length === 0" class="no-payments">
+        <mat-icon>receipt_long</mat-icon>
+        <p>No payments recorded yet</p>
+      </div>
+
+      <div *ngIf="data.payments.length > 0" class="payments-list">
+        <table mat-table [dataSource]="data.payments" class="payments-table">
+          <!-- Date Column -->
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let payment">
+              {{ payment.paymentDate | date:'MMM d, yyyy' }}
+            </td>
+          </ng-container>
+
+          <!-- Amount Column -->
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef>Amount</th>
+            <td mat-cell *matCellDef="let payment" class="amount-cell">
+              {{ payment.amount | currency }}
+            </td>
+          </ng-container>
+
+          <!-- Method Column -->
+          <ng-container matColumnDef="method">
+            <th mat-header-cell *matHeaderCellDef>Method</th>
+            <td mat-cell *matCellDef="let payment">
+              <span class="payment-method-badge">
+                {{ getPaymentMethodLabel(payment.paymentMethod) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Reference Column -->
+          <ng-container matColumnDef="reference">
+            <th mat-header-cell *matHeaderCellDef>Reference</th>
+            <td mat-cell *matCellDef="let payment" class="reference-cell">
+              <span *ngIf="payment.referenceNumber" class="reference-text">
+                {{ payment.referenceNumber }}
+              </span>
+              <span *ngIf="!payment.referenceNumber" class="no-reference">—</span>
+              <div *ngIf="payment.notes" class="payment-notes">
+                <mat-icon class="notes-icon" matTooltip="{{ payment.notes }}">note</mat-icon>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let payment" class="actions-cell">
+              <button
+                mat-icon-button
+                class="delete-button"
+                matTooltip="Delete payment"
+                (click)="onDeletePayment(payment)"
+              >
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="payment-row"></tr>
+        </table>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-stroked-button type="button" (click)="onClose()">Close</button>
+  </mat-dialog-actions>
+</div>

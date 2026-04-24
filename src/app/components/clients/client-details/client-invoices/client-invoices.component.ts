@@ -19,6 +19,8 @@ import {
   updateInvoice, updateInvoiceSuccess, updateInvoiceFailure,
   updateInvoiceStatus, updateInvoiceStatusSuccess, updateInvoiceStatusFailure,
   deleteInvoice, deleteInvoiceSuccess, deleteInvoiceFailure,
+  createPayment, createPaymentSuccess, createPaymentFailure,
+  deletePayment, deletePaymentSuccess, deletePaymentFailure,
 } from '../../../../store/invoices/invoices.actions';
 import {
   InvoiceDialogComponent,
@@ -40,6 +42,16 @@ import {
   InvoiceStatusDialogComponent,
   InvoiceStatusDialogData,
 } from '../../../../shared/components/invoice-status-dialog/invoice-status-dialog.component';
+import {
+  PaymentDialogComponent,
+  PaymentDialogData,
+  PaymentDialogResult,
+} from '../../../../shared/components/payment-dialog/payment-dialog.component';
+import {
+  PaymentHistoryDialogComponent,
+  PaymentHistoryDialogData,
+  PaymentHistoryDialogResult,
+} from '../../../../shared/components/payment-history-dialog/payment-history-dialog.component';
 import { ClientDetailsNavigationService } from '../client-details-navigation.service';
 
 @Component({
@@ -83,6 +95,13 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
   private readonly searchQuery$ = new BehaviorSubject<string>('');
 
   protected pdfDownloading = new Set<string>();
+  protected invoiceSummary$!: Observable<{
+    totalValue: number;
+    totalPaid: number;
+    totalUnpaid: number;
+    overdueAmount: number;
+    count: number;
+  }>;
 
   ngOnInit(): void {
     const allInvoices$ = this.store.select(selectInvoicesByClientId(this.clientId));
@@ -125,6 +144,26 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
 
     this.invoicesLoading$ = this.store.select(selectInvoicesLoading);
     this.invoicesError$ = this.store.select(selectInvoicesError);
+
+    // Calculate invoice summary statistics
+    this.invoiceSummary$ = this.invoices$.pipe(
+      map(invoices => {
+        const totalValue = invoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
+        const totalPaid = invoices.reduce((sum, inv) => sum + inv.paidAmount, 0);
+        const totalUnpaid = invoices
+          .filter(inv => inv.status !== 'PAID' && inv.status !== 'VOID')
+          .reduce((sum, inv) => sum + inv.remainingAmount, 0);
+        const overdueAmount = 0; // Overdue is calculated on backend, not a separate status
+
+        return {
+          totalValue,
+          totalPaid,
+          totalUnpaid,
+          overdueAmount,
+          count: invoices.length,
+        };
+      })
+    );
 
     this.store.dispatch(loadInvoices({
       companyId: this.companyId,
@@ -370,9 +409,8 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
   protected getInvoiceStatusClass(status: InvoiceStatus): string {
     switch (status) {
       case 'PAID':    return 'invoice-status--paid';
-      case 'SENT':    return 'invoice-status--sent';
+      case 'ISSUED':  return 'invoice-status--issued';
       case 'DRAFT':   return 'invoice-status--draft';
-      case 'OVERDUE': return 'invoice-status--overdue';
       case 'VOID':    return 'invoice-status--void';
       default:        return 'invoice-status--draft';
     }
@@ -394,5 +432,88 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
   protected clearSearch(): void {
     this.searchQuery = '';
     this.searchQuery$.next('');
+  }
+
+  protected onRecordPayment(invoice: Invoice): void {
+    const dialogRef = this.dialog.open(PaymentDialogComponent, {
+      width: '580px',
+      maxWidth: '95vw',
+      maxHeight: '92vh',
+      disableClose: false,
+      autoFocus: true,
+      panelClass: 'payment-dialog-container',
+      data: {
+        invoiceNumber: invoice.invoiceNumber,
+        invoiceTitle: invoice.title,
+        totalAmount: invoice.totalAmount,
+        paidAmount: invoice.paidAmount,
+        remainingAmount: invoice.remainingAmount,
+      } satisfies PaymentDialogData,
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: PaymentDialogResult | undefined) => {
+      if (!result) return;
+
+      this.store.dispatch(createPayment({
+        companyId: this.companyId,
+        invoiceId: invoice.id,
+        payment: result.payment,
+      }));
+
+      this.actions$.pipe(
+        ofType(createPaymentSuccess, createPaymentFailure),
+        take(1),
+        takeUntil(this.destroy$),
+      ).subscribe(action => {
+        if (action.type === createPaymentSuccess.type) {
+          this.notificationService.success('Payment recorded successfully!');
+          this.store.dispatch(loadInvoices({ companyId: this.companyId, clientId: this.clientId, page: 0, size: 100 }));
+        } else {
+          this.notificationService.error('Failed to record payment. Please try again.');
+        }
+      });
+    });
+  }
+
+  protected onViewPaymentHistory(invoice: Invoice): void {
+    const dialogRef = this.dialog.open(PaymentHistoryDialogComponent, {
+      width: '750px',
+      maxWidth: '95vw',
+      maxHeight: '92vh',
+      disableClose: false,
+      autoFocus: false,
+      panelClass: 'payment-history-dialog-container',
+      data: {
+        invoiceNumber: invoice.invoiceNumber,
+        invoiceTitle: invoice.title,
+        totalAmount: invoice.totalAmount,
+        paidAmount: invoice.paidAmount,
+        remainingAmount: invoice.remainingAmount,
+        payments: invoice.payments || [],
+      } satisfies PaymentHistoryDialogData,
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: PaymentHistoryDialogResult | undefined) => {
+      if (!result || result.action !== 'delete') return;
+
+      this.store.dispatch(deletePayment({
+        companyId: this.companyId,
+        paymentId: result.paymentId,
+        invoiceId: invoice.id,
+      }));
+
+      this.actions$.pipe(
+        ofType(deletePaymentSuccess, deletePaymentFailure),
+        take(1),
+        takeUntil(this.destroy$),
+      ).subscribe(action => {
+        if (action.type === deletePaymentSuccess.type) {
+          this.notificationService.success('Payment deleted successfully!');
+          this.store.dispatch(loadInvoices({ companyId: this.companyId, clientId: this.clientId, page: 0, size: 100 }));
+        } else {
+          this.notificationService.error('Failed to delete payment. Please try again.');
+        }
+      });
+    });
   }
 }

@@ -54,6 +54,41 @@
             </button>
           </div>
         </div>
+
+        <!-- Financial Stats -->
+        @if (financialStats$ | async; as stats) {
+          <div class="hero-stats">
+            <div class="stat-card stat-card--outstanding" [class.stat-card--warning]="stats.outstandingBalance > 0">
+              <div class="stat-icon">
+                <mat-icon>account_balance_wallet</mat-icon>
+              </div>
+              <div class="stat-content">
+                <div class="stat-label">Outstanding</div>
+                <div class="stat-value">{{ stats.outstandingBalance | currency }}</div>
+              </div>
+            </div>
+
+            <div class="stat-card stat-card--overdue" [class.stat-card--danger]="stats.overdueAmount > 0">
+              <div class="stat-icon">
+                <mat-icon>warning</mat-icon>
+              </div>
+              <div class="stat-content">
+                <div class="stat-label">Overdue</div>
+                <div class="stat-value">{{ stats.overdueAmount | currency }}</div>
+              </div>
+            </div>
+
+            <div class="stat-card stat-card--paid">
+              <div class="stat-icon">
+                <mat-icon>paid</mat-icon>
+              </div>
+              <div class="stat-content">
+                <div class="stat-label">Total Paid</div>
+                <div class="stat-value">{{ stats.totalPaid | currency }}</div>
+              </div>
+            </div>
+          </div>
+        }
       </div>
     </div>
 

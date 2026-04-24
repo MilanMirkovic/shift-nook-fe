@@ -69,6 +69,160 @@
   }
 }
 
+// ─── Financial Summary ────────────────────────────────────────────────────────
+.financial-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1rem;
+  background: #f8f9fc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .summary-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  .summary-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .summary-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+  }
+
+  .summary-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.2;
+  }
+
+  &--total {
+    .summary-icon {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+      border: 1px solid rgba(37, 99, 235, 0.2);
+
+      mat-icon {
+        color: #2563eb;
+      }
+    }
+
+    .summary-value {
+      color: #2563eb;
+    }
+  }
+
+  &--paid {
+    .summary-icon {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(52, 211, 153, 0.1) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+
+      mat-icon {
+        color: #10b981;
+      }
+    }
+
+    .summary-value {
+      color: #059669;
+    }
+  }
+
+  &--unpaid {
+    .summary-icon {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+
+      mat-icon {
+        color: #f59e0b;
+      }
+    }
+
+    &.summary-card--warning {
+      background: linear-gradient(135deg, rgba(254, 243, 199, 0.3) 0%, rgba(255, 255, 255, 1) 100%);
+      border-color: rgba(245, 158, 11, 0.3);
+
+      .summary-value {
+        color: #d97706;
+      }
+    }
+  }
+
+  &--overdue {
+    .summary-icon {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(252, 165, 165, 0.1) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+
+      mat-icon {
+        color: #ef4444;
+      }
+    }
+
+    &.summary-card--danger {
+      background: linear-gradient(135deg, rgba(254, 226, 226, 0.3) 0%, rgba(255, 255, 255, 1) 100%);
+      border-color: rgba(239, 68, 68, 0.3);
+
+      .summary-value {
+        color: #dc2626;
+      }
+
+      .summary-icon mat-icon {
+        animation: warningPulse 2s ease-in-out infinite;
+      }
+    }
+  }
+}
+
+@keyframes warningPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
 // ─── Search bar ───────────────────────────────────────────────────────────────
 .invoices-search {
   margin-bottom: 1.25rem;
@@ -169,6 +323,7 @@
       &.col-items,
       &.col-date,
       &.col-due { text-align: right; }
+      &.col-payment { text-align: left; }
       &.col-status { text-align: center; }
       &.col-actions { text-align: right; }
     }
@@ -190,6 +345,7 @@
       &.col-items,
       &.col-date,
       &.col-due { text-align: right; }
+      &.col-payment { text-align: left; }
       &.col-status { text-align: center; }
       &.col-actions { text-align: right; }
     }
@@ -200,7 +356,8 @@
 .col-date    { width: 130px; white-space: nowrap; color: #94a3b8 !important; font-size: 0.825rem !important; }
 .col-due     { width: 130px; white-space: nowrap; color: #94a3b8 !important; font-size: 0.825rem !important; }
 .col-items   { width: 90px; color: #94a3b8 !important; font-size: 0.825rem !important; }
-.col-total   { width: 110px; }
+.col-total   { width: 130px; }
+.col-payment { width: 180px; min-width: 180px; }
 .col-status  { width: 110px; }
 .col-actions { width: 90px; }
 
@@ -237,10 +394,23 @@
   max-width: 320px;
 }
 
+.total-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: flex-end;
+}
+
 .inv-total {
   font-weight: 700;
   font-size: 0.9375rem;
   color: #2563eb;
+}
+
+.inv-paid {
+  font-size: 0.75rem;
+  color: #10b981;
+  font-weight: 500;
 }
 
 .row-actions {
@@ -256,11 +426,77 @@
 .action-btn {
   width: 32px; height: 32px; line-height: 32px;
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  &.action-btn--payment mat-icon { color: #10b981; }
+  &.action-btn--history mat-icon { color: #6366f1; }
   &.action-btn--status mat-icon { color: #0ea5e9; }
   &.action-btn--edit mat-icon   { color: #2563eb; }
   &.action-btn--duplicate mat-icon { color: #059669; }
   &.action-btn--pdf mat-icon    { color: #7c3aed; }
   &.action-btn--delete mat-icon { color: #ef4444; }
+}
+
+// ─── Payment tracking ─────────────────────────────────────────────────────────
+.payment-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 20px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  transition: width 0.4s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: 0;
+}
+
+.progress-text {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.02em;
+}
+
+.payment-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  min-height: 18px;
+}
+
+.remaining-amount {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.fully-paid {
+  color: #10b981;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  &::before {
+    content: '✓';
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
 }
 
 .invoices-table-footer {
@@ -288,7 +524,7 @@
     color: #10b981;
     border: 1px solid rgba(16, 185, 129, 0.3);
   }
-  &.invoice-status--sent {
+  &.invoice-status--issued {
     background: rgba(59, 130, 246, 0.1);
     color: #3b82f6;
     border: 1px solid rgba(59, 130, 246, 0.3);
@@ -297,11 +533,6 @@
     background: rgba(148, 163, 184, 0.1);
     color: #64748b;
     border: 1px solid rgba(148, 163, 184, 0.3);
-  }
-  &.invoice-status--overdue {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.3);
   }
   &.invoice-status--void {
     background: rgba(245, 158, 11, 0.1);

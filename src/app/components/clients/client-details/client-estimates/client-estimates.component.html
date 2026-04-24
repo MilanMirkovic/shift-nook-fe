@@ -20,6 +20,51 @@
     </div>
   </div>
 
+  <!-- Financial Summary -->
+  <div *ngIf="!vm.loading && !vm.error && vm.estimates && vm.estimates.length > 0" class="financial-summary">
+    <ng-container *ngIf="estimateSummary$ | async as summary">
+      <div class="summary-card summary-card--total">
+        <div class="summary-icon">
+          <mat-icon>request_quote</mat-icon>
+        </div>
+        <div class="summary-content">
+          <div class="summary-label">Total Value</div>
+          <div class="summary-value">{{ summary.totalValue | currency }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card summary-card--accepted" [class.summary-card--success]="summary.acceptedValue > 0">
+        <div class="summary-icon">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="summary-content">
+          <div class="summary-label">Accepted</div>
+          <div class="summary-value">{{ summary.acceptedValue | currency }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card summary-card--pending">
+        <div class="summary-icon">
+          <mat-icon>pending</mat-icon>
+        </div>
+        <div class="summary-content">
+          <div class="summary-label">Pending</div>
+          <div class="summary-value">{{ summary.pendingValue | currency }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card summary-card--rejected">
+        <div class="summary-icon">
+          <mat-icon>cancel</mat-icon>
+        </div>
+        <div class="summary-content">
+          <div class="summary-label">Declined/Void</div>
+          <div class="summary-value">{{ summary.rejectedValue | currency }}</div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
   <!-- Search Bar -->
   <div *ngIf="!vm.loading && !vm.error && vm.estimates && vm.estimates.length > 0" class="estimates-search">
     <div class="estimates-search__wrap">
