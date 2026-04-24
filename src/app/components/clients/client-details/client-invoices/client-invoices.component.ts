@@ -1,6 +1,6 @@
 import { Component, inject, Input, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subject, combineLatest } from 'rxjs';
+import { Observable, Subject, BehaviorSubject, combineLatest } from 'rxjs';
 import { take, takeUntil, map } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 
@@ -80,7 +80,7 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
   protected invoicesError$!: Observable<string | null>;
   protected activeFilter$ = this.navigationService.invoiceFilter$;
   protected searchQuery = '';
-  private readonly searchQuery$ = new Subject<string>();
+  private readonly searchQuery$ = new BehaviorSubject<string>('');
 
   protected pdfDownloading = new Set<string>();
 
@@ -122,9 +122,6 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
         return filtered;
       })
     );
-
-    // Initialize search query stream
-    this.searchQuery$.next('');
 
     this.invoicesLoading$ = this.store.select(selectInvoicesLoading);
     this.invoicesError$ = this.store.select(selectInvoicesError);

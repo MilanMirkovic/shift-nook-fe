@@ -1,6 +1,6 @@
 import { Component, inject, Input, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subject, combineLatest } from 'rxjs';
+import { Observable, Subject, BehaviorSubject, combineLatest } from 'rxjs';
 import { filter, map, take, takeUntil } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
 
@@ -73,7 +73,7 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
   protected estimatesError$!: Observable<string | null>;
 
   protected searchQuery = '';
-  private readonly searchQuery$ = new Subject<string>();
+  private readonly searchQuery$ = new BehaviorSubject<string>('');
 
   ngOnInit(): void {
     const allEstimates$ = this.store.select(selectEstimatesByClientId(this.clientId));
@@ -100,9 +100,6 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
         return estimates;
       })
     );
-
-    // Initialize search query stream
-    this.searchQuery$.next('');
 
     this.estimatesLoading$ = this.store.select(selectEstimatesLoading);
     this.estimatesError$ = this.store.select(selectEstimatesError);
