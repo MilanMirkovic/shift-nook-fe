@@ -12,7 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, map } from 'rxjs';
 import { CreateEstimateInput, Estimate, UpdateEstimateInput } from '../../../store/estimates/estimates.models';
 import { JobsitesStoreService } from '../../../store/jobsites/jobsites-store.service';
 import { Jobsite } from '../../../store/jobsites/jobsites.models';
@@ -62,7 +62,9 @@ export class EstimateDialogComponent implements OnInit, OnDestroy {
   protected submitting = false;
   protected readonly form: FormGroup;
   protected readonly isEditMode: boolean;
-  protected jobsites$ = this.jobsitesStore.jobsites$;
+  protected jobsites$ = this.jobsitesStore.jobsites$.pipe(
+    map(jobsites => jobsites.filter(j => j.clientId === this.data.clientId || j.clientId === null))
+  );
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: EstimateDialogData) {
     this.isEditMode = !!data.estimate;

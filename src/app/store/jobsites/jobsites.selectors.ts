@@ -80,3 +80,8 @@ export const selectJobsiteById = (jobsiteId: string) => createSelector(
   selectJobsitesState,
   (state) => state.jobsites.find(j => j.id === jobsiteId) ?? undefined
 );
+
+export const selectJobsitesByClientId = (clientId: string) => createSelector(
+  selectJobsitesState,
+  (state) => state.jobsites.filter(j => j.clientId === clientId || j.clientId === null)
+);
