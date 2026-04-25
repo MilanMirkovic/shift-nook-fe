@@ -417,19 +417,30 @@
   display: flex;
   justify-content: flex-end;
   gap: 2px;
-  opacity: 0;
   transition: opacity 0.15s;
 
-  .invoice-row:hover & { opacity: 1; }
+  // Show actions on hover OR when payment button exists (for better discoverability)
+  .invoice-row:hover & {
+    opacity: 1;
+  }
 }
 
 .action-btn {
   width: 32px; height: 32px; line-height: 32px;
+  transition: opacity 0.15s;
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
 
-  // Payment button is always visible for better discoverability
-  &.action-btn--payment {
+  // All buttons hidden by default
+  opacity: 0;
+
+  // Show all buttons on row hover
+  .invoice-row:hover & {
     opacity: 1;
+  }
+
+  // Payment button is ALWAYS visible for better discoverability
+  &.action-btn--payment {
+    opacity: 1 !important;
     mat-icon { color: #10b981; }
 
     &:hover {
