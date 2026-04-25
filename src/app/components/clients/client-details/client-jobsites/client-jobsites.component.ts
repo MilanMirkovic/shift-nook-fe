@@ -311,6 +311,7 @@ export class ClientJobsitesComponent implements OnInit, OnDestroy {
   protected readonly InvoiceStatusEnum = {
     DRAFT: 'DRAFT' as const,
     ISSUED: 'ISSUED' as const,
+    PARTIALLY_PAID: 'PARTIALLY_PAID' as const,
     PAID: 'PAID' as const,
     VOID: 'VOID' as const,
   };

@@ -148,12 +148,15 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
     // Calculate invoice summary statistics
     this.invoiceSummary$ = this.invoices$.pipe(
       map(invoices => {
+        const now = new Date();
         const totalValue = invoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
         const totalPaid = invoices.reduce((sum, inv) => sum + inv.paidAmount, 0);
         const totalUnpaid = invoices
           .filter(inv => inv.status !== 'PAID' && inv.status !== 'VOID')
           .reduce((sum, inv) => sum + inv.remainingAmount, 0);
-        const overdueAmount = 0; // Overdue is calculated on backend, not a separate status
+        const overdueAmount = invoices
+          .filter(inv => (inv.status === 'ISSUED' || inv.status === 'PARTIALLY_PAID') && inv.dueAt && new Date(inv.dueAt) < now)
+          .reduce((sum, inv) => sum + inv.remainingAmount, 0);
 
         return {
           totalValue,
@@ -408,11 +411,12 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
 
   protected getInvoiceStatusClass(status: InvoiceStatus): string {
     switch (status) {
-      case 'PAID':    return 'invoice-status--paid';
-      case 'ISSUED':  return 'invoice-status--issued';
-      case 'DRAFT':   return 'invoice-status--draft';
-      case 'VOID':    return 'invoice-status--void';
-      default:        return 'invoice-status--draft';
+      case 'PAID':           return 'invoice-status--paid';
+      case 'PARTIALLY_PAID': return 'invoice-status--partially-paid';
+      case 'ISSUED':         return 'invoice-status--issued';
+      case 'DRAFT':          return 'invoice-status--draft';
+      case 'VOID':           return 'invoice-status--void';
+      default:               return 'invoice-status--draft';
     }
   }
 

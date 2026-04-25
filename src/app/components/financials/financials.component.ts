@@ -120,13 +120,13 @@ export class FinancialsComponent implements OnInit, OnDestroy {
 
     // Invoice stats
     const paidInvoices = invoices.filter(inv => inv.status === 'PAID');
-    const unpaidInvoices = invoices.filter(inv => inv.status === 'ISSUED');
-    const overdueInvoices = invoices.filter(inv => inv.status === 'ISSUED' && inv.dueAt && new Date(inv.dueAt) < now);
+    const unpaidInvoices = invoices.filter(inv => inv.status === 'ISSUED' || inv.status === 'PARTIALLY_PAID');
+    const overdueInvoices = invoices.filter(inv => (inv.status === 'ISSUED' || inv.status === 'PARTIALLY_PAID') && inv.dueAt && new Date(inv.dueAt) < now);
     const draftInvoices = invoices.filter(inv => inv.status === 'DRAFT');
     const voidInvoices = invoices.filter(inv => inv.status === 'VOID');
 
     const totalRevenue = paidInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
-    const totalOutstanding = unpaidInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
+    const totalOutstanding = unpaidInvoices.reduce((sum, inv) => sum + inv.remainingAmount, 0);
 
     // Estimate stats
     const acceptedEstimates = estimates.filter(est => est.status === 'ACCEPTED');
@@ -160,11 +160,12 @@ export class FinancialsComponent implements OnInit, OnDestroy {
 
   protected getInvoiceStatusClass(status: InvoiceStatus): string {
     switch (status) {
-      case 'PAID':   return 'status-badge--paid';
-      case 'ISSUED': return 'status-badge--issued';
-      case 'DRAFT':  return 'status-badge--draft';
-      case 'VOID':   return 'status-badge--void';
-      default:       return 'status-badge--draft';
+      case 'PAID':           return 'status-badge--paid';
+      case 'PARTIALLY_PAID': return 'status-badge--partially-paid';
+      case 'ISSUED':         return 'status-badge--issued';
+      case 'DRAFT':          return 'status-badge--draft';
+      case 'VOID':           return 'status-badge--void';
+      default:               return 'status-badge--draft';
     }
   }
 

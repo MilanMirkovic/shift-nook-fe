@@ -102,7 +102,7 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
           .reduce((sum, inv) => sum + inv.remainingAmount, 0);
 
         const overdueAmount = invoices
-          .filter(inv => inv.status === 'ISSUED' && inv.dueAt && new Date(inv.dueAt) < now)
+          .filter(inv => (inv.status === 'ISSUED' || inv.status === 'PARTIALLY_PAID') && inv.dueAt && new Date(inv.dueAt) < now)
           .reduce((sum, inv) => sum + inv.remainingAmount, 0);
 
         const totalPaid = invoices

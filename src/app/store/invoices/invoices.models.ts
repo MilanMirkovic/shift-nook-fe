@@ -1,4 +1,4 @@
-export type InvoiceStatus = 'DRAFT' | 'ISSUED' | 'PAID' | 'VOID';
+export type InvoiceStatus = 'DRAFT' | 'ISSUED' | 'PARTIALLY_PAID' | 'PAID' | 'VOID';
 
 export type PaymentMethod =
   | 'CASH'

@@ -524,6 +524,11 @@
     color: #10b981;
     border: 1px solid rgba(16, 185, 129, 0.3);
   }
+  &.invoice-status--partially-paid {
+    background: rgba(251, 191, 36, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+  }
   &.invoice-status--issued {
     background: rgba(59, 130, 246, 0.1);
     color: #3b82f6;

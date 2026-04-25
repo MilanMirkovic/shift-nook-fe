@@ -77,10 +77,11 @@
                   (click)="onInvoiceStatusClick($event, jobsite.id, entry.key)"
                   [class.badge-draft]="entry.key === InvoiceStatusEnum.DRAFT"
                   [class.badge-issued]="entry.key === InvoiceStatusEnum.ISSUED"
+                  [class.badge-partially-paid]="entry.key === InvoiceStatusEnum.PARTIALLY_PAID"
                   [class.badge-paid]="entry.key === InvoiceStatusEnum.PAID"
                   [class.badge-void]="entry.key === InvoiceStatusEnum.VOID"
-                  matTooltip="Click to view {{ entry.key.toLowerCase() }} invoices for this jobsite">
-            {{ entry.value }} {{ entry.key }}
+                  matTooltip="Click to view {{ entry.key.toLowerCase().replace('_', ' ') }} invoices for this jobsite">
+            {{ entry.value }} {{ entry.key.replace('_', ' ') }}
           </button>
         </ng-container>
       </div>
