@@ -164,7 +164,15 @@
           </td>
           <td class="col-jobsite-address">{{ invoice.jobsiteAddress}}</td>
           <td class="col-date">{{ invoice.issuedAt | date:'MMM d, yyyy' }}</td>
-          <td class="col-due">{{ invoice.dueAt | date:'MMM d, yyyy' }}</td>
+          <td class="col-due">
+            <div class="due-date-cell" [class.overdue]="isOverdue(invoice)">
+              <span class="due-date">{{ invoice.dueAt | date:'MMM d, yyyy' }}</span>
+              <span *ngIf="isOverdue(invoice)" class="overdue-badge">
+                <mat-icon>warning</mat-icon>
+                {{ getOverdueDays(invoice) }} days overdue
+              </span>
+            </div>
+          </td>
           <td class="col-items">{{ invoice.items.length }} item{{ invoice.items.length !== 1 ? 's' : '' }}</td>
           <td class="col-total">
             <div class="total-cell">

@@ -500,6 +500,48 @@
   }
 }
 
+// ─── Due date cell with overdue indicator ────────────────────────────────────
+.due-date-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+
+  .due-date {
+    font-size: 0.825rem;
+    color: #94a3b8;
+  }
+
+  &.overdue {
+    .due-date {
+      color: #dc2626;
+      font-weight: 600;
+    }
+  }
+}
+
+.overdue-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  border-radius: 6px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    line-height: 14px;
+  }
+}
+
 .invoices-table-footer {
   display: flex;
   justify-content: space-between;

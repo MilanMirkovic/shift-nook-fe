@@ -520,4 +520,23 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
       });
     });
   }
+
+  protected isOverdue(invoice: Invoice): boolean {
+    if (!invoice.dueAt) return false;
+    if (invoice.status === 'PAID' || invoice.status === 'VOID') return false;
+
+    const now = new Date();
+    const dueDate = new Date(invoice.dueAt);
+    return dueDate < now;
+  }
+
+  protected getOverdueDays(invoice: Invoice): number {
+    if (!invoice.dueAt) return 0;
+
+    const now = new Date();
+    const dueDate = new Date(invoice.dueAt);
+    const diffTime = now.getTime() - dueDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  }
 }

@@ -84,6 +84,9 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
   constructor(@Inject(MAT_DIALOG_DATA) public data: InvoiceDialogData) {
     this.isEditMode = !!data.invoice;
 
+    // Calculate default due date (30 days from today for new invoices)
+    const defaultDueDate = !data.invoice ? this.addDays(new Date(), 30) : null;
+
     this.form = this.fb.group({
       title: [
         data.invoice?.title ?? '',
@@ -94,7 +97,7 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
         data.invoice ? new Date(data.invoice.issuedAt) : new Date(),
         Validators.required,
       ],
-      dueAt: [data.invoice?.dueAt ? new Date(data.invoice.dueAt) : null],
+      dueAt: [data.invoice?.dueAt ? new Date(data.invoice.dueAt) : defaultDueDate],
       notes: [data.invoice?.notes ?? '', Validators.maxLength(2000)],
       lineItems: this.fb.array([]),
     });
@@ -103,6 +106,18 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Load jobsites for the dropdown
     this.jobsitesStore.loadJobsites(this.data.companyId, 0, 100);
+
+    // Auto-update due date when issue date changes (only for new invoices)
+    if (!this.isEditMode) {
+      this.form.get('issuedAt')?.valueChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(issuedDate => {
+          if (issuedDate && !this.form.get('dueAt')?.touched) {
+            const newDueDate = this.addDays(new Date(issuedDate), 30);
+            this.form.get('dueAt')?.setValue(newDueDate, { emitEvent: false });
+          }
+        });
+    }
 
     if (this.data.invoice && this.data.invoice.items.length > 0) {
       for (const item of this.data.invoice.items) {
@@ -291,6 +306,12 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
 
   onCancel(): void {
     this.dialogRef.close();
+  }
+
+  private addDays(date: Date, days: number): Date {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
   }
 }
 
