@@ -76,6 +76,8 @@ export interface CreateInvoiceInput {
   jobsiteId?: string;
   title: string;
   notes?: string;
+  issuedAt?: string;
+  dueAt?: string;
   items: InvoiceItemInput[];
 }
 

@@ -90,13 +90,11 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
         [Validators.required, Validators.maxLength(255)],
       ],
       jobsiteId: [data.invoice?.jobsiteId ?? ''],
-      ...(this.isEditMode ? {
-        issuedAt: [
-          data.invoice ? new Date(data.invoice.issuedAt) : new Date(),
-          Validators.required,
-        ],
-        dueAt: [data.invoice?.dueAt ? new Date(data.invoice.dueAt) : null],
-      } : {}),
+      issuedAt: [
+        data.invoice ? new Date(data.invoice.issuedAt) : new Date(),
+        Validators.required,
+      ],
+      dueAt: [data.invoice?.dueAt ? new Date(data.invoice.dueAt) : null],
       notes: [data.invoice?.notes ?? '', Validators.maxLength(2000)],
       lineItems: this.fb.array([]),
     });
@@ -222,8 +220,8 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
 
     const raw = this.form.getRawValue();
 
-    // Validate due date is not before issue date (only in edit mode where we have both dates)
-    if (this.isEditMode && raw.issuedAt && raw.dueAt) {
+    // Validate due date is not before issue date
+    if (raw.issuedAt && raw.dueAt) {
       const issuedDate = raw.issuedAt instanceof Date ? raw.issuedAt : new Date(raw.issuedAt);
       const dueDate = raw.dueAt instanceof Date ? raw.dueAt : new Date(raw.dueAt);
 
@@ -268,6 +266,8 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
           jobsiteId: raw.jobsiteId || undefined,
           title: raw.title.trim(),
           notes: raw.notes?.trim() || undefined,
+          issuedAt: this.formatDate(raw.issuedAt),
+          dueAt: this.formatDate(raw.dueAt),
           items,
         },
       };
