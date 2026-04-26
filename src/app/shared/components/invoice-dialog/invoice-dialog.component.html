@@ -49,8 +49,7 @@
           </mat-select>
         </mat-form-field>
 
-        <!-- Dates row (edit mode only) -->
-        @if (isEditMode) {
+        <!-- Dates row -->
         <div class="date-row">
           <mat-form-field appearance="outline">
             <mat-label>Invoice Date <span class="required-star">*</span></mat-label>
@@ -71,7 +70,6 @@
             <mat-datepicker #duePicker></mat-datepicker>
           </mat-form-field>
         </div>
-        }
 
         <!-- Notes -->
         <mat-form-field appearance="outline" class="full-width">
