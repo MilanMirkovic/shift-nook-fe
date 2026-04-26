@@ -1,6 +1,6 @@
 import { Component, inject, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -71,7 +71,7 @@ export class PaymentDialogComponent implements OnInit {
           Validators.min(0.01),
           Validators.max(data.remainingAmount),
           // Custom validator to ensure amount is a valid number
-          (control) => {
+          (control: AbstractControl): ValidationErrors | null => {
             const value = control.value;
             if (value === null || value === undefined || value === '') {
               return { required: true };
