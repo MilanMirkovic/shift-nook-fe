@@ -417,31 +417,17 @@
   display: flex;
   justify-content: flex-end;
   gap: 2px;
-  opacity: 1; // Always visible container
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  .invoice-row:hover & { opacity: 1; }
 }
 
 .action-btn {
   width: 32px; height: 32px; line-height: 32px;
-  opacity: 0; // Hide all buttons by default
-  transition: opacity 0.15s, background 0.15s;
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
 
-  // Show all buttons on row hover
-  .invoice-row:hover & {
-    opacity: 1;
-  }
-
-  // Payment button is ALWAYS visible for better discoverability
-  &.action-btn--payment {
-    opacity: 1 !important;
-    mat-icon { color: #10b981; }
-
-    &:hover {
-      background: rgba(16, 185, 129, 0.1);
-      mat-icon { color: #059669; }
-    }
-  }
-
+  &.action-btn--payment mat-icon { color: #10b981; }
   &.action-btn--history mat-icon { color: #6366f1; }
   &.action-btn--status mat-icon { color: #0ea5e9; }
   &.action-btn--edit mat-icon   { color: #2563eb; }
