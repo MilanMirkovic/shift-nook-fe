@@ -66,7 +66,23 @@ export class PaymentDialogComponent implements OnInit {
     this.form = this.fb.group({
       amount: [
         data.remainingAmount,
-        [Validators.required, Validators.min(0.01), Validators.max(data.remainingAmount)],
+        [
+          Validators.required,
+          Validators.min(0.01),
+          Validators.max(data.remainingAmount),
+          // Custom validator to ensure amount is a valid number
+          (control) => {
+            const value = control.value;
+            if (value === null || value === undefined || value === '') {
+              return { required: true };
+            }
+            const num = typeof value === 'number' ? value : parseFloat(value);
+            if (isNaN(num)) {
+              return { invalidNumber: true };
+            }
+            return null;
+          }
+        ],
       ],
       paymentDate: [new Date(), Validators.required],
       paymentMethod: ['', Validators.required],
@@ -84,6 +100,7 @@ export class PaymentDialogComponent implements OnInit {
   protected onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      console.error('Payment form is invalid:', this.form.errors, this.form.value);
       return;
     }
 
@@ -94,14 +111,23 @@ export class PaymentDialogComponent implements OnInit {
       ? raw.paymentDate.toISOString().split('T')[0]
       : raw.paymentDate;
 
+    // Ensure amount is a number
+    const amount = typeof raw.amount === 'number' ? raw.amount : parseFloat(raw.amount);
+
+    if (isNaN(amount) || amount <= 0) {
+      console.error('Invalid payment amount:', raw.amount);
+      return;
+    }
+
     const payment: CreatePaymentInput = {
-      amount: parseFloat(raw.amount),
+      amount,
       paymentDate,
       paymentMethod: raw.paymentMethod,
       referenceNumber: raw.referenceNumber?.trim() || undefined,
       notes: raw.notes?.trim() || undefined,
     };
 
+    console.log('Submitting payment:', payment);
     this.dialogRef.close({ payment } as PaymentDialogResult);
   }
 

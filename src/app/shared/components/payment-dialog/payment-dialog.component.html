@@ -47,11 +47,14 @@
         <mat-error *ngIf="form.get('amount')?.hasError('required')">
           Payment amount is required
         </mat-error>
+        <mat-error *ngIf="form.get('amount')?.hasError('invalidNumber')">
+          Please enter a valid number
+        </mat-error>
         <mat-error *ngIf="form.get('amount')?.hasError('min')">
-          Amount must be greater than $0.00
+          Amount must be at least $0.01
         </mat-error>
         <mat-error *ngIf="form.get('amount')?.hasError('max')">
-          Amount cannot exceed remaining balance
+          Amount cannot exceed {{ maxAmount | currency }}
         </mat-error>
       </mat-form-field>
 
