@@ -200,7 +200,7 @@
                 mat-icon-button
                 class="action-btn action-btn--payment"
                 matTooltip="Record Payment"
-                *ngIf="invoice.status !== 'PAID' && invoice.status !== 'VOID' && invoice.remainingAmount > 0"
+                *ngIf="invoice.status === 'ISSUED' || invoice.status === 'PARTIALLY_PAID'"
                 (click)="onRecordPayment(invoice)">
                 <mat-icon>payment</mat-icon>
               </button>

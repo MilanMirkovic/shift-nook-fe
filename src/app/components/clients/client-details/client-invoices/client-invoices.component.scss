@@ -417,21 +417,14 @@
   display: flex;
   justify-content: flex-end;
   gap: 2px;
-  transition: opacity 0.15s;
-
-  // Show actions on hover OR when payment button exists (for better discoverability)
-  .invoice-row:hover & {
-    opacity: 1;
-  }
+  opacity: 1; // Always visible container
 }
 
 .action-btn {
   width: 32px; height: 32px; line-height: 32px;
-  transition: opacity 0.15s;
+  opacity: 0; // Hide all buttons by default
+  transition: opacity 0.15s, background 0.15s;
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
-
-  // All buttons hidden by default
-  opacity: 0;
 
   // Show all buttons on row hover
   .invoice-row:hover & {
