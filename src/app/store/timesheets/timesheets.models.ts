@@ -21,6 +21,8 @@ export interface Timesheet {
   createdAt?: string; // ISO 8601 date string
   updatedAt?: string; // ISO 8601 date string
   durationMinutes?: number | null;
+  invoiceId?: string | null; // Link to invoice when timesheet has been billed
+  invoiceNumber?: string | null; // Invoice number for display
 }
 
 export interface CreateTimesheetRequest {

@@ -1,5 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { Invoice, CreateInvoiceInput, UpdateInvoiceInput, UpdateInvoiceStatusInput, Payment, CreatePaymentInput } from './invoices.models';
+import { CreateInvoiceFromTimesheetsInput, CreateInvoiceFromTimesheetsResponse } from '../../shared/models/invoice-from-timesheets.model';
 
 // Create invoice
 export const createInvoice = createAction(
@@ -54,6 +55,20 @@ export const promoteEstimateToInvoiceSuccess = createAction(
 );
 export const promoteEstimateToInvoiceFailure = createAction(
   '[Invoices] Promote Estimate To Invoice Failure',
+  props<{ error: string }>()
+);
+
+// Create invoice from timesheets
+export const createInvoiceFromTimesheets = createAction(
+  '[Invoices] Create Invoice From Timesheets',
+  props<{ companyId: string; request: CreateInvoiceFromTimesheetsInput }>()
+);
+export const createInvoiceFromTimesheetsSuccess = createAction(
+  '[Invoices] Create Invoice From Timesheets Success',
+  props<{ response: CreateInvoiceFromTimesheetsResponse }>()
+);
+export const createInvoiceFromTimesheetsFailure = createAction(
+  '[Invoices] Create Invoice From Timesheets Failure',
   props<{ error: string }>()
 );
 

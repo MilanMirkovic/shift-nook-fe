@@ -7,6 +7,7 @@ import {CompanyRole} from '../../shared/models/company-role';
     lastName: string;
     email: string;
     role: CompanyRole;
+    hourlyRate?: number; // Hourly billing rate for this user in company context
   }
 
   export interface CompanyMembersState {

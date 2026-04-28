@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -11,6 +11,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
 
 import { JobsitesComponent } from './jobsites.component';
 import { JobsiteDetailsComponent } from './jobsite-details/jobsite-details.component';
@@ -20,6 +23,7 @@ import { JobsiteTasksComponent } from './jobsite-details/tabs/jobsite-tasks/jobs
 import { JobsiteInfoComponent } from './jobsite-details/tabs/jobsite-info/jobsite-info.component';
 import { JobsiteActivityComponent } from './jobsite-details/tabs/jobsite-activity/jobsite-activity.component';
 import { ListPageComponent } from '../../layout/list-page/list-page.component';
+import { CreateInvoiceFromTimesheetsDialogComponent } from '../../shared/components/create-invoice-from-timesheets-dialog/create-invoice-from-timesheets-dialog.component';
 
 const routes: Routes = [
   {
@@ -39,11 +43,13 @@ const routes: Routes = [
     JobsiteTimesheetsComponent,
     JobsiteTasksComponent,
     JobsiteInfoComponent,
-    JobsiteActivityComponent
+    JobsiteActivityComponent,
+    CreateInvoiceFromTimesheetsDialogComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
@@ -53,6 +59,9 @@ const routes: Routes = [
     MatNativeDateModule,
     MatInputModule,
     MatTooltipModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    MatTableModule,
     ListPageComponent,
     RouterModule.forChild(routes)
   ],

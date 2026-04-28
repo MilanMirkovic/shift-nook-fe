@@ -64,6 +64,18 @@ export class InvoicesEffects {
     )
   );
 
+  createInvoiceFromTimesheets$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(InvoicesActions.createInvoiceFromTimesheets),
+      switchMap(({ companyId, request }) =>
+        this.invoicesApi.createInvoiceFromTimesheets(companyId, request).pipe(
+          map((response) => InvoicesActions.createInvoiceFromTimesheetsSuccess({ response })),
+          catchError((error) => of(InvoicesActions.createInvoiceFromTimesheetsFailure({ error: error?.message || 'Failed to create invoice from timesheets' })))
+        )
+      )
+    )
+  );
+
   updateInvoice$ = createEffect(() =>
     this.actions$.pipe(
       ofType(InvoicesActions.updateInvoice),

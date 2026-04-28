@@ -83,3 +83,13 @@ export const selectActiveTimesheetsForWorker = (userId: string) => createSelecto
   selectActiveTimesheets,
   timesheets => timesheets.filter(t => t.userId === userId || t.workerUserId === userId)
 );
+
+/**
+ * Get unbilled timesheets (closed but not yet invoiced)
+ */
+export const selectUnbilledTimesheets = createSelector(
+  selectTimesheets,
+  timesheets => timesheets.filter(t =>
+    t.status === 'CLOSED' && !t.invoiceId
+  )
+);

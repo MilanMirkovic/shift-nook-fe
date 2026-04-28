@@ -11,6 +11,10 @@ import {
   Payment,
   CreatePaymentInput,
 } from './invoices.models';
+import {
+  CreateInvoiceFromTimesheetsInput,
+  CreateInvoiceFromTimesheetsResponse,
+} from '../../shared/models/invoice-from-timesheets.model';
 
 @Injectable({ providedIn: 'root' })
 export class InvoicesApiService {
@@ -55,6 +59,16 @@ export class InvoicesApiService {
     return this.http.post<Invoice>(
       `${this.apiUrl}/companies/${companyId}/invoices/from-estimate/${estimateId}`,
       null
+    );
+  }
+
+  createInvoiceFromTimesheets(
+    companyId: string,
+    request: CreateInvoiceFromTimesheetsInput
+  ): Observable<CreateInvoiceFromTimesheetsResponse> {
+    return this.http.post<CreateInvoiceFromTimesheetsResponse>(
+      `${this.apiUrl}/companies/${companyId}/invoices/from-timesheets`,
+      request
     );
   }
 

@@ -31,10 +31,9 @@ export class CompanySelectionComponent implements OnInit, OnDestroy {
     this.userStore.getUserCompanies()
       .pipe(takeUntil(this.destroy$))
       .subscribe(companies => {
-        const filtered = companies.filter(c => c.role !== CompanyRole.SUBCONTRACTOR);
-
-        if (filtered.length === 0) {
-          this.companies = filtered;
+        // Don't filter out SUBCONTRACTOR companies - users can be subcontractors in other companies
+        if (companies.length === 0) {
+          this.companies = companies;
           this.loading = false;
           this.userStore.user$.pipe(take(1)).subscribe(user => {
             if (user?.canCreateCompany) {
@@ -48,13 +47,13 @@ export class CompanySelectionComponent implements OnInit, OnDestroy {
 
         // Fetch logos for all companies in parallel
         forkJoin(
-          filtered.map(c =>
+          companies.map(c =>
             this.companyApi.getLogo(c.companyId).pipe(
               catchError(() => of({ logoUrl: undefined }))
             )
           )
         ).pipe(take(1)).subscribe(logoResponses => {
-          this.companies = filtered.map((c, i) => ({
+          this.companies = companies.map((c, i) => ({
             ...c,
             logoUrl: logoResponses[i]?.logoUrl || undefined
           }));
@@ -95,10 +94,10 @@ export class CompanySelectionComponent implements OnInit, OnDestroy {
             this.startNewCompanySession(company);
           }
         });
-    } else if (company.role === CompanyRole.WORKER || company.role === CompanyRole.OWNER) {
-      // For WORKER and OWNER roles, select company and navigate to jobsites
+    } else if (company.role === CompanyRole.WORKER || company.role === CompanyRole.OWNER || company.role === CompanyRole.SUBCONTRACTOR) {
+      // For WORKER, OWNER, and SUBCONTRACTOR roles, select company and navigate to jobsites
       this.userStore.selectCompany(company.companyId);
-      console.log('Switched company (worker/owner):', company);
+      console.log('Switched company (worker/owner/subcontractor):', company);
       this.router.navigate(['/jobsites']);
     } else {
       // For other roles, just select the company without time tracking

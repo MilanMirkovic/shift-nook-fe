@@ -1,7 +1,27 @@
 <div class="tab-content">
+  <div class="tab-header">
+    <h2 class="tab-title">Timesheets</h2>
+    <div class="tab-actions">
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="onCreateInvoiceFromTimesheets()"
+        [disabled]="!jobsite.clientId">
+        <mat-icon>receipt_long</mat-icon>
+        Create Invoice
+      </button>
+    </div>
+  </div>
+
   <div class="empty-state">
     <div class="empty-state__icon"><mat-icon>schedule</mat-icon></div>
     <h3 class="empty-state__title">No timesheets yet</h3>
     <p class="empty-state__description">Timesheets for {{ jobsite.name }} will appear here</p>
+    @if (!jobsite.clientId) {
+      <p class="empty-state__warning">
+        <mat-icon>warning</mat-icon>
+        Assign a client to this jobsite before creating invoices
+      </p>
+    }
   </div>
 </div>
