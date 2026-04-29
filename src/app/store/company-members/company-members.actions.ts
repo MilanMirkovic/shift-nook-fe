@@ -101,3 +101,8 @@ export const removeMemberFailure = createAction(
   '[Company Members] Remove Member Failure',
   props<{ error: string }>()
 );
+
+/**
+ * Clear members state (on company change or logout)
+ */
+export const clearMembers = createAction('[Company Members] Clear');

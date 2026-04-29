@@ -15,7 +15,8 @@ import {
 import {
   loadMembers,
   updateFilters,
-  updatePage
+  updatePage,
+  clearMembers
 } from '../../store/company-members/company-members.actions';
 import { CompanyMember } from '../../store/company-members/company-members.models';
 import { selectSelectedCompanyId, selectCurrentUserRole } from '../../store/user/user.selectors';
@@ -134,20 +135,19 @@ export class TeamMembersComponent implements OnInit, OnDestroy {
       .subscribe((companyId) => {
         this.companyId = companyId;
 
-        // Skip API call if data is already loaded for this session
-        this.loaded$.pipe(take(1)).subscribe(loaded => {
-          if (!loaded) {
-            this.store.dispatch(
-              loadMembers({
-                companyId,
-                page: this.currentPage,
-                size: this.pageSize,
-                role: null,
-                q: this.currentQuery
-              })
-            );
-          }
-        });
+        // Clear stale data from previous company
+        this.store.dispatch(clearMembers());
+
+        // Load members for the new company
+        this.store.dispatch(
+          loadMembers({
+            companyId,
+            page: this.currentPage,
+            size: this.pageSize,
+            role: null,
+            q: this.currentQuery
+          })
+        );
       });
   }
 

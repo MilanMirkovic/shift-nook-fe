@@ -21,7 +21,8 @@ import {
   loadMembers,
   updateFilters,
   updatePage,
-  removeMember
+  removeMember,
+  clearMembers
 } from '../../store/company-members/company-members.actions';
 import { CompanyMember } from '../../store/company-members/company-members.models';
 import { selectSelectedCompanyId } from '../../store/user/user.selectors';
@@ -93,7 +94,7 @@ export class WorkersComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit(): void {
-    // Wait for company ID to be available, then load members only if not already loaded
+    // Wait for company ID to be available, then clear and reload when company changes
     this.selectedCompanyId$
       .pipe(
         filter(id => id !== null),
@@ -103,21 +104,20 @@ export class WorkersComponent implements OnInit, OnDestroy {
       .subscribe(companyId => {
         this.companyId = companyId;
 
-        // Skip API call if data is already loaded for this session
-        this.loaded$.pipe(take(1)).subscribe(loaded => {
-          if (!loaded) {
-            this._store.dispatch(updateFilters({ role: CompanyRole.WORKER, q: null }));
-            this._store.dispatch(
-              loadMembers({
-                companyId: companyId,
-                page: 0,
-                size: 20,
-                role: CompanyRole.WORKER,
-                q: null
-              })
-            );
-          }
-        });
+        // Clear stale data from previous company
+        this._store.dispatch(clearMembers());
+
+        // Load members for the new company
+        this._store.dispatch(updateFilters({ role: CompanyRole.WORKER, q: null }));
+        this._store.dispatch(
+          loadMembers({
+            companyId: companyId,
+            page: 0,
+            size: 20,
+            role: CompanyRole.WORKER,
+            q: null
+          })
+        );
       });
   }
 

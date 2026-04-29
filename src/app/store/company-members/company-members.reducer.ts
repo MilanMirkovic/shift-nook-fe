@@ -11,7 +11,8 @@ import {
   loadMemberByIdFailure,
   removeMember,
   removeMemberSuccess,
-  removeMemberFailure
+  removeMemberFailure,
+  clearMembers
 } from './company-members.actions';
 
 export const initialState: CompanyMembersState = {
@@ -113,5 +114,8 @@ export const reducer = createReducer(
     ...state,
     loading: false,
     error
-  }))
+  })),
+
+  // Clear members state (on company change or logout)
+  on(clearMembers, () => initialState)
 );
