@@ -75,21 +75,53 @@
 
         <!-- NO_COMPANY -->
         @if (preview.acceptorStatus === 'NO_COMPANY') {
-          <div class="state">
-            <div class="company-avatar">{{ preview.ownerCompanyName[0].toUpperCase() }}</div>
-            <div class="invite-header">
-              <h2 class="state-title">One more step…</h2>
-              <p class="state-msg">
-                You're logged in, but you don't have a company yet.
-                Create your company first, then you'll be able to accept the invitation from
-                <strong>{{ preview.ownerCompanyName }}</strong>.
-              </p>
+          @if ((userCompanies$ | async)?.length) {
+            <!-- User already has a company — treat as READY -->
+            <div class="state">
+              <div class="company-avatar">{{ preview.ownerCompanyName[0].toUpperCase() }}</div>
+              <div class="invite-header">
+                <h2 class="state-title">Accept Invitation</h2>
+                <p class="state-msg">
+                  You're accepting on behalf of your company.
+                </p>
+              </div>
+              <div class="detail-card">
+                <div class="detail-row">
+                  <mat-icon class="detail-icon">business</mat-icon>
+                  <div>
+                    <span class="detail-label">Invited by</span>
+                    <span class="detail-value">{{ preview.ownerCompanyName }}</span>
+                  </div>
+                </div>
+                <div class="detail-row">
+                  <mat-icon class="detail-icon">mail_outline</mat-icon>
+                  <div>
+                    <span class="detail-label">Invited email</span>
+                    <span class="detail-value">{{ preview.invitedEmail }}</span>
+                  </div>
+                </div>
+              </div>
+              <button mat-flat-button class="btn-primary btn-full" (click)="onAccept()">
+                Accept Invitation
+              </button>
             </div>
-            <button mat-flat-button class="btn-primary btn-full" (click)="onCreateCompany()">
-              <mat-icon>business</mat-icon>
-              Create My Company
-            </button>
-          </div>
+          } @else {
+            <div class="state">
+              <div class="company-avatar">{{ preview.ownerCompanyName[0].toUpperCase() }}</div>
+              <div class="invite-header">
+                <h2 class="state-title">One more step…</h2>
+                <p class="state-msg">
+                  You're logged in, but you don't have a company yet.
+                  Create your company first, then you'll be able to accept the invitation from
+                  <strong>{{ preview.ownerCompanyName }}</strong>.
+                </p>
+              </div>
+              <button mat-flat-button class="btn-primary btn-full" (click)="onCreateCompany()">
+                <mat-icon>business</mat-icon>
+                Create My Company
+              </button>
+            </div>
+          }
         }
 
         <!-- READY -->

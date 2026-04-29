@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Actions, ofType } from '@ngrx/effects';
-import { Subject, takeUntil, filter, take } from 'rxjs';
+import { Subject, takeUntil, filter, take, combineLatest } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -21,6 +21,7 @@ import {
   selectSubcontractorInvitePreview,
   selectSubcontractorInvitePreviewError,
 } from '../../../store/subcontractors/subcontractors.selectors';
+import { selectUserCompanies } from '../../../store/user/user.selectors';
 import { UserStoreService } from '../../../store/user/user-store.service';
 import { AuthService } from '../../../core/auth/auth.service';
 
@@ -50,6 +51,7 @@ export class SubcontractorAcceptInviteComponent implements OnInit, OnDestroy {
   acceptError = signal<string | null>(null);
 
   readonly preview$ = this.store.select(selectSubcontractorInvitePreview);
+  readonly userCompanies$ = this.store.select(selectUserCompanies);
 
   ngOnInit(): void {
     this.store.dispatch(resetAcceptInviteState());
@@ -60,7 +62,6 @@ export class SubcontractorAcceptInviteComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Preview endpoint is public — call it immediately without auth
     this.store.dispatch(previewSubcontractorInvite({ token: this.token }));
 
     this.store.select(selectSubcontractorInvitePreviewError)
@@ -70,11 +71,49 @@ export class SubcontractorAcceptInviteComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       });
 
-    this.store.select(selectSubcontractorInvitePreview)
-      .pipe(takeUntil(this.destroy$), filter(p => p !== null), take(1))
-      .subscribe(() => {
-        this.view.set('status');
-        this.cdr.markForCheck();
+    // When preview loads, check if the user already has a company in the store.
+    // If the backend returns NO_COMPANY but the user store shows they have a company,
+    // skip the company creation step and re-fetch the preview so the backend
+    // can re-evaluate with the freshly available auth context.
+    combineLatest([
+      this.store.select(selectSubcontractorInvitePreview),
+      this.store.select(selectUserCompanies),
+    ])
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(([preview]) => preview !== null),
+        take(1),
+      )
+      .subscribe(([preview, companies]) => {
+        if (preview!.acceptorStatus === 'NO_COMPANY' && companies.length > 0) {
+          // User already has a company — re-dispatch preview so the backend
+          // can return the correct READY status with the updated auth state.
+          this.store.dispatch(previewSubcontractorInvite({ token: this.token! }));
+
+          // Wait for the refreshed preview
+          this.store.select(selectSubcontractorInvitePreview)
+            .pipe(
+              takeUntil(this.destroy$),
+              // Skip the stale NO_COMPANY value, wait for the next emission
+              filter(p => p !== null && p.acceptorStatus !== 'NO_COMPANY'),
+              take(1),
+            )
+            .subscribe(() => {
+              this.view.set('status');
+              this.cdr.markForCheck();
+            });
+
+          // If the re-fetch still returns NO_COMPANY after a short delay, show status anyway
+          setTimeout(() => {
+            if (this.view() === 'loading') {
+              this.view.set('status');
+              this.cdr.markForCheck();
+            }
+          }, 3000);
+        } else {
+          this.view.set('status');
+          this.cdr.markForCheck();
+        }
       });
   }
 
