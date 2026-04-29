@@ -8,6 +8,7 @@ export interface JobsiteTask {
   description?: string;
   status: TaskStatus;
   createdAt: string; // ISO 8601 date string
+  assignedToSubcontractorCompanyId?: string; // Subcontractor company assigned to this task
   workDescription?: string; // Work description submitted by worker
   assignedWorkerUserId?: string;
   assignedWorkerName?: string;
@@ -34,12 +35,14 @@ export interface CreateJobsiteTaskRequest {
   jobsiteId: string;
   name: string;
   description?: string;
+  assignedToSubcontractorCompanyId?: string;
 }
 
 export interface UpdateJobsiteTaskRequest {
   name?: string;
   description?: string;
   status?: TaskStatus;
+  assignedToSubcontractorCompanyId?: string;
   reviewNotes?: string; // Notes from owner when approving/rejecting
 }
 

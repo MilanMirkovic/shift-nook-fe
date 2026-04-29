@@ -3,6 +3,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { JobsitesPageResponse, Jobsite, CreateJobsiteInput, UpdateJobsiteInput } from './jobsites.models';
+import {
+  JobsiteSubcontractorAssignment,
+  AssignSubcontractorToJobsiteRequest
+} from '../../shared/models/jobsite-subcontractor-assignment.model';
 
 @Injectable({ providedIn: 'root' })
 export class JobsitesApiService {
@@ -73,6 +77,49 @@ export class JobsitesApiService {
     return this.http.put<Jobsite>(
       `${this.apiUrl}/companies/${companyId}/jobsites/${jobsiteId}`,
       jobsite
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Subcontractor Assignment APIs
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Assign a subcontractor company to a jobsite
+   */
+  assignSubcontractorToJobsite(
+    companyId: string,
+    jobsiteId: string,
+    request: AssignSubcontractorToJobsiteRequest
+  ): Observable<JobsiteSubcontractorAssignment> {
+    return this.http.post<JobsiteSubcontractorAssignment>(
+      `${this.apiUrl}/companies/${companyId}/jobsites/${jobsiteId}/subcontractors`,
+      request
+    );
+  }
+
+  /**
+   * List all subcontractors assigned to a jobsite
+   */
+  listSubcontractorsForJobsite(
+    companyId: string,
+    jobsiteId: string
+  ): Observable<JobsiteSubcontractorAssignment[]> {
+    return this.http.get<JobsiteSubcontractorAssignment[]>(
+      `${this.apiUrl}/companies/${companyId}/jobsites/${jobsiteId}/subcontractors`
+    );
+  }
+
+  /**
+   * Revoke a subcontractor's assignment to a jobsite
+   */
+  revokeSubcontractorAssignment(
+    companyId: string,
+    jobsiteId: string,
+    assignmentId: string
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/companies/${companyId}/jobsites/${jobsiteId}/subcontractors/${assignmentId}`
     );
   }
 }

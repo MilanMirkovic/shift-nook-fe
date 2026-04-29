@@ -48,7 +48,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   protected isWorker = false; // Show Check In button only for WORKER role
   protected isAuthenticated = false;
   protected canSeeSubcontractors = false;   // OWNER or ADMIN of a company
-  protected canSeePrincipalCompanies = false; // OWNER whose company is a sub (any company)
+  protected canSeePrincipalCompanies = false; // OWNER or SUBCONTRACTOR of a company
   protected canSeeWorkTime = false; // Only show Work Time for ACCOUNTANT
   protected isPlatformAdmin = false; // Show Admin section for platform ADMIN role
   protected isAccountant = false; // Show work session timer for ACCOUNTANT
@@ -139,11 +139,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.canSeeSubcontractors = canSee;
       });
 
-    // Principal Companies tab — OWNER of current company
-    // (a sub-company owner manages their principal links from here)
+    // Principal Companies tab — OWNER or SUBCONTRACTOR of current company
+    // (a sub-company owner or subcontractor manages their principal links from here)
     this.userStore.currentCompany$
       .pipe(
-        map(company => company?.role === CompanyRole.OWNER),
+        map(company => company?.role === CompanyRole.OWNER || company?.role === CompanyRole.SUBCONTRACTOR),
         takeUntil(this.destroy$)
       )
       .subscribe(canSee => {

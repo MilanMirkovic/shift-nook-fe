@@ -220,7 +220,7 @@ export const routes: Routes = [
   },
   {
     path: 'financials',
-    canActivate: [authGuard, roleGuard(CompanyRole.ACCOUNTANT)],
+    canActivate: [authGuard, roleGuard(CompanyRole.OWNER, CompanyRole.ACCOUNTANT)],
     data: { preload: true },
     providers: [
       provideState(INVOICES_FEATURE_KEY, invoicesReducer),

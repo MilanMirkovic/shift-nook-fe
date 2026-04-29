@@ -1,0 +1,78 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>Assign Subcontractor to {{ data.jobsiteName }}</h2>
+    <button mat-icon-button (click)="onCancel()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="assignmentForm">
+      @if (data.availableSubcontractors.length === 0) {
+        <div class="empty-state">
+          <mat-icon>groups</mat-icon>
+          <p>No available subcontractors</p>
+          <small>You need to add subcontractors to your company first</small>
+        </div>
+      } @else {
+        <div class="form-section">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Select Subcontractor</mat-label>
+            <mat-select formControlName="subcontractorCompanyId" required>
+              @for (subcontractor of data.availableSubcontractors; track subcontractor.companyId) {
+                <mat-option [value]="subcontractor.companyId">
+                  {{ subcontractor.companyName }}
+                </mat-option>
+              }
+            </mat-select>
+            @if (assignmentForm.get('subcontractorCompanyId')?.hasError('required') &&
+                 assignmentForm.get('subcontractorCompanyId')?.touched) {
+              <mat-error>Please select a subcontractor</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Notes (optional)</mat-label>
+            <textarea
+              matInput
+              formControlName="notes"
+              rows="3"
+              placeholder="Add any notes about this assignment"></textarea>
+          </mat-form-field>
+
+          <div class="info-message">
+            <mat-icon>info</mat-icon>
+            <div class="info-content">
+              <p><strong>What happens when you assign a subcontractor:</strong></p>
+              <ul>
+                <li>The subcontractor company can view this jobsite</li>
+                <li>They can see tasks assigned to them or create new tasks</li>
+                <li>Their workers can check in to assigned tasks</li>
+                <li>They can create invoices that bill your company</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      }
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-button (click)="onCancel()" [disabled]="submitting">
+      Cancel
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="assignmentForm.invalid || submitting || data.availableSubcontractors.length === 0"
+      class="submit-button">
+      @if (submitting) {
+        <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
+        <span>Assigning...</span>
+      } @else {
+        <span>Assign Subcontractor</span>
+      }
+    </button>
+  </mat-dialog-actions>
+</div>

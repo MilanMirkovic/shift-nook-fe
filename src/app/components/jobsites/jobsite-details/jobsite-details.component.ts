@@ -1,7 +1,7 @@
 import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { filter, take, shareReplay, tap, switchMap, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, combineLatest } from 'rxjs';
+import { filter, take, shareReplay, tap, switchMap, takeUntil, map } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
@@ -21,6 +21,10 @@ import { ConfirmationDialogComponent } from '../../../shared/components/confirma
 import { JobsiteDialogComponent } from '../../../shared/components/jobsite-dialog/jobsite-dialog.component';
 import { updateJobsite, updateJobsiteSuccess, updateJobsiteFailure } from '../../../store/jobsites/jobsites.actions';
 import { ActivityFilters } from './tabs/jobsite-activity/jobsite-activity.component';
+import { AssignSubcontractorDialogComponent, AssignSubcontractorDialogData, SubcontractorOption } from '../../../shared/components/assign-subcontractor-dialog/assign-subcontractor-dialog.component';
+import { loadSubcontractors } from '../../../store/subcontractors/subcontractors.actions';
+import { selectSubcontractorLinks } from '../../../store/subcontractors/subcontractors.selectors';
+import { JobsitesApiService } from '../../../store/jobsites/jobsites.api';
 
 @Component({
   selector: 'app-jobsite-details',
@@ -39,6 +43,7 @@ export class JobsiteDetailsComponent implements OnInit, OnDestroy {
   private readonly stateService = inject(JobsiteDetailsStateService);
   private readonly destroy$ = new Subject<void>();
   private readonly store = inject(Store);
+  private readonly jobsitesApi = inject(JobsitesApiService);
 
   private readonly jobsiteSubject$ = new BehaviorSubject<Jobsite | null>(null);
   jobsite$: Observable<Jobsite | null> = this.jobsiteSubject$.asObservable();
@@ -352,6 +357,64 @@ export class JobsiteDetailsComponent implements OnInit, OnDestroy {
         return;
       }
       window.open(url, '_blank');
+    });
+  }
+
+  protected onManageSubcontractors(): void {
+    if (!this.currentCompanyId) return;
+
+    // Load subcontractors first
+    this.store.dispatch(loadSubcontractors({ companyId: this.currentCompanyId }));
+
+    // Combine jobsite and subcontractor data
+    combineLatest([
+      this.jobsite$.pipe(filter(j => j !== null), take(1)),
+      this.store.select(selectSubcontractorLinks).pipe(take(1))
+    ]).subscribe(([jobsite, links]) => {
+      if (!jobsite || !this.currentCompanyId) return;
+
+      // Filter to active subcontractors only
+      const availableSubcontractors: SubcontractorOption[] = links
+        .filter(link => link.status === 'ACTIVE' && link.subcontractorCompanyId)
+        .map(link => ({
+          companyId: link.subcontractorCompanyId!,
+          companyName: link.subcontractorCompanyName || 'Unknown',
+          linkId: link.id
+        }));
+
+      const dialogRef = this.dialog.open(AssignSubcontractorDialogComponent, {
+        width: '600px',
+        maxWidth: '95vw',
+        disableClose: false,
+        autoFocus: true,
+        data: {
+          companyId: this.currentCompanyId,
+          jobsiteId: jobsite.id,
+          jobsiteName: jobsite.name,
+          availableSubcontractors
+        } as AssignSubcontractorDialogData
+      });
+
+      dialogRef.afterClosed().pipe(
+        filter(result => !!result),
+        switchMap(request => {
+          return this.jobsitesApi.assignSubcontractorToJobsite(
+            this.currentCompanyId!,
+            jobsite.id,
+            request
+          );
+        })
+      ).subscribe({
+        next: () => {
+          this.notificationService.success('Subcontractor assigned successfully!');
+          // TODO: Reload assignments list when we add that display
+        },
+        error: (error) => {
+          this.notificationService.error(
+            error?.error?.message || 'Failed to assign subcontractor. Please try again.'
+          );
+        }
+      });
     });
   }
 
