@@ -125,9 +125,10 @@ export class JobsiteDetailsComponent implements OnInit, OnDestroy {
 
     const tabIndexMap: Record<string, number> = {
       'timesheets': 0,
-      'tasks': 1,
-      'details': 2,
-      'activity': 3
+      'invoices': 1,
+      'tasks': 2,
+      'details': 3,
+      'activity': 4
     };
 
     const tabIndex = tabIndexMap[tabName.toLowerCase()];

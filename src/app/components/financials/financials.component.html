@@ -160,7 +160,13 @@
           <div class="invoices-list" *ngIf="recentInvoices.length > 0">
             <div class="invoice-item" *ngFor="let invoice of recentInvoices; trackBy: trackById" (click)="navigateToInvoice(invoice)">
               <div class="invoice-item-info">
-                <span class="invoice-number">#{{ invoice.invoiceNumber }}</span>
+                <div class="invoice-number-container">
+                  <span class="invoice-number">#{{ invoice.invoiceNumber }}</span>
+                  <span class="invoice-direction-badge" *ngIf="isReceivedInvoice(invoice)" matTooltip="Invoice from subcontractor">
+                    <mat-icon>call_received</mat-icon>
+                    Received
+                  </span>
+                </div>
                 <span class="invoice-title">{{ invoice.title }}</span>
                 <span class="invoice-date">{{ invoice.issuedAt | date:'MMM d, yyyy' }}</span>
               </div>

@@ -26,8 +26,8 @@ export class InvoicesEffects {
   loadInvoices$ = createEffect(() =>
     this.actions$.pipe(
       ofType(InvoicesActions.loadInvoices),
-      switchMap(({ companyId, page = 0, size = 20, sort, clientId }) =>
-        this.invoicesApi.loadInvoices(companyId, page, size, sort, clientId).pipe(
+      switchMap(({ companyId, page = 0, size = 20, sort, clientId, jobsiteId, includeReceived }) =>
+        this.invoicesApi.loadInvoices(companyId, page, size, sort, clientId, jobsiteId, includeReceived).pipe(
           map((response) => InvoicesActions.loadInvoicesSuccess({ invoices: response.content, total: response.totalElements })),
           catchError((error: HttpErrorResponse) => {
             if (error?.status === 404) {

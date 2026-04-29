@@ -90,6 +90,20 @@
           </div>
         </mat-tab>
 
+        <!-- Invoices Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="tab-label">
+              <mat-icon>receipt_long</mat-icon>
+              <span>Invoices</span>
+            </div>
+          </ng-template>
+
+          <div class="tab-panel">
+            <app-jobsite-invoices [jobsite]="jobsite"></app-jobsite-invoices>
+          </div>
+        </mat-tab>
+
         <!-- Tasks Tab -->
         <mat-tab>
           <ng-template mat-tab-label>

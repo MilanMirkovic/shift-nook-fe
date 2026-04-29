@@ -19,7 +19,7 @@ export const createInvoiceFailure = createAction(
 // Load all invoices (optional clientId filter)
 export const loadInvoices = createAction(
   '[Invoices] Load Invoices',
-  props<{ companyId: string; clientId?: string; page?: number; size?: number; sort?: string }>()
+  props<{ companyId: string; clientId?: string; jobsiteId?: string; page?: number; size?: number; sort?: string; includeReceived?: boolean }>()
 );
 export const loadInvoicesSuccess = createAction(
   '[Invoices] Load Invoices Success',

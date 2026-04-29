@@ -21,6 +21,20 @@ export const selectInvoicesByClientId = (clientId: string) => createSelector(
   (state) => state.invoices.filter(i => i.clientId === clientId)
 );
 
+/**
+ * Selects invoices related to a specific client (bidirectional).
+ * Includes both:
+ * - Invoices sent TO the client (where clientId = selectedClientId)
+ * - Invoices received FROM the client (where companyId = selectedClientId and clientId = currentCompanyId)
+ */
+export const selectInvoicesByClientIdBidirectional = (currentCompanyId: string, selectedClientId: string) => createSelector(
+  selectInvoicesState,
+  (state) => state.invoices.filter(i =>
+    i.clientId === selectedClientId || // Sent to this client
+    (i.companyId === selectedClientId && i.clientId === currentCompanyId) // Received from this client
+  )
+);
+
 export const selectInvoicesByEstimateId = (estimateId: string) => createSelector(
   selectInvoicesState,
   (state) => state.invoices.filter(i => i.estimateId === estimateId)

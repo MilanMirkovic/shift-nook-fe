@@ -154,7 +154,13 @@
       <tbody>
         <tr *ngFor="let invoice of vm.invoices; trackBy: trackById" class="invoice-row">
           <td class="col-num">
-            <span class="inv-number">#{{ invoice.invoiceNumber }}</span>
+            <div class="invoice-number-container">
+              <span class="inv-number">#{{ invoice.invoiceNumber }}</span>
+              <span class="invoice-direction-badge" *ngIf="isReceivedInvoice(invoice)" matTooltip="Invoice from {{ clientName }} (subcontractor)">
+                <mat-icon>call_received</mat-icon>
+                Received
+              </span>
+            </div>
           </td>
           <td class="col-title">
             <div class="inv-title-cell">

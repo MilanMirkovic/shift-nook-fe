@@ -22,6 +22,7 @@ import { JobsiteTimesheetsComponent } from './jobsite-details/tabs/jobsite-times
 import { JobsiteTasksComponent } from './jobsite-details/tabs/jobsite-tasks/jobsite-tasks.component';
 import { JobsiteInfoComponent } from './jobsite-details/tabs/jobsite-info/jobsite-info.component';
 import { JobsiteActivityComponent } from './jobsite-details/tabs/jobsite-activity/jobsite-activity.component';
+import { JobsiteInvoicesComponent } from './jobsite-details/tabs/jobsite-invoices/jobsite-invoices.component';
 import { ListPageComponent } from '../../layout/list-page/list-page.component';
 import { CreateInvoiceFromTimesheetsDialogComponent } from '../../shared/components/create-invoice-from-timesheets-dialog/create-invoice-from-timesheets-dialog.component';
 
@@ -44,6 +45,7 @@ const routes: Routes = [
     JobsiteTasksComponent,
     JobsiteInfoComponent,
     JobsiteActivityComponent,
+    JobsiteInvoicesComponent,
     CreateInvoiceFromTimesheetsDialogComponent
   ],
   imports: [

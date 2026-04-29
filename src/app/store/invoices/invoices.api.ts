@@ -27,7 +27,8 @@ export class InvoicesApiService {
     size: number = 20,
     sort?: string,
     clientId?: string,
-    jobsiteId?: string
+    jobsiteId?: string,
+    includeReceived?: boolean
   ): Observable<InvoicesPageResponse> {
     let params = new HttpParams()
       .set('page', page.toString())
@@ -35,6 +36,7 @@ export class InvoicesApiService {
     if (sort) params = params.set('sort', sort);
     if (clientId) params = params.set('clientId', clientId);
     if (jobsiteId) params = params.set('jobsiteId', jobsiteId);
+    if (includeReceived) params = params.set('includeReceived', 'true');
 
     return this.http.get<InvoicesPageResponse>(
       `${this.apiUrl}/companies/${companyId}/invoices`,

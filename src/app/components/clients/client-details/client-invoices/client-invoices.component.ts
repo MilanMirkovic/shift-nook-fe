@@ -27,7 +27,7 @@ import {
   InvoiceDialogResult,
 } from '../../../../shared/components/invoice-dialog/invoice-dialog.component';
 import {
-  selectInvoicesByClientId,
+  selectInvoicesByClientIdBidirectional,
   selectInvoicesLoading,
   selectInvoicesError,
 } from '../../../../store/invoices/invoices.selectors';
@@ -104,7 +104,8 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
   }>;
 
   ngOnInit(): void {
-    const allInvoices$ = this.store.select(selectInvoicesByClientId(this.clientId));
+    // Use bidirectional selector to show both sent and received invoices
+    const allInvoices$ = this.store.select(selectInvoicesByClientIdBidirectional(this.companyId, this.clientId));
 
     // Apply filtering based on navigation service filter and search query
     this.invoices$ = combineLatest([
@@ -168,11 +169,13 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
       })
     );
 
+    // Load invoices - include both sent (to this client) and received (from this client as subcontractor)
     this.store.dispatch(loadInvoices({
       companyId: this.companyId,
       clientId: this.clientId,
       page: 0,
       size: 100,
+      includeReceived: true,
     }));
   }
 
@@ -538,5 +541,10 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
     const diffTime = now.getTime() - dueDate.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
+  }
+
+  protected isReceivedInvoice(invoice: Invoice): boolean {
+    // Invoice is received if it was issued BY the client (subcontractor) TO us (principal company)
+    return invoice.companyId === this.clientId && invoice.clientId === this.companyId;
   }
 }

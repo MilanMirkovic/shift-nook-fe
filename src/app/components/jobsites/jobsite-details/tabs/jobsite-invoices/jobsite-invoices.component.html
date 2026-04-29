@@ -1,0 +1,102 @@
+<div class="tab-content">
+  <div class="tab-header">
+    <h2 class="tab-title">Invoices</h2>
+    <p class="tab-subtitle" *ngIf="!loading">
+      {{ invoices.length }} invoice{{ invoices.length !== 1 ? 's' : '' }} for {{ jobsite.name }}
+    </p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading invoices...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && invoices.length === 0" class="empty-state">
+    <div class="empty-state__icon"><mat-icon>receipt_long</mat-icon></div>
+    <h3 class="empty-state__title">No invoices yet</h3>
+    <p class="empty-state__description">
+      Invoices created from timesheets on this jobsite will appear here
+    </p>
+  </div>
+
+  <!-- Invoices Table -->
+  <div *ngIf="!loading && invoices.length > 0" class="invoices-container">
+    <table class="invoices-table">
+      <thead>
+        <tr>
+          <th class="col-number">#</th>
+          <th class="col-title">Title</th>
+          <th class="col-issued">Issued</th>
+          <th class="col-due">Due Date</th>
+          <th class="col-amount">Amount</th>
+          <th class="col-paid">Paid</th>
+          <th class="col-status">Status</th>
+          <th class="col-actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let invoice of invoices; trackBy: trackById"
+          class="invoice-row"
+          [class.invoice-row--sent]="isSentInvoice(invoice)"
+          [class.invoice-row--received]="isReceivedInvoice(invoice)">
+          <td class="col-number">
+            <div class="invoice-number-container">
+              <span class="invoice-number">#{{ invoice.invoiceNumber }}</span>
+              <span
+                *ngIf="isSentInvoice(invoice)"
+                class="direction-badge direction-badge--sent"
+                matTooltip="Invoice sent to client">
+                <mat-icon>call_made</mat-icon>
+                Sent
+              </span>
+              <span
+                *ngIf="isReceivedInvoice(invoice)"
+                class="direction-badge direction-badge--received"
+                matTooltip="Invoice received from subcontractor">
+                <mat-icon>call_received</mat-icon>
+                Received
+              </span>
+            </div>
+          </td>
+          <td class="col-title">
+            <div class="title-container">
+              <span class="invoice-title">{{ invoice.title }}</span>
+              <span class="invoice-notes" *ngIf="invoice.notes">{{ invoice.notes }}</span>
+            </div>
+          </td>
+          <td class="col-issued">{{ invoice.issuedAt | date:'MMM d, yyyy' }}</td>
+          <td class="col-due">
+            <span [class.overdue]="isOverdue(invoice)">
+              {{ invoice.dueAt | date:'MMM d, yyyy' }}
+            </span>
+          </td>
+          <td class="col-amount">{{ invoice.totalAmount | currency }}</td>
+          <td class="col-paid">
+            <div class="payment-info">
+              <span class="paid-amount">{{ invoice.paidAmount | currency }}</span>
+              <span class="payment-percentage" *ngIf="invoice.paymentPercentage > 0">
+                ({{ invoice.paymentPercentage }}%)
+              </span>
+            </div>
+          </td>
+          <td class="col-status">
+            <span class="status-badge" [ngClass]="getStatusClass(invoice.status)">
+              {{ invoice.status }}
+            </span>
+          </td>
+          <td class="col-actions">
+            <button
+              mat-icon-button
+              (click)="navigateToClient(invoice)"
+              [matTooltip]="isSentInvoice(invoice) ? 'View client details' : 'View subcontractor details'">
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

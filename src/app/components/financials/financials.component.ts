@@ -59,6 +59,8 @@ export class FinancialsComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
 
+  private currentCompanyId: string | null = null;
+
   protected loading$ = combineLatest([
     this.store.select(selectInvoices),
     this.store.select(selectEstimates),
@@ -99,6 +101,7 @@ export class FinancialsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(companyId => {
         if (companyId) {
+          this.currentCompanyId = companyId;
           this.loadFinancialData(companyId);
         }
       });
@@ -110,8 +113,8 @@ export class FinancialsComponent implements OnInit, OnDestroy {
   }
 
   private loadFinancialData(companyId: string): void {
-    // Load all invoices and estimates
-    this.store.dispatch(loadInvoices({ companyId, page: 0, size: 1000 }));
+    // Load all invoices (including received invoices from subcontractors) and estimates
+    this.store.dispatch(loadInvoices({ companyId, page: 0, size: 1000, includeReceived: true }));
     this.store.dispatch(loadEstimates({ companyId, page: 0, size: 1000 }));
   }
 
@@ -178,5 +181,10 @@ export class FinancialsComponent implements OnInit, OnDestroy {
     if (invoice.clientId) {
       this.router.navigate(['/clients', invoice.clientId]);
     }
+  }
+
+  protected isReceivedInvoice(invoice: Invoice): boolean {
+    // Invoice is received if the current company is the client (recipient)
+    return this.currentCompanyId !== null && invoice.clientId === this.currentCompanyId;
   }
 }
