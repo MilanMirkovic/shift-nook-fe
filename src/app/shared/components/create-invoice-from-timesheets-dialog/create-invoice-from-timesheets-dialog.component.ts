@@ -372,9 +372,14 @@ export class CreateInvoiceFromTimesheetsDialogComponent implements OnInit, OnDes
     };
 
     // Dispatch action
+    // For assigned jobsites (subcontractor flow), create the invoice under the principal company
+    const invoiceCompanyId = this.isSubcontractor
+      ? this.data.jobsiteCompanyId
+      : this.data.companyId;
+
     this.store.dispatch(
       createInvoiceFromTimesheets({
-        companyId: this.data.companyId,
+        companyId: invoiceCompanyId,
         request: request
       })
     );
