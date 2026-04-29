@@ -12,7 +12,7 @@ import {
   selectLoading,
   selectLoaded
 } from '../../store/jobsites/jobsites.selectors';
-import { loadJobsites, updatePage, createJobsite, createJobsiteSuccess, deleteJobsite, updateJobsite, updateJobsiteSuccess, updateJobsiteFailure } from '../../store/jobsites/jobsites.actions';
+import { loadJobsites, updatePage, createJobsite, createJobsiteSuccess, deleteJobsite, updateJobsite, updateJobsiteSuccess, updateJobsiteFailure, clearJobsites } from '../../store/jobsites/jobsites.actions';
 import { Jobsite } from '../../store/jobsites/jobsites.models';
 import { selectSelectedCompanyId, selectCurrentCompany } from '../../store/user/user.selectors';
 import { CompanyRole } from '../../shared/models/company-role';
@@ -86,7 +86,7 @@ export class JobsitesComponent implements OnInit, OnDestroy {
         this.canManageJobsites = company?.role === CompanyRole.OWNER || company?.role === CompanyRole.ACCOUNTANT;
       });
 
-    // Wait for company ID, then load only if not already loaded
+    // Wait for company ID, then clear and reload when company changes
     this.selectedCompanyId$
       .pipe(
         filter(id => id !== null),
@@ -96,11 +96,11 @@ export class JobsitesComponent implements OnInit, OnDestroy {
       .subscribe(companyId => {
         this.companyId = companyId;
 
-        this.loaded$.pipe(take(1)).subscribe(loaded => {
-          if (!loaded) {
-            this.loadJobsitesList();
-          }
-        });
+        // Clear stale data from previous company
+        this._store.dispatch(clearJobsites());
+
+        // Load jobsites for the new company
+        this.loadJobsitesList();
       });
 
     // Reload jobsites after successful creation to ensure clientName is populated

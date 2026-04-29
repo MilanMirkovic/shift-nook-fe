@@ -22,7 +22,7 @@ import { JobsiteDialogComponent } from '../../../shared/components/jobsite-dialo
 import { updateJobsite, updateJobsiteSuccess, updateJobsiteFailure } from '../../../store/jobsites/jobsites.actions';
 import { ActivityFilters } from './tabs/jobsite-activity/jobsite-activity.component';
 import { AssignSubcontractorDialogComponent, AssignSubcontractorDialogData, SubcontractorOption } from '../../../shared/components/assign-subcontractor-dialog/assign-subcontractor-dialog.component';
-import { loadSubcontractors } from '../../../store/subcontractors/subcontractors.actions';
+import { loadSubcontractors, loadSubcontractorsSuccess } from '../../../store/subcontractors/subcontractors.actions';
 import { selectSubcontractorLinks } from '../../../store/subcontractors/subcontractors.selectors';
 import { JobsitesApiService } from '../../../store/jobsites/jobsites.api';
 
@@ -363,14 +363,17 @@ export class JobsiteDetailsComponent implements OnInit, OnDestroy {
   protected onManageSubcontractors(): void {
     if (!this.currentCompanyId) return;
 
-    // Load subcontractors first
+    // Load subcontractors and wait for success action
     this.store.dispatch(loadSubcontractors({ companyId: this.currentCompanyId }));
 
-    // Combine jobsite and subcontractor data
+    // Wait for loadSubcontractorsSuccess action, then open dialog
     combineLatest([
       this.jobsite$.pipe(filter(j => j !== null), take(1)),
-      this.store.select(selectSubcontractorLinks).pipe(take(1))
-    ]).subscribe(([jobsite, links]) => {
+      this.actions$.pipe(
+        ofType(loadSubcontractorsSuccess),
+        take(1)
+      )
+    ]).subscribe(([jobsite, { links }]) => {
       if (!jobsite || !this.currentCompanyId) return;
 
       // Filter to active subcontractors only
