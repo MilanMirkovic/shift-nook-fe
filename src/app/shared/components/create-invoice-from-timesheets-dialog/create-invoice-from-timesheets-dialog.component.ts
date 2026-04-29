@@ -209,24 +209,28 @@ export class CreateInvoiceFromTimesheetsDialogComponent implements OnInit, OnDes
   }
 
   private groupByWorker(timesheets: Timesheet[]): TimesheetLineItemPreview[] {
-    const workerMap = new Map<string, TimesheetLineItemPreview>();
+    const workerMap = new Map<string, TimesheetLineItemPreview & { taskNameSet: Set<string> }>();
 
     timesheets.forEach(ts => {
       const workerId = ts.workerUserId;
-      const workerName = ts.workerName || 'Unknown Worker';
 
       if (!workerMap.has(workerId)) {
-        // Find worker's hourly rate from company members
+        // Resolve worker display name: API field → member record → fallback
         const member = this.data.companyMembers.find(m => m.userId === workerId);
+        const workerName = ts.workerName
+          || (member ? `${member.firstName} ${member.lastName}`.trim() : null)
+          || 'Unknown Worker';
         const hourlyRate = member?.hourlyRate || 0;
 
         workerMap.set(workerId, {
           workerUserId: workerId,
-          workerName: workerName,
+          workerName,
           totalHours: 0,
-          hourlyRate: hourlyRate,
+          hourlyRate,
           amount: 0,
-          timesheetIds: []
+          timesheetIds: [],
+          taskNames: [],
+          taskNameSet: new Set<string>()
         });
       }
 
@@ -234,6 +238,12 @@ export class CreateInvoiceFromTimesheetsDialogComponent implements OnInit, OnDes
       const hours = (ts.durationMinutes || 0) / 60;
       preview.totalHours += hours;
       preview.timesheetIds.push(ts.id);
+
+      // Collect distinct task names
+      if (ts.jobsiteTaskName && !preview.taskNameSet.has(ts.jobsiteTaskName)) {
+        preview.taskNameSet.add(ts.jobsiteTaskName);
+        preview.taskNames!.push(ts.jobsiteTaskName);
+      }
     });
 
     // Calculate amounts
@@ -325,7 +335,10 @@ export class CreateInvoiceFromTimesheetsDialogComponent implements OnInit, OnDes
     const lineItems: InvoiceItemInput[] = this.lineItemPreviews.map((preview, index) => {
       let description: string;
       if (this.groupByStrategy === 'WORKER') {
-        description = `${preview.workerName} - ${preview.totalHours.toFixed(2)} hours`;
+        const taskPart = preview.taskNames && preview.taskNames.length > 0
+          ? ` | Tasks: ${preview.taskNames.join(', ')}`
+          : '';
+        description = `${preview.workerName} - ${preview.totalHours.toFixed(2)} hrs${taskPart}`;
       } else {
         description = `${preview.taskName} - ${preview.totalHours.toFixed(2)} hours`;
       }

@@ -17,6 +17,7 @@ export interface TimesheetLineItemPreview {
   workerName?: string;
   taskId?: string;
   taskName?: string;
+  taskNames?: string[]; // All distinct tasks this worker performed (WORKER grouping)
   totalHours: number;
   hourlyRate: number;
   amount: number;
