@@ -85,6 +85,52 @@ export class TimesheetsApi {
   }
 
   /**
+   * Get timesheets for a specific jobsite with pagination
+   */
+  getJobsiteTimesheets(
+    companyId: string,
+    jobsiteId: string,
+    page = 0,
+    size = 20,
+    from?: string,
+    to?: string
+  ): Observable<{ items: Timesheet[]; total: number; page: number; size: number }> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    if (from) {
+      params = params.set('from', from);
+    }
+
+    if (to) {
+      params = params.set('to', to);
+    }
+
+    return this.http.get<{
+      content: Timesheet[];
+      totalElements: number;
+      totalPages: number;
+      size: number;
+      number: number;
+      numberOfElements: number;
+      first: boolean;
+      last: boolean;
+      empty: boolean;
+    }>(
+      `${this.baseUrl}/${companyId}/timesheets/jobsites/${jobsiteId}/paginated`,
+      { params }
+    ).pipe(
+      map(response => ({
+        items: response.content || [],
+        total: response.totalElements || 0,
+        page: response.number || 0,
+        size: response.size || 20
+      }))
+    );
+  }
+
+  /**
    * Get a single timesheet by ID
    */
   getTimesheetById(companyId: string, timesheetId: string): Observable<Timesheet> {

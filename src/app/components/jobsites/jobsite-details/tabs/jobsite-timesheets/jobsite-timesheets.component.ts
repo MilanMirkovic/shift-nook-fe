@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
@@ -13,6 +13,7 @@ import { selectTimesheets } from '../../../../../store/timesheets/timesheets.sel
 import { selectMembers } from '../../../../../store/company-members/company-members.selectors';
 import { selectCurrentUserRole, selectSelectedCompanyId } from '../../../../../store/user/user.selectors';
 import { CreateInvoiceFromTimesheetsDialogComponent, CreateInvoiceFromTimesheetsDialogData } from '../../../../../shared/components/create-invoice-from-timesheets-dialog/create-invoice-from-timesheets-dialog.component';
+import { loadJobsiteTimesheets } from '../../../../../store/timesheets/timesheets.actions';
 
 @Component({
   selector: 'app-jobsite-timesheets',
@@ -20,7 +21,7 @@ import { CreateInvoiceFromTimesheetsDialogComponent, CreateInvoiceFromTimesheets
   templateUrl: './jobsite-timesheets.component.html',
   styleUrls: ['./jobsite-timesheets.component.scss']
 })
-export class JobsiteTimesheetsComponent implements OnInit, OnDestroy {
+export class JobsiteTimesheetsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() jobsite!: Jobsite;
   @Output() createTimesheet = new EventEmitter<void>();
 
@@ -56,12 +57,33 @@ export class JobsiteTimesheetsComponent implements OnInit, OnDestroy {
       this.currentUserRole = role;
     });
 
-    // Subscribe to current company ID
+    // Subscribe to current company ID and load timesheets when it changes
     this.store.select(selectSelectedCompanyId).pipe(
       takeUntil(this.destroy$)
     ).subscribe(companyId => {
       this.currentCompanyId = companyId;
+      if (companyId && this.jobsite?.id) {
+        this.loadTimesheets(companyId);
+      }
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Reload timesheets when jobsite changes
+    if (changes['jobsite'] && !changes['jobsite'].firstChange && this.currentCompanyId) {
+      this.loadTimesheets(this.currentCompanyId);
+    }
+  }
+
+  private loadTimesheets(companyId: string): void {
+    if (!this.jobsite?.id) return;
+
+    this.store.dispatch(loadJobsiteTimesheets({
+      companyId,
+      jobsiteId: this.jobsite.id,
+      page: 0,
+      size: 100 // Load more timesheets for jobsite view
+    }));
   }
 
   ngOnDestroy(): void {
@@ -88,6 +110,7 @@ export class JobsiteTimesheetsComponent implements OnInit, OnDestroy {
         companyId: this.currentCompanyId,
         jobsiteId: this.jobsite.id,
         jobsiteName: this.jobsite.name,
+        jobsiteCompanyId: this.jobsite.companyId, // The company that owns the jobsite
         clientId: this.jobsite.clientId,
         currentUserRole: this.currentUserRole,
         timesheets: this.timesheets,

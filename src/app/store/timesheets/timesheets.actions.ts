@@ -18,6 +18,14 @@ export const loadWorkerTimesheets = createAction(
 );
 
 /**
+ * Load timesheets for a specific jobsite
+ */
+export const loadJobsiteTimesheets = createAction(
+  '[Timesheets] Load Jobsite Timesheets',
+  props<{ companyId: string; jobsiteId: string; page?: number; size?: number; from?: string; to?: string }>()
+);
+
+/**
  * Load timesheets success
  */
 export const loadTimesheetsSuccess = createAction(

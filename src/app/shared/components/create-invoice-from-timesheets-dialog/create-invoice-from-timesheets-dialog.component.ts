@@ -25,6 +25,7 @@ export interface CreateInvoiceFromTimesheetsDialogData {
   companyId: string;
   jobsiteId: string;
   jobsiteName: string;
+  jobsiteCompanyId: string; // The company that OWNS the jobsite
   clientId: string;
   currentUserRole: CompanyRole;
   timesheets: Timesheet[];
@@ -70,13 +71,13 @@ export class CreateInvoiceFromTimesheetsDialogComponent implements OnInit, OnDes
     private store: Store,
     private actions$: Actions
   ) {
-    // Determine role-based behavior
-    this.isSubcontractor = data.currentUserRole === CompanyRole.SUBCONTRACTOR;
-    this.isOwnerOrAccountant = [
-      CompanyRole.OWNER,
-      CompanyRole.ACCOUNTANT,
-      CompanyRole.ADMIN
-    ].includes(data.currentUserRole);
+    // Determine behavior based on jobsite ownership:
+    // - If jobsite is OWNED by current company → OWNER flow (billing the client)
+    // - If jobsite is ASSIGNED to current company → SUBCONTRACTOR flow (billing the principal)
+    const isJobsiteOwned = data.jobsiteCompanyId === data.companyId;
+
+    this.isSubcontractor = !isJobsiteOwned;  // Assigned jobsite = acting as subcontractor
+    this.isOwnerOrAccountant = isJobsiteOwned;  // Owned jobsite = acting as owner
 
     this.groupByStrategy = this.isSubcontractor ? 'WORKER' : 'TASK';
 
@@ -275,6 +276,7 @@ export class CreateInvoiceFromTimesheetsDialogComponent implements OnInit, OnDes
     this.missingRatesWarning = false;
 
     if (this.isSubcontractor) {
+      // When working as subcontractor on an assigned jobsite, check for missing worker rates
       this.lineItemPreviews.forEach(preview => {
         if (preview.hourlyRate <= 0 && preview.workerName) {
           this.missingRateWorkers.push(preview.workerName);

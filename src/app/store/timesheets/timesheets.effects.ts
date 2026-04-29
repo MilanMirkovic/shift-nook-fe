@@ -18,7 +18,8 @@ import {
   updateTimesheetFailure,
   loadWorkerTimesheets,
   loadWorkerTimesheetsSuccess,
-  loadWorkerTimesheetsFailure
+  loadWorkerTimesheetsFailure,
+  loadJobsiteTimesheets
 } from './timesheets.actions';
 import { TimesheetsApi } from './timesheets.api';
 
@@ -52,6 +53,21 @@ export class TimesheetsEffects {
         this.api.getWorkerTimesheets(companyId, workerUserId, page, size, sort, startDate, endDate).pipe(
           map(({ items, total, page, size }) => loadWorkerTimesheetsSuccess({ timesheets: items, total, page, size })),
           catchError((err) => of(loadWorkerTimesheetsFailure({ error: this.toErrorMessage(err) })))
+        )
+      )
+    )
+  );
+
+  /**
+   * Load jobsite timesheets when loadJobsiteTimesheets action is dispatched
+   */
+  loadJobsiteTimesheets$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(loadJobsiteTimesheets),
+      switchMap(({ companyId, jobsiteId, page = 0, size = 20, from, to }) =>
+        this.api.getJobsiteTimesheets(companyId, jobsiteId, page, size, from, to).pipe(
+          map(({ items, total }) => loadTimesheetsSuccess({ timesheets: items, total })),
+          catchError((err) => of(loadTimesheetsFailure({ error: this.toErrorMessage(err) })))
         )
       )
     )
