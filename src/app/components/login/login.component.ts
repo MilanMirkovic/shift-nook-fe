@@ -114,15 +114,9 @@ export class LoginComponent implements OnInit, OnDestroy {
             return;
           }
 
-          // User has companies but is not an owner of any — and is allowed to create one
-          const isOwnerOfAny = user.companies.some(c => c.role === CompanyRole.OWNER);
-          if (user.role === 'USER' && user.canCreateCompany && !isOwnerOfAny) {
-            console.log('Branch: user has no owned company and can create, navigating to /create-company');
-            this.router.navigate(['/create-company']);
-            return;
-          }
-
-          console.log('Branch: fallback, navigating to /dashboard');
+          // User has at least one company - go to dashboard
+          // (Even if they're not an owner, they might be a subcontractor/worker with access)
+          console.log('Branch: user has companies, navigating to /dashboard');
           this.router.navigate(['/dashboard']);
         });
     } catch (err: any) {
