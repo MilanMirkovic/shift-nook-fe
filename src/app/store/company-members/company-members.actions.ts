@@ -103,6 +103,24 @@ export const removeMemberFailure = createAction(
 );
 
 /**
+ * Update a member's hourly rate
+ */
+export const updateMemberHourlyRate = createAction(
+  '[Company Members] Update Hourly Rate',
+  props<{ companyId: string; userId: string; hourlyRate: number }>()
+);
+
+export const updateMemberHourlyRateSuccess = createAction(
+  '[Company Members] Update Hourly Rate Success',
+  props<{ member: CompanyMember }>()
+);
+
+export const updateMemberHourlyRateFailure = createAction(
+  '[Company Members] Update Hourly Rate Failure',
+  props<{ error: string }>()
+);
+
+/**
  * Clear members state (on company change or logout)
  */
 export const clearMembers = createAction('[Company Members] Clear');

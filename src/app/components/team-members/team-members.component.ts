@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { Subject, takeUntil, filter, distinctUntilChanged, take } from 'rxjs';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { Actions, ofType } from '@ngrx/effects';
 
 import { DataTableColumn, DataTableAction } from '../../layout/data-table/data-table.component';
 
@@ -16,12 +17,17 @@ import {
   loadMembers,
   updateFilters,
   updatePage,
-  clearMembers
+  clearMembers,
+  updateMemberHourlyRate,
+  updateMemberHourlyRateSuccess,
+  updateMemberHourlyRateFailure
 } from '../../store/company-members/company-members.actions';
 import { CompanyMember } from '../../store/company-members/company-members.models';
 import { selectSelectedCompanyId, selectCurrentUserRole } from '../../store/user/user.selectors';
 import { InviteWorkerDialogComponent } from '../../shared/components/invite-worker-dialog/invite-worker-dialog.component';
 import { CompanyRole } from '../../shared/models/company-role';
+import { EditHourlyRateDialogComponent, EditHourlyRateDialogData } from '../../shared/components/edit-hourly-rate-dialog/edit-hourly-rate-dialog.component';
+import { NotificationService } from '../../shared/services/notification.service';
 
 @Component({
   selector: 'app-team-members',
@@ -35,6 +41,8 @@ export class TeamMembersComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly route = inject(ActivatedRoute);
+  private readonly actions$ = inject(Actions);
+  private readonly notificationService = inject(NotificationService);
   private readonly destroy$ = new Subject<void>();
 
   readonly selectedCompanyId$ = this.store.select(selectSelectedCompanyId);
@@ -57,10 +65,17 @@ export class TeamMembersComponent implements OnInit, OnDestroy {
     { id: 'firstName', header: 'First name', field: 'firstName', searchable: true },
     { id: 'lastName', header: 'Last name', field: 'lastName', searchable: true },
     { id: 'email', header: 'Email', field: 'email', searchable: true },
-    { id: 'role', header: 'Role', field: 'role', searchable: true, width: '140px' }
+    { id: 'role', header: 'Role', field: 'role', searchable: true, width: '140px' },
+    { id: 'hourlyRate', header: 'Hourly Rate', field: 'hourlyRate', width: '120px' }
   ];
 
   protected readonly actions: DataTableAction<CompanyMember>[] = [
+    {
+      icon: 'payments',
+      label: 'Edit Hourly Rate',
+      color: 'primary',
+      handler: (member) => this.onEditHourlyRate(member)
+    },
     {
       icon: 'visibility',
       label: 'View Details',
@@ -162,6 +177,39 @@ export class TeamMembersComponent implements OnInit, OnDestroy {
 
   onRowClick(member: CompanyMember): void {
     this.onViewDetails(member);
+  }
+
+  onEditHourlyRate(member: CompanyMember): void {
+    if (!this.companyId) return;
+
+    const dialogRef = this.dialog.open(EditHourlyRateDialogComponent, {
+      width: '400px',
+      data: { member } as EditHourlyRateDialogData
+    });
+
+    dialogRef.afterClosed().pipe(
+      filter((rate): rate is number => rate !== undefined && rate !== null),
+      take(1)
+    ).subscribe(hourlyRate => {
+      this.store.dispatch(updateMemberHourlyRate({
+        companyId: this.companyId!,
+        userId: member.userId,
+        hourlyRate
+      }));
+
+      this.actions$.pipe(
+        ofType(updateMemberHourlyRateSuccess, updateMemberHourlyRateFailure),
+        take(1)
+      ).subscribe(action => {
+        if (action.type === updateMemberHourlyRateSuccess.type) {
+          this.notificationService.success(
+            `Hourly rate updated for ${member.firstName} ${member.lastName}`
+          );
+        } else {
+          this.notificationService.error('Failed to update hourly rate. Please try again.');
+        }
+      });
+    });
   }
 
   openInviteDialog(): void {

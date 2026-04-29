@@ -66,4 +66,14 @@ export class CompanyMembersApi {
   removeMember(companyId: string, userId: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/companies/${companyId}/members/${userId}`);
   }
+
+  /**
+   * Update a member's hourly rate
+   */
+  updateMemberHourlyRate(companyId: string, userId: string, hourlyRate: number): Observable<CompanyMember> {
+    return this.http.patch<CompanyMember>(
+      `${this.baseUrl}/companies/${companyId}/members/${userId}/hourly-rate`,
+      { hourlyRate }
+    );
+  }
 }

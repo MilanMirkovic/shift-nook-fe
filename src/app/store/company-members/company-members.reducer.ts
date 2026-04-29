@@ -12,7 +12,10 @@ import {
   removeMember,
   removeMemberSuccess,
   removeMemberFailure,
-  clearMembers
+  clearMembers,
+  updateMemberHourlyRate,
+  updateMemberHourlyRateSuccess,
+  updateMemberHourlyRateFailure
 } from './company-members.actions';
 
 export const initialState: CompanyMembersState = {
@@ -117,5 +120,20 @@ export const reducer = createReducer(
   })),
 
   // Clear members state (on company change or logout)
-  on(clearMembers, () => initialState)
+  on(clearMembers, () => initialState),
+
+  // Update hourly rate
+  on(updateMemberHourlyRate, state => ({ ...state, loading: true, error: null })),
+
+  on(updateMemberHourlyRateSuccess, (state, { member }) => ({
+    ...state,
+    loading: false,
+    items: state.items.map(m => m.userId === member.userId ? { ...m, hourlyRate: member.hourlyRate } : m),
+    selectedMember: state.selectedMember?.userId === member.userId
+      ? { ...state.selectedMember, hourlyRate: member.hourlyRate }
+      : state.selectedMember,
+    error: null
+  })),
+
+  on(updateMemberHourlyRateFailure, (state, { error }) => ({ ...state, loading: false, error }))
 );

@@ -14,6 +14,7 @@ import { selectMembers } from '../../../../../store/company-members/company-memb
 import { selectCurrentUserRole, selectSelectedCompanyId } from '../../../../../store/user/user.selectors';
 import { CreateInvoiceFromTimesheetsDialogComponent, CreateInvoiceFromTimesheetsDialogData } from '../../../../../shared/components/create-invoice-from-timesheets-dialog/create-invoice-from-timesheets-dialog.component';
 import { loadJobsiteTimesheets } from '../../../../../store/timesheets/timesheets.actions';
+import { loadMembers } from '../../../../../store/company-members/company-members.actions';
 
 @Component({
   selector: 'app-jobsite-timesheets',
@@ -57,13 +58,17 @@ export class JobsiteTimesheetsComponent implements OnInit, OnChanges, OnDestroy 
       this.currentUserRole = role;
     });
 
-    // Subscribe to current company ID and load timesheets when it changes
+    // Subscribe to current company ID and load timesheets + members when it changes
     this.store.select(selectSelectedCompanyId).pipe(
       takeUntil(this.destroy$)
     ).subscribe(companyId => {
       this.currentCompanyId = companyId;
       if (companyId && this.jobsite?.id) {
         this.loadTimesheets(companyId);
+      }
+      if (companyId) {
+        // Ensure company members (with hourly rates) are loaded
+        this.store.dispatch(loadMembers({ companyId, page: 0, size: 200, role: null, q: null }));
       }
     });
   }

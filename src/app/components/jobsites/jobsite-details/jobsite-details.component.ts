@@ -452,7 +452,10 @@ export class JobsiteDetailsComponent implements OnInit, OnDestroy {
             companyId: this.currentCompanyId!,
             jobsiteId: task.jobsiteId,
             taskId: task.id,
-            updateData: result
+            updateData: {
+              name: result.name,
+              description: result.description,
+            }
           })
         );
       }),

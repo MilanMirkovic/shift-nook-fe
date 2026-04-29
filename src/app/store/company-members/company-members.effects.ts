@@ -15,7 +15,10 @@ import {
   loadMemberByIdFailure,
   removeMember,
   removeMemberSuccess,
-  removeMemberFailure
+  removeMemberFailure,
+  updateMemberHourlyRate,
+  updateMemberHourlyRateSuccess,
+  updateMemberHourlyRateFailure
 } from './company-members.actions';
 
 import { CompanyMembersApi } from './company-members.api';
@@ -96,6 +99,21 @@ export class CompanyMembersEffects {
         this.api.removeMember(companyId, userId).pipe(
           map(() => removeMemberSuccess({ userId })),
           catchError((err) => of(removeMemberFailure({ error: this.toErrorMessage(err) })))
+        )
+      )
+    )
+  );
+
+  /**
+   * Update member hourly rate effect
+   */
+  updateMemberHourlyRate$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(updateMemberHourlyRate),
+      switchMap(({ companyId, userId, hourlyRate }) =>
+        this.api.updateMemberHourlyRate(companyId, userId, hourlyRate).pipe(
+          map((member) => updateMemberHourlyRateSuccess({ member })),
+          catchError((err) => of(updateMemberHourlyRateFailure({ error: this.toErrorMessage(err) })))
         )
       )
     )
