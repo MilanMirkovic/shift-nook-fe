@@ -1,5 +1,7 @@
 export type InvoiceStatus = 'DRAFT' | 'ISSUED' | 'PARTIALLY_PAID' | 'PAID' | 'VOID';
 
+export type InvoiceType = 'MANUAL' | 'FROM_ESTIMATE' | 'FROM_TIMESHEETS' | 'PASS_THROUGH';
+
 export type PaymentMethod =
   | 'CASH'
   | 'CHECK'
@@ -46,6 +48,7 @@ export interface Invoice {
   invoiceNumber: string;
   title: string;
   status: InvoiceStatus;
+  invoiceType: InvoiceType;
   currency: string;
   subtotalAmount: number;
   taxAmount: number;
