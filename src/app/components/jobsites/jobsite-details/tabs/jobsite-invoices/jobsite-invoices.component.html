@@ -113,10 +113,12 @@
               <mat-icon>add_business</mat-icon>
             </button>
 
+            <!-- Only show navigation for sent invoices -->
             <button
+              *ngIf="isSentInvoice(invoice)"
               mat-icon-button
               (click)="navigateToClient(invoice)"
-              [matTooltip]="isSentInvoice(invoice) ? 'View client details' : 'View subcontractor details'">
+              matTooltip="View client details">
               <mat-icon>arrow_forward</mat-icon>
             </button>
           </td>

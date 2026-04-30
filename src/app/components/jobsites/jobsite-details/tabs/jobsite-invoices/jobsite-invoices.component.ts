@@ -92,8 +92,11 @@ export class JobsiteInvoicesComponent implements OnInit, OnDestroy {
       // For sent invoices, navigate to the client (recipient)
       this.router.navigate(['/clients', invoice.clientId]);
     } else {
-      // For received invoices, navigate to the company that sent it (the subcontractor)
-      this.router.navigate(['/clients', invoice.companyId]);
+      // For received invoices from subcontractors
+      // The backend auto-creates them as clients when they send invoices
+      // We need to find their client record by company ID
+      // For now, show a message - we'll need to add client lookup by linkedCompanyId
+      this.snackBar.open('Subcontractor client view coming soon', 'Close', { duration: 3000 });
     }
   }
 
