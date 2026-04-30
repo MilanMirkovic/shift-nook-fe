@@ -100,6 +100,30 @@ export class InvoicesEffects {
     )
   );
 
+  sendInvoice$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(InvoicesActions.sendInvoice),
+      switchMap(({ companyId, invoiceId }) =>
+        this.invoicesApi.sendInvoice(companyId, invoiceId).pipe(
+          map((invoice) => InvoicesActions.sendInvoiceSuccess({ invoice })),
+          catchError((error) => of(InvoicesActions.sendInvoiceFailure({ error: error?.message || 'Failed to send invoice' })))
+        )
+      )
+    )
+  );
+
+  createPassThroughInvoice$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(InvoicesActions.createPassThroughInvoice),
+      switchMap(({ companyId, request }) =>
+        this.invoicesApi.createPassThroughInvoice(companyId, request).pipe(
+          map((invoice) => InvoicesActions.createPassThroughInvoiceSuccess({ invoice })),
+          catchError((error) => of(InvoicesActions.createPassThroughInvoiceFailure({ error: error?.message || 'Failed to create pass-through invoice' })))
+        )
+      )
+    )
+  );
+
   deleteInvoice$ = createEffect(() =>
     this.actions$.pipe(
       ofType(InvoicesActions.deleteInvoice),

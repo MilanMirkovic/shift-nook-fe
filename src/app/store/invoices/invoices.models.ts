@@ -61,6 +61,7 @@ export interface Invoice {
   createdAt: string;
   updatedAt: string;
   pdfFileId: string | null;
+  sourceInvoiceId: string | null;
 }
 
 export interface InvoiceItemInput {
@@ -100,6 +101,11 @@ export interface CreatePaymentInput {
   paymentMethod: PaymentMethod;
   referenceNumber?: string;
   notes?: string;
+}
+
+export interface CreatePassThroughInvoiceInput {
+  sourceInvoiceId: string;
+  markupPercentage: number;
 }
 
 export interface InvoicesPageResponse {

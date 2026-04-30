@@ -59,6 +59,13 @@
                 <mat-icon>call_received</mat-icon>
                 Received
               </span>
+              <span
+                *ngIf="invoice.sourceInvoiceId"
+                class="direction-badge direction-badge--passthrough"
+                matTooltip="Pass-through invoice with markup">
+                <mat-icon>trending_up</mat-icon>
+                Pass-Through
+              </span>
             </div>
           </td>
           <td class="col-title">
@@ -88,6 +95,24 @@
             </span>
           </td>
           <td class="col-actions">
+            <!-- Send Invoice button (for DRAFT invoices sent by current company) -->
+            <button
+              *ngIf="isSentInvoice(invoice) && invoice.status === 'DRAFT'"
+              mat-icon-button
+              (click)="sendInvoice(invoice)"
+              matTooltip="Send invoice to client">
+              <mat-icon>send</mat-icon>
+            </button>
+
+            <!-- Create Pass-Through Invoice button (for received ISSUED invoices) -->
+            <button
+              *ngIf="isReceivedInvoice(invoice) && invoice.status !== 'DRAFT'"
+              mat-icon-button
+              (click)="createPassThroughInvoice(invoice)"
+              matTooltip="Create pass-through invoice with markup">
+              <mat-icon>add_business</mat-icon>
+            </button>
+
             <button
               mat-icon-button
               (click)="navigateToClient(invoice)"

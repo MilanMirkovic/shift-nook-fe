@@ -10,6 +10,7 @@ import {
   UpdateInvoiceStatusInput,
   Payment,
   CreatePaymentInput,
+  CreatePassThroughInvoiceInput,
 } from './invoices.models';
 import {
   CreateInvoiceFromTimesheetsInput,
@@ -85,6 +86,20 @@ export class InvoicesApiService {
     return this.http.patch<Invoice>(
       `${this.apiUrl}/companies/${companyId}/invoices/${invoiceId}/status`,
       statusUpdate
+    );
+  }
+
+  sendInvoice(companyId: string, invoiceId: string): Observable<Invoice> {
+    return this.http.post<Invoice>(
+      `${this.apiUrl}/companies/${companyId}/invoices/${invoiceId}/send`,
+      {}
+    );
+  }
+
+  createPassThroughInvoice(companyId: string, request: CreatePassThroughInvoiceInput): Observable<Invoice> {
+    return this.http.post<Invoice>(
+      `${this.apiUrl}/companies/${companyId}/invoices/pass-through`,
+      request
     );
   }
 

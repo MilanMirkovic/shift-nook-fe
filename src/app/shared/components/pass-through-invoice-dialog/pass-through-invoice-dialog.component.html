@@ -1,0 +1,86 @@
+<h2 mat-dialog-title>Create Pass-Through Invoice</h2>
+
+<mat-dialog-content>
+  <div class="dialog-content">
+    <div class="source-invoice-info">
+      <h3>Source Invoice</h3>
+      <div class="info-row">
+        <span class="label">Invoice #:</span>
+        <span class="value">{{ data.sourceInvoice.invoiceNumber }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Title:</span>
+        <span class="value">{{ data.sourceInvoice.title }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Amount:</span>
+        <span class="value amount">{{ data.sourceInvoice.totalAmount | currency }}</span>
+      </div>
+    </div>
+
+    <form [formGroup]="form" class="markup-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Markup Percentage</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="markupPercentage"
+          placeholder="Enter markup percentage"
+          min="0"
+          max="1000"
+          step="0.1"
+        />
+        <span matSuffix>%</span>
+        <mat-hint>Enter the percentage markup to add (e.g., 20 for 20%)</mat-hint>
+        <mat-error *ngIf="form.get('markupPercentage')?.hasError('required')">
+          Markup percentage is required
+        </mat-error>
+        <mat-error *ngIf="form.get('markupPercentage')?.hasError('min')">
+          Markup must be at least 0%
+        </mat-error>
+        <mat-error *ngIf="form.get('markupPercentage')?.hasError('max')">
+          Markup cannot exceed 1000%
+        </mat-error>
+      </mat-form-field>
+    </form>
+
+    <div class="preview-section" *ngIf="form.get('markupPercentage')?.valid">
+      <h3>Preview</h3>
+      <div class="preview-calculations">
+        <div class="calc-row">
+          <span class="label">Original Amount:</span>
+          <span class="value">{{ data.sourceInvoice.totalAmount | currency }}</span>
+        </div>
+        <div class="calc-row markup">
+          <span class="label">Markup ({{ form.get('markupPercentage')?.value }}%):</span>
+          <span class="value">+ {{ markupAmount | currency }}</span>
+        </div>
+        <div class="calc-row total">
+          <span class="label">New Invoice Total:</span>
+          <span class="value">{{ previewTotal | currency }}</span>
+        </div>
+      </div>
+
+      <div class="info-message">
+        <mat-icon>info</mat-icon>
+        <p>
+          This will create a new invoice to your end client with {{ form.get('markupPercentage')?.value }}% markup.
+          All line items will be copied with the markup applied to their unit prices.
+        </p>
+      </div>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="(loading$ | async)">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="form.invalid || (loading$ | async)"
+  >
+    <mat-spinner diameter="20" *ngIf="loading$ | async"></mat-spinner>
+    <span *ngIf="!(loading$ | async)">Create Invoice</span>
+  </button>
+</mat-dialog-actions>

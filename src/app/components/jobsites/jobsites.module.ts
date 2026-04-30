@@ -25,6 +25,7 @@ import { JobsiteActivityComponent } from './jobsite-details/tabs/jobsite-activit
 import { JobsiteInvoicesComponent } from './jobsite-details/tabs/jobsite-invoices/jobsite-invoices.component';
 import { ListPageComponent } from '../../layout/list-page/list-page.component';
 import { CreateInvoiceFromTimesheetsDialogComponent } from '../../shared/components/create-invoice-from-timesheets-dialog/create-invoice-from-timesheets-dialog.component';
+import { PassThroughInvoiceDialogComponent } from '../../shared/components/pass-through-invoice-dialog/pass-through-invoice-dialog.component';
 
 const routes: Routes = [
   {
@@ -46,7 +47,8 @@ const routes: Routes = [
     JobsiteInfoComponent,
     JobsiteActivityComponent,
     JobsiteInvoicesComponent,
-    CreateInvoiceFromTimesheetsDialogComponent
+    CreateInvoiceFromTimesheetsDialogComponent,
+    PassThroughInvoiceDialogComponent
   ],
   imports: [
     CommonModule,

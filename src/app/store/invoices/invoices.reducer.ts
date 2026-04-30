@@ -67,6 +67,26 @@ export const invoicesReducer = createReducer(
   })),
   on(InvoicesActions.updateInvoiceStatusFailure, (state, { error }) => ({ ...state, loading: false, error })),
 
+  // Send invoice (DRAFT → ISSUED)
+  on(InvoicesActions.sendInvoice, (state) => ({ ...state, loading: true, error: null })),
+  on(InvoicesActions.sendInvoiceSuccess, (state, { invoice }) => ({
+    ...state,
+    invoices: state.invoices.map(i => i.id === invoice.id ? invoice : i),
+    selectedInvoice: state.selectedInvoice?.id === invoice.id ? invoice : state.selectedInvoice,
+    loading: false, error: null,
+  })),
+  on(InvoicesActions.sendInvoiceFailure, (state, { error }) => ({ ...state, loading: false, error })),
+
+  // Create pass-through invoice
+  on(InvoicesActions.createPassThroughInvoice, (state) => ({ ...state, loading: true, error: null })),
+  on(InvoicesActions.createPassThroughInvoiceSuccess, (state, { invoice }) => ({
+    ...state,
+    invoices: [invoice, ...state.invoices],
+    total: state.total + 1,
+    loading: false, error: null,
+  })),
+  on(InvoicesActions.createPassThroughInvoiceFailure, (state, { error }) => ({ ...state, loading: false, error })),
+
   // Delete invoice
   on(InvoicesActions.deleteInvoice, (state) => ({ ...state, loading: true, error: null })),
   on(InvoicesActions.deleteInvoiceSuccess, (state, { invoiceId }) => ({

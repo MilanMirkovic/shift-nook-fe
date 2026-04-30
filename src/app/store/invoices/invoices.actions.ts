@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Invoice, CreateInvoiceInput, UpdateInvoiceInput, UpdateInvoiceStatusInput, Payment, CreatePaymentInput } from './invoices.models';
+import { Invoice, CreateInvoiceInput, UpdateInvoiceInput, UpdateInvoiceStatusInput, Payment, CreatePaymentInput, CreatePassThroughInvoiceInput } from './invoices.models';
 import { CreateInvoiceFromTimesheetsInput, CreateInvoiceFromTimesheetsResponse } from '../../shared/models/invoice-from-timesheets.model';
 
 // Create invoice
@@ -97,6 +97,34 @@ export const updateInvoiceStatusSuccess = createAction(
 );
 export const updateInvoiceStatusFailure = createAction(
   '[Invoices] Update Invoice Status Failure',
+  props<{ error: string }>()
+);
+
+// Send invoice (DRAFT → ISSUED)
+export const sendInvoice = createAction(
+  '[Invoices] Send Invoice',
+  props<{ companyId: string; invoiceId: string }>()
+);
+export const sendInvoiceSuccess = createAction(
+  '[Invoices] Send Invoice Success',
+  props<{ invoice: Invoice }>()
+);
+export const sendInvoiceFailure = createAction(
+  '[Invoices] Send Invoice Failure',
+  props<{ error: string }>()
+);
+
+// Create pass-through invoice with markup
+export const createPassThroughInvoice = createAction(
+  '[Invoices] Create Pass-Through Invoice',
+  props<{ companyId: string; request: CreatePassThroughInvoiceInput }>()
+);
+export const createPassThroughInvoiceSuccess = createAction(
+  '[Invoices] Create Pass-Through Invoice Success',
+  props<{ invoice: Invoice }>()
+);
+export const createPassThroughInvoiceFailure = createAction(
+  '[Invoices] Create Pass-Through Invoice Failure',
   props<{ error: string }>()
 );
 
