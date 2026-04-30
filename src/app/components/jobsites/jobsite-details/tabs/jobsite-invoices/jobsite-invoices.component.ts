@@ -83,7 +83,9 @@ export class JobsiteInvoicesComponent implements OnInit, OnDestroy {
 
   isReceivedInvoice(invoice: Invoice): boolean {
     // Invoice is received if current company is the recipient (from subcontractor)
-    return this.currentCompanyId !== null && invoice.clientId === this.currentCompanyId;
+    // Check recipientCompanyId which tracks the actual company being billed
+    return this.currentCompanyId !== null &&
+           invoice.recipientCompanyId === this.currentCompanyId;
   }
 
   navigateToClient(invoice: Invoice): void {

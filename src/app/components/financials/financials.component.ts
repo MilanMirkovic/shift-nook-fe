@@ -185,6 +185,7 @@ export class FinancialsComponent implements OnInit, OnDestroy {
 
   protected isReceivedInvoice(invoice: Invoice): boolean {
     // Invoice is received if the current company is the client (recipient)
-    return this.currentCompanyId !== null && invoice.clientId === this.currentCompanyId;
+    // Check recipientCompanyId which tracks the actual company being billed
+    return this.currentCompanyId !== null && invoice.recipientCompanyId === this.currentCompanyId;
   }
 }

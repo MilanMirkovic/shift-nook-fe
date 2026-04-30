@@ -545,6 +545,7 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
 
   protected isReceivedInvoice(invoice: Invoice): boolean {
     // Invoice is received if it was issued BY the client (subcontractor) TO us (principal company)
-    return invoice.companyId === this.clientId && invoice.clientId === this.companyId;
+    // Check recipientCompanyId which tracks the actual company being billed
+    return invoice.companyId === this.clientId && invoice.recipientCompanyId === this.companyId;
   }
 }
