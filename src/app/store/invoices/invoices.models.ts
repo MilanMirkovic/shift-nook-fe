@@ -62,6 +62,7 @@ export interface Invoice {
   updatedAt: string;
   pdfFileId: string | null;
   sourceInvoiceId: string | null;
+  recipientCompanyId: string | null;
 }
 
 export interface InvoiceItemInput {
