@@ -13,6 +13,7 @@ import { Activity } from '../../../shared/models/activity.models';
 import { JobsiteTaskDialogComponent } from '../../../shared/components/jobsite-task-dialog/jobsite-task-dialog.component';
 import { TaskReviewDialogComponent, TaskReviewDialogData, TaskReviewDialogResult } from '../../../shared/components/task-review-dialog/task-review-dialog.component';
 import { createJobsiteTask, createJobsiteTaskSuccess, createJobsiteTaskFailure, updateJobsiteTask, updateJobsiteTaskSuccess, updateJobsiteTaskFailure, deleteJobsiteTask, deleteJobsiteTaskSuccess, deleteJobsiteTaskFailure, loadJobsiteTasks } from '../../../store/jobsite-tasks/jobsite-tasks.actions';
+import { loadInvoices } from '../../../store/invoices/invoices.actions';
 import { JobsiteTask } from '../../../store/jobsite-tasks/jobsite-tasks.models';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { JobsiteDetailsStateService } from './jobsite-details-state.service';
@@ -588,6 +589,22 @@ export class JobsiteDetailsComponent implements OnInit, OnDestroy {
   protected formatCoordinates(lat: number | undefined, lng: number | undefined): string {
     if (!lat || !lng) return 'Not provided';
     return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+  }
+
+  protected onInvoiceCreated(): void {
+    // Switch to invoices tab (index 1)
+    this.selectedTabIndex = 1;
+
+    // Reload invoices to show the newly created invoice
+    if (this.currentCompanyId && this.currentJobsiteId) {
+      this.store.dispatch(loadInvoices({
+        companyId: this.currentCompanyId,
+        jobsiteId: this.currentJobsiteId,
+        page: 0,
+        size: 100,
+        includeReceived: true
+      }));
+    }
   }
 
   protected selectedTabIndex = 0;

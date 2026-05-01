@@ -25,6 +25,7 @@ import { loadMembers } from '../../../../../store/company-members/company-member
 export class JobsiteTimesheetsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() jobsite!: Jobsite;
   @Output() createTimesheet = new EventEmitter<void>();
+  @Output() invoiceCreated = new EventEmitter<void>();
 
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
@@ -127,6 +128,8 @@ export class JobsiteTimesheetsComponent implements OnInit, OnChanges, OnDestroy 
       if (success) {
         this.snackBar.open('Invoice created successfully!', 'Close', { duration: 3000 });
         // Timesheets will be automatically updated via NgRx store
+        // Notify parent to switch to invoices tab
+        this.invoiceCreated.emit();
       }
     });
   }

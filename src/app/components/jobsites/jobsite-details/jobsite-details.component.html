@@ -85,7 +85,8 @@
           <div class="tab-panel">
             <app-jobsite-timesheets
               [jobsite]="jobsite"
-              (createTimesheet)="onCreateTimesheet()">
+              (createTimesheet)="onCreateTimesheet()"
+              (invoiceCreated)="onInvoiceCreated()">
             </app-jobsite-timesheets>
           </div>
         </mat-tab>
