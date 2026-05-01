@@ -235,7 +235,7 @@ export class CreateInvoiceFromTimesheetsDialogComponent implements OnInit, OnDes
       }
 
       const preview = workerMap.get(workerId)!;
-      const hours = (ts.durationMinutes || 0) / 60;
+      const hours = this.getNetHours(ts);
       preview.totalHours += hours;
       preview.timesheetIds.push(ts.id);
 
@@ -273,7 +273,7 @@ export class CreateInvoiceFromTimesheetsDialogComponent implements OnInit, OnDes
       }
 
       const preview = taskMap.get(taskId)!;
-      const hours = (ts.durationMinutes || 0) / 60;
+      const hours = this.getNetHours(ts);
       preview.totalHours += hours;
       preview.timesheetIds.push(ts.id);
     });
@@ -404,5 +404,21 @@ export class CreateInvoiceFromTimesheetsDialogComponent implements OnInit, OnDes
     const date = new Date();
     date.setDate(date.getDate() + 30);
     return date;
+  }
+
+  /**
+   * Returns the billable hours for a timesheet entry, matching the timesheet
+   * PDF export logic exactly:
+   *   netMinutes = grossDuration - lunchDeduction
+   * Falls back gracefully if the API hasn't populated the derived field.
+   */
+  private getNetHours(ts: Timesheet): number {
+    const net = ts.netDurationMinutes;
+    if (net !== undefined && net !== null) {
+      return net / 60;
+    }
+    const gross = ts.durationMinutes || 0;
+    const lunch = ts.lunchtimeDurationMinutes || 0;
+    return Math.max(0, gross - lunch) / 60;
   }
 }

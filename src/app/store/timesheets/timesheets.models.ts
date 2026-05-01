@@ -20,7 +20,9 @@ export interface Timesheet {
   clientEventId: string;
   createdAt?: string; // ISO 8601 date string
   updatedAt?: string; // ISO 8601 date string
-  durationMinutes?: number | null;
+  durationMinutes?: number | null; // Gross duration (checkOut - checkIn)
+  lunchtimeDurationMinutes?: number | null; // Lunch break minutes deducted from gross
+  netDurationMinutes?: number | null; // Net minutes worked = gross - lunch (matches timesheet export)
   invoiceId?: string | null; // Link to invoice when timesheet has been billed
   invoiceNumber?: string | null; // Invoice number for display
 }
