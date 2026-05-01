@@ -113,6 +113,16 @@
               <mat-icon>add_business</mat-icon>
             </button>
 
+            <!-- Download PDF button -->
+            <button
+              mat-icon-button
+              [disabled]="pdfDownloading.has(invoice.id)"
+              (click)="onDownloadInvoicePdf(invoice)"
+              matTooltip="Download PDF">
+              <mat-spinner *ngIf="pdfDownloading.has(invoice.id)" diameter="18"></mat-spinner>
+              <mat-icon *ngIf="!pdfDownloading.has(invoice.id)">picture_as_pdf</mat-icon>
+            </button>
+
             <!-- Only show navigation for sent invoices -->
             <button
               *ngIf="isSentInvoice(invoice)"

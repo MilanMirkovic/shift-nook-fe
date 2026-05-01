@@ -14,6 +14,7 @@ import { selectInvoices, selectInvoicesLoading } from '../../../../../store/invo
 import { selectSelectedCompanyId } from '../../../../../store/user/user.selectors';
 import { PassThroughInvoiceDialogComponent } from '../../../../../shared/components/pass-through-invoice-dialog/pass-through-invoice-dialog.component';
 import { ConfirmationDialogComponent } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { InvoicesApiService } from '../../../../../store/invoices/invoices.api';
 
 @Component({
   selector: 'app-jobsite-invoices',
@@ -29,11 +30,13 @@ export class JobsiteInvoicesComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly actions$ = inject(Actions);
+  private readonly invoicesApi = inject(InvoicesApiService);
   private readonly destroy$ = new Subject<void>();
 
   invoices: Invoice[] = [];
   loading = false;
   currentCompanyId: string | null = null;
+  pdfDownloading = new Set<string>();
 
   ngOnInit(): void {
     this.store.select(selectInvoicesLoading).pipe(takeUntil(this.destroy$))
@@ -165,6 +168,29 @@ export class JobsiteInvoicesComponent implements OnInit, OnDestroy {
         }));
 
         this.snackBar.open('Pass-through invoice created successfully', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  onDownloadInvoicePdf(invoice: Invoice): void {
+    if (!this.currentCompanyId || this.pdfDownloading.has(invoice.id)) return;
+    this.pdfDownloading.add(invoice.id);
+
+    this.invoicesApi.downloadPdf(this.currentCompanyId, invoice.id).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `invoice-${invoice.invoiceNumber}.pdf`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+        this.pdfDownloading.delete(invoice.id);
+      },
+      error: () => {
+        this.snackBar.open('Failed to download PDF. Please try again.', 'Close', { duration: 3000 });
+        this.pdfDownloading.delete(invoice.id);
       }
     });
   }
