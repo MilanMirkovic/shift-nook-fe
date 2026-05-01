@@ -9,7 +9,7 @@ import { Jobsite } from '../../../../../store/jobsites/jobsites.models';
 import { Timesheet } from '../../../../../store/timesheets/timesheets.models';
 import { CompanyMember } from '../../../../../store/company-members/company-members.models';
 import { CompanyRole } from '../../../../../shared/models/company-role';
-import { selectTimesheets } from '../../../../../store/timesheets/timesheets.selectors';
+import { selectTimesheets, selectTimesheetsLoading } from '../../../../../store/timesheets/timesheets.selectors';
 import { selectMembers } from '../../../../../store/company-members/company-members.selectors';
 import { selectCurrentUserRole, selectSelectedCompanyId } from '../../../../../store/user/user.selectors';
 import { CreateInvoiceFromTimesheetsDialogComponent, CreateInvoiceFromTimesheetsDialogData } from '../../../../../shared/components/create-invoice-from-timesheets-dialog/create-invoice-from-timesheets-dialog.component';
@@ -36,6 +36,17 @@ export class JobsiteTimesheetsComponent implements OnInit, OnChanges, OnDestroy 
   companyMembers: CompanyMember[] = [];
   currentUserRole: CompanyRole | null = null;
   currentCompanyId: string | null = null;
+  loading = false;
+
+  // Filters
+  showFilters = false;
+  filterStartDate: Date | null = null;
+  filterEndDate: Date | null = null;
+  private activeStartDate: Date | null = null;
+  private activeEndDate: Date | null = null;
+
+  // Expand/collapse per worker
+  private expandedWorkers = new Set<string>();
 
   ngOnInit(): void {
     // Subscribe to timesheets
@@ -43,6 +54,13 @@ export class JobsiteTimesheetsComponent implements OnInit, OnChanges, OnDestroy 
       takeUntil(this.destroy$)
     ).subscribe(timesheets => {
       this.timesheets = timesheets;
+    });
+
+    // Subscribe to loading state
+    this.store.select(selectTimesheetsLoading).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(loading => {
+      this.loading = loading;
     });
 
     // Subscribe to company members
@@ -95,6 +113,100 @@ export class JobsiteTimesheetsComponent implements OnInit, OnChanges, OnDestroy 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  // ─── Filter helpers ───────────────────────────────────────────────────────
+  applyFilters(): void {
+    this.activeStartDate = this.filterStartDate;
+    this.activeEndDate = this.filterEndDate;
+  }
+
+  clearFilters(): void {
+    this.filterStartDate = null;
+    this.filterEndDate = null;
+    this.activeStartDate = null;
+    this.activeEndDate = null;
+  }
+
+  get filteredTimesheets(): Timesheet[] {
+    return this.timesheets.filter(t => {
+      const date = new Date(t.checkInTime);
+      if (this.activeStartDate && date < this.activeStartDate) return false;
+      if (this.activeEndDate) {
+        const end = new Date(this.activeEndDate);
+        end.setHours(23, 59, 59, 999);
+        if (date > end) return false;
+      }
+      return true;
+    });
+  }
+
+  // ─── Grouping ─────────────────────────────────────────────────────────────
+  getWorkerGroups(): { workerUserId: string; workerName: string; timesheets: Timesheet[] }[] {
+    const map = new Map<string, { workerUserId: string; workerName: string; timesheets: Timesheet[] }>();
+    for (const t of this.filteredTimesheets) {
+      const key = t.workerUserId;
+      if (!map.has(key)) {
+        map.set(key, { workerUserId: key, workerName: t.workerName ?? key, timesheets: [] });
+      }
+      map.get(key)!.timesheets.push(t);
+    }
+    // Sort timesheets within each group by check-in time desc
+    for (const group of map.values()) {
+      group.timesheets.sort((a, b) => new Date(b.checkInTime).getTime() - new Date(a.checkInTime).getTime());
+      // Auto-expand first group
+      if (this.expandedWorkers.size === 0) {
+        this.expandedWorkers.add(group.workerUserId);
+      }
+    }
+    return Array.from(map.values());
+  }
+
+  toggleWorker(workerUserId: string): void {
+    if (this.expandedWorkers.has(workerUserId)) {
+      this.expandedWorkers.delete(workerUserId);
+    } else {
+      this.expandedWorkers.add(workerUserId);
+    }
+  }
+
+  isWorkerExpanded(workerUserId: string): boolean {
+    return this.expandedWorkers.has(workerUserId);
+  }
+
+  // ─── Display helpers ──────────────────────────────────────────────────────
+  getInitials(name: string): string {
+    const parts = name.trim().split(' ');
+    return parts.length >= 2
+      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      : name.substring(0, 2).toUpperCase();
+  }
+
+  getTotalHoursForWorker(timesheets: Timesheet[]): string {
+    const totalMinutes = timesheets.reduce((sum, t) => {
+      if (!t.checkOutTime) return sum;
+      const ms = new Date(t.checkOutTime).getTime() - new Date(t.checkInTime).getTime();
+      return sum + ms / 60000;
+    }, 0);
+    return (totalMinutes / 60).toFixed(1);
+  }
+
+  formatDuration(timesheet: Timesheet): string {
+    if (!timesheet.checkInTime) return 'N/A';
+    const checkIn = new Date(timesheet.checkInTime);
+    const checkOut = timesheet.checkOutTime ? new Date(timesheet.checkOutTime) : new Date();
+    const diffMs = checkOut.getTime() - checkIn.getTime();
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours}h ${minutes}m`;
+  }
+
+  getTimesheetStatusClass(timesheet: Timesheet): string {
+    return timesheet.checkOutTime ? 'status--completed' : 'status--active';
+  }
+
+  getTimesheetStatusLabel(timesheet: Timesheet): string {
+    return timesheet.checkOutTime ? 'Completed' : 'Active';
   }
 
   onCreateTimesheet(): void {

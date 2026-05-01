@@ -2,6 +2,11 @@
   <div class="tab-header">
     <h2 class="tab-title">Timesheets</h2>
     <div class="tab-actions">
+      <!-- Date filters toggle -->
+      <button mat-stroked-button (click)="showFilters = !showFilters">
+        <mat-icon>{{ showFilters ? 'filter_list_off' : 'filter_list' }}</mat-icon>
+        {{ showFilters ? 'Hide' : 'Filter' }}
+      </button>
       <button
         mat-flat-button
         color="primary"
@@ -13,15 +18,123 @@
     </div>
   </div>
 
-  <div class="empty-state">
-    <div class="empty-state__icon"><mat-icon>schedule</mat-icon></div>
-    <h3 class="empty-state__title">No timesheets yet</h3>
-    <p class="empty-state__description">Timesheets for {{ jobsite.name }} will appear here</p>
-    @if (!jobsite.clientId) {
-      <p class="empty-state__warning">
-        <mat-icon>warning</mat-icon>
-        Assign a client to this jobsite before creating invoices
-      </p>
+  <!-- Filters Panel -->
+  @if (showFilters) {
+    <div class="activity-filters">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Start Date</mat-label>
+        <input matInput [matDatepicker]="startPicker" [(ngModel)]="filterStartDate">
+        <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>End Date</mat-label>
+        <input matInput [matDatepicker]="endPicker" [(ngModel)]="filterEndDate">
+        <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+      </mat-form-field>
+      <div class="filter-actions">
+        <button mat-flat-button color="primary" (click)="applyFilters()">
+          <mat-icon>search</mat-icon> Apply
+        </button>
+        <button mat-stroked-button (click)="clearFilters()">
+          <mat-icon>clear</mat-icon> Clear
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading timesheets...</p>
+    </div>
+  } @else if (timesheets.length === 0) {
+    <div class="empty-state">
+      <div class="empty-state__icon"><mat-icon>schedule</mat-icon></div>
+      <h3 class="empty-state__title">No timesheets yet</h3>
+      <p class="empty-state__description">Timesheets for {{ jobsite.name }} will appear here</p>
+      @if (!jobsite.clientId) {
+        <p class="empty-state__warning">
+          <mat-icon>warning</mat-icon>
+          Assign a client to this jobsite before creating invoices
+        </p>
+      }
+    </div>
+  } @else {
+    <!-- Workers grouped timesheets -->
+    @for (workerGroup of getWorkerGroups(); track workerGroup.workerUserId) {
+      <div class="worker-section">
+        <!-- Worker header -->
+        <div class="worker-header" (click)="toggleWorker(workerGroup.workerUserId)">
+          <div class="worker-avatar">
+            <span>{{ getInitials(workerGroup.workerName) }}</span>
+          </div>
+          <div class="worker-info">
+            <div class="worker-name">{{ workerGroup.workerName }}</div>
+            <div class="worker-meta">
+              {{ workerGroup.timesheets.length }} shift{{ workerGroup.timesheets.length !== 1 ? 's' : '' }}
+              &nbsp;·&nbsp;
+              {{ getTotalHoursForWorker(workerGroup.timesheets) }}h total
+            </div>
+          </div>
+          <mat-icon class="expand-icon">{{ isWorkerExpanded(workerGroup.workerUserId) ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </div>
+
+        <!-- Timesheets list for worker -->
+        @if (isWorkerExpanded(workerGroup.workerUserId)) {
+          <div class="timeline-list">
+            @for (timesheet of workerGroup.timesheets; track timesheet.id) {
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <div class="timeline-header">
+                    <div class="timeline-date">
+                      <mat-icon>event</mat-icon>
+                      <span>{{ timesheet.checkInTime | date:'EEEE, MMMM d, yyyy' }}</span>
+                    </div>
+                    <span class="timeline-status" [ngClass]="getTimesheetStatusClass(timesheet)">
+                      {{ getTimesheetStatusLabel(timesheet) }}
+                    </span>
+                  </div>
+
+                  <div class="timeline-details">
+                    <div class="detail-group">
+                      <div class="detail-item">
+                        <mat-icon>login</mat-icon>
+                        <div>
+                          <div class="detail-label">Check-in</div>
+                          <div class="detail-value">{{ timesheet.checkInTime | date:'h:mm a' }}</div>
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <mat-icon>logout</mat-icon>
+                        <div>
+                          <div class="detail-label">Check-out</div>
+                          <div class="detail-value">{{ timesheet.checkOutTime ? (timesheet.checkOutTime | date:'h:mm a') : '—' }}</div>
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <mat-icon>timer</mat-icon>
+                        <div>
+                          <div class="detail-label">Duration</div>
+                          <div class="detail-value detail-value--highlight">{{ formatDuration(timesheet) }}</div>
+                        </div>
+                      </div>
+                    </div>
+                    @if (timesheet.jobsiteTaskName) {
+                      <div class="detail-footer">
+                        <mat-icon>task</mat-icon>
+                        <span>{{ timesheet.jobsiteTaskName }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
     }
-  </div>
+  }
 </div>
