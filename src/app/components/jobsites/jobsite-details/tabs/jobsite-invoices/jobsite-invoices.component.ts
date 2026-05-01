@@ -1,14 +1,15 @@
 import { Component, Input, OnInit, OnDestroy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subject } from 'rxjs';
-import { takeUntil, filter, distinctUntilChanged } from 'rxjs/operators';
+import { takeUntil, filter, distinctUntilChanged, take } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Actions, ofType } from '@ngrx/effects';
 
 import { Jobsite } from '../../../../../store/jobsites/jobsites.models';
 import { Invoice } from '../../../../../store/invoices/invoices.models';
-import { loadInvoices, sendInvoice } from '../../../../../store/invoices/invoices.actions';
+import { loadInvoices, sendInvoice, createPassThroughInvoiceSuccess, createPassThroughInvoiceFailure } from '../../../../../store/invoices/invoices.actions';
 import { selectInvoices, selectInvoicesLoading } from '../../../../../store/invoices/invoices.selectors';
 import { selectSelectedCompanyId } from '../../../../../store/user/user.selectors';
 import { PassThroughInvoiceDialogComponent } from '../../../../../shared/components/pass-through-invoice-dialog/pass-through-invoice-dialog.component';
@@ -27,6 +28,7 @@ export class JobsiteInvoicesComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly actions$ = inject(Actions);
   private readonly destroy$ = new Subject<void>();
 
   invoices: Invoice[] = [];
@@ -153,6 +155,15 @@ export class JobsiteInvoicesComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(success => {
       if (success) {
+        // Reload invoices to show the new pass-through invoice
+        this.store.dispatch(loadInvoices({
+          companyId: this.currentCompanyId!,
+          jobsiteId: this.jobsite.id,
+          page: 0,
+          size: 100,
+          includeReceived: true
+        }));
+
         this.snackBar.open('Pass-through invoice created successfully', 'Close', { duration: 3000 });
       }
     });

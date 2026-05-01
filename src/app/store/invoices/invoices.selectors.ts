@@ -29,10 +29,23 @@ export const selectInvoicesByClientId = (clientId: string) => createSelector(
  */
 export const selectInvoicesByClientIdBidirectional = (currentCompanyId: string, selectedClientId: string) => createSelector(
   selectInvoicesState,
-  (state) => state.invoices.filter(i =>
-    i.clientId === selectedClientId || // Sent to this client
-    (i.companyId === selectedClientId && i.clientId === currentCompanyId) // Received from this client
-  )
+  (state) => {
+    const filtered = state.invoices.filter(i =>
+      i.clientId === selectedClientId || // Sent to this client
+      (i.companyId === selectedClientId && i.clientId === currentCompanyId) // Received from this client
+    );
+    console.log('[Invoice Selector] currentCompanyId:', currentCompanyId, 'selectedClientId:', selectedClientId);
+    console.log('[Invoice Selector] Total invoices:', state.invoices.length, 'Filtered:', filtered.length);
+    console.log('[Invoice Selector] Filtered invoices:', filtered.map(i => ({
+      id: i.id,
+      number: i.invoiceNumber,
+      clientId: i.clientId,
+      companyId: i.companyId,
+      type: i.invoiceType,
+      sourceInvoiceId: i.sourceInvoiceId
+    })));
+    return filtered;
+  }
 );
 
 export const selectInvoicesByEstimateId = (estimateId: string) => createSelector(

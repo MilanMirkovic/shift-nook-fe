@@ -1,11 +1,13 @@
-import { Component, Inject, OnInit, inject } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
+import { Actions, ofType } from '@ngrx/effects';
 import { Invoice } from '../../../store/invoices/invoices.models';
-import { createPassThroughInvoice } from '../../../store/invoices/invoices.actions';
+import { createPassThroughInvoice, createPassThroughInvoiceSuccess, createPassThroughInvoiceFailure } from '../../../store/invoices/invoices.actions';
 import { selectInvoicesLoading } from '../../../store/invoices/invoices.selectors';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { take, takeUntil } from 'rxjs/operators';
 
 export interface PassThroughInvoiceDialogData {
   companyId: string;
@@ -18,10 +20,12 @@ export interface PassThroughInvoiceDialogData {
   templateUrl: './pass-through-invoice-dialog.component.html',
   styleUrls: ['./pass-through-invoice-dialog.component.scss']
 })
-export class PassThroughInvoiceDialogComponent implements OnInit {
+export class PassThroughInvoiceDialogComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly store = inject(Store);
+  private readonly actions$ = inject(Actions);
   private readonly dialogRef = inject(MatDialogRef<PassThroughInvoiceDialogComponent>);
+  private readonly destroy$ = new Subject<void>();
 
   form!: FormGroup;
   loading$: Observable<boolean>;
@@ -46,6 +50,11 @@ export class PassThroughInvoiceDialogComponent implements OnInit {
     return this.previewTotal - this.data.sourceInvoice.totalAmount;
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   onSubmit(): void {
     if (this.form.valid) {
       this.store.dispatch(createPassThroughInvoice({
@@ -56,8 +65,17 @@ export class PassThroughInvoiceDialogComponent implements OnInit {
         }
       }));
 
-      // Close dialog on success (handled by effect)
-      this.dialogRef.close(true);
+      // Wait for success or failure before closing
+      this.actions$.pipe(
+        ofType(createPassThroughInvoiceSuccess, createPassThroughInvoiceFailure),
+        take(1),
+        takeUntil(this.destroy$)
+      ).subscribe(action => {
+        if (action.type === createPassThroughInvoiceSuccess.type) {
+          this.dialogRef.close(true);
+        }
+        // On failure, keep dialog open (error will be shown)
+      });
     }
   }
 
