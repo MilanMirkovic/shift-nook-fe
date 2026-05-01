@@ -669,3 +669,12 @@
   button { gap: 6px; }
 }
 
+// ─── Actions Menu ─────────────────────────────────────────────────────────────
+.delete-action {
+  color: #ef4444 !important;
+
+  mat-icon {
+    color: #ef4444 !important;
+  }
+}
+

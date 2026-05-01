@@ -95,42 +95,42 @@
             </span>
           </td>
           <td class="col-actions">
-            <!-- Send Invoice button (for DRAFT invoices sent by current company) -->
-            <button
-              *ngIf="isSentInvoice(invoice) && invoice.status === 'DRAFT'"
-              mat-icon-button
-              (click)="sendInvoice(invoice)"
-              matTooltip="Send invoice to client">
-              <mat-icon>send</mat-icon>
+            <button mat-icon-button [matMenuTriggerFor]="actionsMenu" matTooltip="Actions">
+              <mat-icon>more_vert</mat-icon>
             </button>
-
-            <!-- Create Pass-Through Invoice button (for received ISSUED invoices) -->
-            <button
-              *ngIf="isReceivedInvoice(invoice) && invoice.status !== 'DRAFT'"
-              mat-icon-button
-              (click)="createPassThroughInvoice(invoice)"
-              matTooltip="Create pass-through invoice with markup">
-              <mat-icon>add_business</mat-icon>
-            </button>
-
-            <!-- Download PDF button -->
-            <button
-              mat-icon-button
-              [disabled]="pdfDownloading.has(invoice.id)"
-              (click)="onDownloadInvoicePdf(invoice)"
-              matTooltip="Download PDF">
-              <mat-spinner *ngIf="pdfDownloading.has(invoice.id)" diameter="18"></mat-spinner>
-              <mat-icon *ngIf="!pdfDownloading.has(invoice.id)">picture_as_pdf</mat-icon>
-            </button>
-
-            <!-- Only show navigation for sent invoices -->
-            <button
-              *ngIf="isSentInvoice(invoice)"
-              mat-icon-button
-              (click)="navigateToClient(invoice)"
-              matTooltip="View client details">
-              <mat-icon>arrow_forward</mat-icon>
-            </button>
+            <mat-menu #actionsMenu="matMenu">
+              <button
+                mat-menu-item
+                *ngIf="isSentInvoice(invoice) && invoice.status === 'DRAFT'"
+                (click)="sendInvoice(invoice)">
+                <mat-icon>send</mat-icon>
+                <span>Send to Client</span>
+              </button>
+              <button
+                mat-menu-item
+                *ngIf="isReceivedInvoice(invoice) && invoice.status !== 'DRAFT'"
+                (click)="createPassThroughInvoice(invoice)">
+                <mat-icon>add_business</mat-icon>
+                <span>Create Pass-Through</span>
+              </button>
+              <button
+                mat-menu-item
+                [disabled]="pdfDownloading.has(invoice.id)"
+                (click)="onDownloadInvoicePdf(invoice)">
+                <mat-icon>
+                  <mat-spinner *ngIf="pdfDownloading.has(invoice.id)" diameter="18"></mat-spinner>
+                  <span *ngIf="!pdfDownloading.has(invoice.id)">picture_as_pdf</span>
+                </mat-icon>
+                <span>Download PDF</span>
+              </button>
+              <button
+                mat-menu-item
+                *ngIf="isSentInvoice(invoice)"
+                (click)="navigateToClient(invoice)">
+                <mat-icon>arrow_forward</mat-icon>
+                <span>View Client</span>
+              </button>
+            </mat-menu>
           </td>
         </tr>
       </tbody>

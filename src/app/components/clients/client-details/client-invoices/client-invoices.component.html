@@ -209,42 +209,52 @@
             </span>
           </td>
           <td class="col-actions">
-            <div class="row-actions">
+            <button mat-icon-button [matMenuTriggerFor]="actionsMenu" matTooltip="Actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionsMenu="matMenu">
+              <button mat-menu-item (click)="onEditInvoice(invoice)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item (click)="onDuplicateInvoice(invoice)">
+                <mat-icon>content_copy</mat-icon>
+                <span>Duplicate</span>
+              </button>
+              <button mat-menu-item (click)="onUpdateInvoiceStatus(invoice)">
+                <mat-icon>swap_horiz</mat-icon>
+                <span>Change Status</span>
+              </button>
               <button
-                mat-icon-button
-                class="action-btn action-btn--payment"
-                matTooltip="Record Payment"
+                mat-menu-item
                 *ngIf="invoice.status === 'ISSUED' || invoice.status === 'PARTIALLY_PAID'"
                 (click)="onRecordPayment(invoice)">
                 <mat-icon>payment</mat-icon>
+                <span>Record Payment</span>
               </button>
               <button
-                mat-icon-button
-                class="action-btn action-btn--history"
-                matTooltip="View Payment History"
+                mat-menu-item
                 *ngIf="invoice.payments && invoice.payments.length > 0"
                 (click)="onViewPaymentHistory(invoice)">
                 <mat-icon>history</mat-icon>
+                <span>Payment History</span>
               </button>
-              <button mat-icon-button class="action-btn action-btn--status" matTooltip="Change status"
-                (click)="onUpdateInvoiceStatus(invoice)">
-                <mat-icon>swap_horiz</mat-icon>
+              <button
+                mat-menu-item
+                [disabled]="pdfDownloading.has(invoice.id)"
+                (click)="onDownloadInvoicePdf(invoice)">
+                <mat-icon>
+                  <mat-spinner *ngIf="pdfDownloading.has(invoice.id)" diameter="18"></mat-spinner>
+                  <span *ngIf="!pdfDownloading.has(invoice.id)">picture_as_pdf</span>
+                </mat-icon>
+                <span>Download PDF</span>
               </button>
-              <button mat-icon-button class="action-btn action-btn--edit" matTooltip="Edit invoice" (click)="onEditInvoice(invoice)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button class="action-btn action-btn--duplicate" matTooltip="Duplicate invoice" (click)="onDuplicateInvoice(invoice)">
-                <mat-icon>content_copy</mat-icon>
-              </button>
-              <button mat-icon-button class="action-btn action-btn--pdf" matTooltip="Download PDF"
-                [disabled]="pdfDownloading.has(invoice.id)" (click)="onDownloadInvoicePdf(invoice)">
-                <mat-spinner *ngIf="pdfDownloading.has(invoice.id)" diameter="18"></mat-spinner>
-                <mat-icon *ngIf="!pdfDownloading.has(invoice.id)">picture_as_pdf</mat-icon>
-              </button>
-              <button mat-icon-button class="action-btn action-btn--delete" matTooltip="Delete invoice" (click)="onDeleteInvoice(invoice)">
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="onDeleteInvoice(invoice)" class="delete-action">
                 <mat-icon>delete_outline</mat-icon>
+                <span>Delete</span>
               </button>
-            </div>
+            </mat-menu>
           </td>
         </tr>
       </tbody>

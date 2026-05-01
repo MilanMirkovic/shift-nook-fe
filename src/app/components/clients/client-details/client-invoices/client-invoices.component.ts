@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 
 import { Invoice, InvoiceStatus } from '../../../../store/invoices/invoices.models';
@@ -71,6 +72,7 @@ import { ClientDetailsNavigationService } from '../client-details-navigation.ser
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatMenuModule,
     InvoiceDialogComponent,
   ],
 })
