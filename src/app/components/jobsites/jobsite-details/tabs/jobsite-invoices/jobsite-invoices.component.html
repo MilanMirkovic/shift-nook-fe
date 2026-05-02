@@ -90,9 +90,10 @@
               <span
                 *ngIf="isReceivedInvoice(invoice)"
                 class="direction-badge direction-badge--received"
-                matTooltip="Invoice received from subcontractor">
+                [matTooltip]="invoice.senderCompanyName ? ('Invoice received from ' + invoice.senderCompanyName) : 'Invoice received from subcontractor'">
                 <mat-icon>call_received</mat-icon>
-                Received
+                <span *ngIf="invoice.senderCompanyName; else genericReceived">From {{ invoice.senderCompanyName }}</span>
+                <ng-template #genericReceived>Received</ng-template>
               </span>
               <span
                 *ngIf="invoice.sourceInvoiceId"

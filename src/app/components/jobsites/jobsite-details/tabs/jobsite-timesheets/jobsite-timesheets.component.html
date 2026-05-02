@@ -89,6 +89,12 @@
                 <div class="timeline-marker"></div>
                 <div class="timeline-content">
                   <div class="timeline-header">
+                    <div class="timeline-worker">
+                      <div class="timeline-worker__avatar">
+                        <span>{{ getInitials(workerGroup.workerName) }}</span>
+                      </div>
+                      <span class="timeline-worker__name">{{ workerGroup.workerName }}</span>
+                    </div>
                     <div class="timeline-date">
                       <mat-icon>event</mat-icon>
                       <span>{{ timesheet.checkInTime | date:'EEEE, MMMM d, yyyy' }}</span>

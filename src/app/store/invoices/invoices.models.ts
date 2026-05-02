@@ -67,6 +67,10 @@ export interface Invoice {
   sourceInvoiceId: string | null;
   recipientCompanyId: string | null;
   combinedFromInvoiceIds?: string[] | null;
+  /** Display name of the company that issued this invoice. Populated by the
+   *  backend; useful for received-invoice rows where {@link companyId} is the
+   *  subcontractor's id. */
+  senderCompanyName?: string | null;
 }
 
 export interface InvoiceItemInput {
