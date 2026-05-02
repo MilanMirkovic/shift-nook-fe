@@ -37,6 +37,14 @@ export class SetPasswordComponent implements OnInit {
   email = '';
   private returnTo = '/accept-invite';
 
+  /**
+   * Enforces the Cognito password policy client-side so we never submit a
+   * password that Cognito will reject (which previously consumed the reset
+   * code and put the user into a broken state on retry).
+   */
+  private static readonly PASSWORD_PATTERN =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -45,7 +53,14 @@ export class SetPasswordComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       code: ['', [Validators.required]],
-      newPassword: ['', [Validators.required, Validators.minLength(8)]],
+      newPassword: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(8),
+          Validators.pattern(SetPasswordComponent.PASSWORD_PATTERN),
+        ],
+      ],
     });
   }
 
@@ -87,6 +102,15 @@ export class SetPasswordComponent implements OnInit {
     try {
       await this.authService.confirmForgotPassword(this.email, code, newPassword);
 
+      // Defensive: if a previous attempt left a partial/stale Amplify session,
+      // signIn() would throw `UserAlreadyAuthenticatedException`. Sign out
+      // first so the new credentials are used cleanly.
+      try {
+        await this.authService.signOut();
+      } catch {
+        // ignore — there may simply be no active session
+      }
+
       // Sign in with the new password
       await this.authService.signIn(this.email, newPassword);
 
@@ -99,6 +123,15 @@ export class SetPasswordComponent implements OnInit {
     } catch (err: any) {
       this.errorMessage = this.mapError(err);
       this.isLoading = false;
+
+      // If the code was rejected (typically because Cognito consumed it on a
+      // prior failed attempt, or it expired), automatically request a fresh
+      // code so the user can simply re-enter it instead of being stuck.
+      const name = err?.name;
+      if (name === 'CodeMismatchException' || name === 'ExpiredCodeException') {
+        this.form.patchValue({ code: '' });
+        this.sendCode();
+      }
     }
   }
 
