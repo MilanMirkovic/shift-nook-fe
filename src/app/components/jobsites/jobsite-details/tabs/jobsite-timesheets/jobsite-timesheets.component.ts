@@ -142,24 +142,42 @@ export class JobsiteTimesheetsComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   // ─── Grouping ─────────────────────────────────────────────────────────────
+  private resolveWorkerName(userId: string, fallback?: string): string {
+    const member = this.companyMembers.find(m => m.userId === userId);
+    if (member) {
+      const name = `${member.firstName ?? ''} ${member.lastName ?? ''}`.trim();
+      if (name) return name;
+      if (member.email) return member.email;
+    }
+    // Use fallback only if it's not just the UUID
+    if (fallback && fallback !== userId) return fallback;
+    return 'Unknown worker';
+  }
+
   getWorkerGroups(): { workerUserId: string; workerName: string; timesheets: Timesheet[] }[] {
     const map = new Map<string, { workerUserId: string; workerName: string; timesheets: Timesheet[] }>();
     for (const t of this.filteredTimesheets) {
       const key = t.workerUserId;
       if (!map.has(key)) {
-        map.set(key, { workerUserId: key, workerName: t.workerName ?? key, timesheets: [] });
+        map.set(key, { workerUserId: key, workerName: this.resolveWorkerName(key, t.workerName), timesheets: [] });
       }
       map.get(key)!.timesheets.push(t);
     }
     // Sort timesheets within each group by check-in time desc
     for (const group of map.values()) {
       group.timesheets.sort((a, b) => new Date(b.checkInTime).getTime() - new Date(a.checkInTime).getTime());
-      // Auto-expand first group
-      if (this.expandedWorkers.size === 0) {
-        this.expandedWorkers.add(group.workerUserId);
-      }
     }
-    return Array.from(map.values());
+    // Sort groups by most recent timesheet (desc) — today first
+    const groups = Array.from(map.values()).sort((a, b) => {
+      const aTime = a.timesheets.length ? new Date(a.timesheets[0].checkInTime).getTime() : 0;
+      const bTime = b.timesheets.length ? new Date(b.timesheets[0].checkInTime).getTime() : 0;
+      return bTime - aTime;
+    });
+    // Auto-expand the most recent group if none expanded
+    if (this.expandedWorkers.size === 0 && groups.length) {
+      this.expandedWorkers.add(groups[0].workerUserId);
+    }
+    return groups;
   }
 
   toggleWorker(workerUserId: string): void {
