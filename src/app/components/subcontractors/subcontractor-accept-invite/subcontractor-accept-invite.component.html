@@ -26,8 +26,14 @@
     @if (view() === 'status') {
       @if (preview$ | async; as preview) {
 
-        <!-- NOT_AUTHENTICATED — existing user: prompt login only -->
-        @if (preview.acceptorStatus === 'NOT_AUTHENTICATED' && preview.isExistingUser) {
+        <!--
+          NOT_AUTHENTICATED.
+          Default to "existing user" (log in) unless the backend explicitly
+          tells us isExistingUser === false. Inviting someone who already has
+          an account is the common case, and assuming "new user" by default
+          incorrectly pushes existing users into a sign-up flow.
+        -->
+        @if (preview.acceptorStatus === 'NOT_AUTHENTICATED' && preview.isExistingUser !== false) {
           <div class="state">
             <div class="company-avatar">{{ preview.ownerCompanyName[0].toUpperCase() }}</div>
             <div class="invite-header">
@@ -40,16 +46,20 @@
               <mat-icon>mail_outline</mat-icon>
               <span>{{ preview.invitedEmail }}</span>
             </div>
-            <p class="state-msg">This email is already registered. Log in to accept the invitation.</p>
+            <p class="state-msg">Log in with this email to accept the invitation.</p>
             <button mat-flat-button class="btn-primary btn-full" (click)="onLogin()">
               <mat-icon>login</mat-icon>
               Log In &amp; Accept
             </button>
+            <p class="secondary-action">
+              Don't have an account yet?
+              <a (click)="onSignUp()" class="link">Create one instead</a>
+            </p>
           </div>
         }
 
-        <!-- NOT_AUTHENTICATED — new user: offer sign-up or login -->
-        @if (preview.acceptorStatus === 'NOT_AUTHENTICATED' && !preview.isExistingUser) {
+        <!-- NOT_AUTHENTICATED — backend confirmed this email has no account -->
+        @if (preview.acceptorStatus === 'NOT_AUTHENTICATED' && preview.isExistingUser === false) {
           <div class="state">
             <div class="company-avatar">{{ preview.ownerCompanyName[0].toUpperCase() }}</div>
             <div class="invite-header">
