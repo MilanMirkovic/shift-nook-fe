@@ -215,16 +215,24 @@ export class JobsiteInvoicesComponent implements OnInit, OnDestroy {
 
   // ───────────────────────── Combine flow ─────────────────────────
 
-  /** Only sent (issued by current company), non-VOID, non-COMBINED invoices
-   *  with a clientId can be combined. */
+  /** Selectable for combining: either a sent invoice we issued, or a received
+   *  invoice from a subcontractor (multiple subcontractor invoices on the same
+   *  jobsite can be rolled up into one combined invoice for the end client).
+   *  Combined and VOID invoices are excluded. Mixing sent + received in one
+   *  batch is prevented in {@link toggleSelected}. */
   isCombinable(invoice: Invoice): boolean {
-    return (
-      this.canCombine &&
-      this.isSentInvoice(invoice) &&
-      invoice.status !== 'VOID' &&
-      invoice.invoiceType !== 'COMBINED' &&
-      !!invoice.clientId
-    );
+    if (!this.canCombine) return false;
+    if (invoice.status === 'VOID') return false;
+    if (invoice.invoiceType === 'COMBINED') return false;
+
+    const isSent = this.isSentInvoice(invoice);
+    const isReceived = this.isReceivedInvoice(invoice);
+    if (!isSent && !isReceived) return false;
+
+    // Sent invoices need a clientId (target client). Received invoices use the
+    // jobsite's end client which is resolved by the backend.
+    if (isSent && !invoice.clientId) return false;
+    return true;
   }
 
   isSelected(invoice: Invoice): boolean {
@@ -235,17 +243,34 @@ export class JobsiteInvoicesComponent implements OnInit, OnDestroy {
     if (!this.isCombinable(invoice)) return;
 
     if (checked) {
-      // Enforce: same client across the selection.
       const firstId = this.selectedInvoiceIds.values().next().value as string | undefined;
       if (firstId) {
         const first = this.invoices.find(i => i.id === firstId);
-        if (first && first.clientId !== invoice.clientId) {
-          this.snackBar.open(
-            'All combined invoices must belong to the same client.',
-            'Close',
-            { duration: 4000 }
-          );
-          return;
+        if (first) {
+          const firstIsSent = this.isSentInvoice(first);
+          const newIsSent = this.isSentInvoice(invoice);
+
+          // Don't mix sent and received in the same combine batch — the
+          // backend rejects this and the resulting invoice would be ambiguous.
+          if (firstIsSent !== newIsSent) {
+            this.snackBar.open(
+              'Cannot combine sent and received invoices in the same batch.',
+              'Close',
+              { duration: 4000 }
+            );
+            return;
+          }
+
+          // For sent batches: enforce same target client. Received batches
+          // intentionally allow different source subcontractors.
+          if (firstIsSent && first.clientId !== invoice.clientId) {
+            this.snackBar.open(
+              'All combined invoices must belong to the same client.',
+              'Close',
+              { duration: 4000 }
+            );
+            return;
+          }
         }
       }
       this.selectedInvoiceIds.add(invoice.id);
