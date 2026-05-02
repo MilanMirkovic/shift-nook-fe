@@ -273,3 +273,28 @@
 .invoice-row--received {
   // Optional: could add subtle background or border for received invoices
 }
+// Combine selection
+.tab-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  .tab-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    .selection-count {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+  }
+}
+.col-select {
+  width: 44px;
+  text-align: center;
+}
+.invoice-row--selected {
+  background: rgba(59, 130, 246, 0.06);
+}

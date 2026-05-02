@@ -1,6 +1,6 @@
 export type InvoiceStatus = 'DRAFT' | 'ISSUED' | 'PARTIALLY_PAID' | 'PAID' | 'VOID';
 
-export type InvoiceType = 'MANUAL' | 'FROM_ESTIMATE' | 'FROM_TIMESHEETS' | 'PASS_THROUGH';
+export type InvoiceType = 'MANUAL' | 'FROM_ESTIMATE' | 'FROM_TIMESHEETS' | 'PASS_THROUGH' | 'COMBINED';
 
 export type PaymentMethod =
   | 'CASH'
@@ -66,6 +66,7 @@ export interface Invoice {
   pdfFileId: string | null;
   sourceInvoiceId: string | null;
   recipientCompanyId: string | null;
+  combinedFromInvoiceIds?: string[] | null;
 }
 
 export interface InvoiceItemInput {
@@ -84,6 +85,30 @@ export interface CreateInvoiceInput {
   issuedAt?: string;
   dueAt?: string;
   items: InvoiceItemInput[];
+  /** When set, server marks the new invoice as type=COMBINED and stores the
+   *  source invoice IDs for traceability. Use with the jobsite "combine" flow. */
+  combinedFromInvoiceIds?: string[];
+  taxAmount?: number;
+}
+
+export interface CombineInvoicesPreviewInput {
+  invoiceIds: string[];
+  jobsiteId?: string;
+}
+
+export interface CombineInvoicesPreviewResponse {
+  clientId: string;
+  jobsiteId: string | null;
+  title: string;
+  notes: string | null;
+  currency: string;
+  subtotalAmount: number;
+  taxAmount: number;
+  totalAmount: number;
+  issuedAt: string;
+  dueAt: string;
+  items: InvoiceItem[];
+  sourceInvoiceIds: string[];
 }
 
 export interface UpdateInvoiceInput {

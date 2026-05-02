@@ -11,6 +11,8 @@ import {
   Payment,
   CreatePaymentInput,
   CreatePassThroughInvoiceInput,
+  CombineInvoicesPreviewInput,
+  CombineInvoicesPreviewResponse,
 } from './invoices.models';
 import {
   CreateInvoiceFromTimesheetsInput,
@@ -99,6 +101,19 @@ export class InvoicesApiService {
   createPassThroughInvoice(companyId: string, request: CreatePassThroughInvoiceInput): Observable<Invoice> {
     return this.http.post<Invoice>(
       `${this.apiUrl}/companies/${companyId}/invoices/pass-through`,
+      request
+    );
+  }
+
+  /** Computes a server-side preview of an invoice combining several existing invoices.
+   *  No DB write — caller submits the (possibly edited) preview via createInvoice
+   *  with combinedFromInvoiceIds populated to actually create the DRAFT. */
+  previewCombineInvoices(
+    companyId: string,
+    request: CombineInvoicesPreviewInput
+  ): Observable<CombineInvoicesPreviewResponse> {
+    return this.http.post<CombineInvoicesPreviewResponse>(
+      `${this.apiUrl}/companies/${companyId}/invoices/combine-preview`,
       request
     );
   }

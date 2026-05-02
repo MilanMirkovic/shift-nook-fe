@@ -8,13 +8,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Actions, ofType } from '@ngrx/effects';
 
 import { Jobsite } from '../../../../../store/jobsites/jobsites.models';
-import { Invoice } from '../../../../../store/invoices/invoices.models';
-import { loadInvoices, sendInvoice, createPassThroughInvoiceSuccess, createPassThroughInvoiceFailure } from '../../../../../store/invoices/invoices.actions';
+import { Invoice, CombineInvoicesPreviewResponse, CreateInvoiceInput } from '../../../../../store/invoices/invoices.models';
+import { loadInvoices, sendInvoice, createInvoice, createInvoiceSuccess, createInvoiceFailure, createPassThroughInvoiceSuccess, createPassThroughInvoiceFailure } from '../../../../../store/invoices/invoices.actions';
 import { selectInvoices, selectInvoicesLoading } from '../../../../../store/invoices/invoices.selectors';
-import { selectSelectedCompanyId } from '../../../../../store/user/user.selectors';
+import { selectSelectedCompanyId, selectCurrentUserRole } from '../../../../../store/user/user.selectors';
 import { PassThroughInvoiceDialogComponent } from '../../../../../shared/components/pass-through-invoice-dialog/pass-through-invoice-dialog.component';
 import { ConfirmationDialogComponent } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { InvoicesApiService } from '../../../../../store/invoices/invoices.api';
+import { InvoiceDialogComponent, InvoiceDialogResult } from '../../../../../shared/components/invoice-dialog/invoice-dialog.component';
 
 @Component({
   selector: 'app-jobsite-invoices',
@@ -38,6 +39,13 @@ export class JobsiteInvoicesComponent implements OnInit, OnDestroy {
   currentCompanyId: string | null = null;
   pdfDownloading = new Set<string>();
 
+  /** Set of invoice IDs the user has selected for combining. */
+  selectedInvoiceIds = new Set<string>();
+  /** True while the combine-preview API call is in flight. */
+  combining = false;
+  /** Whether the current user can issue invoices (Owner/Accountant). */
+  canCombine = false;
+
   ngOnInit(): void {
     this.store.select(selectInvoicesLoading).pipe(takeUntil(this.destroy$))
       .subscribe(loading => this.loading = loading);
@@ -46,6 +54,16 @@ export class JobsiteInvoicesComponent implements OnInit, OnDestroy {
       .subscribe(invoices => {
         // Filter to only this jobsite's invoices (both sent and received)
         this.invoices = invoices.filter(inv => inv.jobsiteId === this.jobsite.id);
+        // Drop any selected ids that are no longer in the visible list.
+        const visible = new Set(this.invoices.map(i => i.id));
+        for (const id of [...this.selectedInvoiceIds]) {
+          if (!visible.has(id)) this.selectedInvoiceIds.delete(id);
+        }
+      });
+
+    this.store.select(selectCurrentUserRole).pipe(takeUntil(this.destroy$))
+      .subscribe(role => {
+        this.canCombine = role === 'OWNER' || role === 'ACCOUNTANT';
       });
 
     this.store.select(selectSelectedCompanyId).pipe(
@@ -192,6 +210,192 @@ export class JobsiteInvoicesComponent implements OnInit, OnDestroy {
         this.snackBar.open('Failed to download PDF. Please try again.', 'Close', { duration: 3000 });
         this.pdfDownloading.delete(invoice.id);
       }
+    });
+  }
+
+  // ───────────────────────── Combine flow ─────────────────────────
+
+  /** Only sent (issued by current company), non-VOID, non-COMBINED invoices
+   *  with a clientId can be combined. */
+  isCombinable(invoice: Invoice): boolean {
+    return (
+      this.canCombine &&
+      this.isSentInvoice(invoice) &&
+      invoice.status !== 'VOID' &&
+      invoice.invoiceType !== 'COMBINED' &&
+      !!invoice.clientId
+    );
+  }
+
+  isSelected(invoice: Invoice): boolean {
+    return this.selectedInvoiceIds.has(invoice.id);
+  }
+
+  toggleSelected(invoice: Invoice, checked: boolean): void {
+    if (!this.isCombinable(invoice)) return;
+
+    if (checked) {
+      // Enforce: same client across the selection.
+      const firstId = this.selectedInvoiceIds.values().next().value as string | undefined;
+      if (firstId) {
+        const first = this.invoices.find(i => i.id === firstId);
+        if (first && first.clientId !== invoice.clientId) {
+          this.snackBar.open(
+            'All combined invoices must belong to the same client.',
+            'Close',
+            { duration: 4000 }
+          );
+          return;
+        }
+      }
+      this.selectedInvoiceIds.add(invoice.id);
+    } else {
+      this.selectedInvoiceIds.delete(invoice.id);
+    }
+  }
+
+  clearSelection(): void {
+    this.selectedInvoiceIds.clear();
+  }
+
+  combineSelected(): void {
+    if (!this.currentCompanyId) return;
+    if (this.selectedInvoiceIds.size < 2) {
+      this.snackBar.open('Select at least two invoices to combine.', 'Close', { duration: 3000 });
+      return;
+    }
+    if (this.combining) return;
+
+    const ids = [...this.selectedInvoiceIds];
+    this.combining = true;
+
+    this.invoicesApi.previewCombineInvoices(this.currentCompanyId, {
+      invoiceIds: ids,
+      jobsiteId: this.jobsite.id,
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (preview) => {
+        this.combining = false;
+        this.openCombinePreviewDialog(preview);
+      },
+      error: (err) => {
+        this.combining = false;
+        const message = err?.error?.message || 'Failed to combine invoices. They must share the same client and currency.';
+        this.snackBar.open(message, 'Close', { duration: 5000 });
+      },
+    });
+  }
+
+  /** Opens the standard invoice editor pre-filled with the server-computed
+   *  preview. On save the result is persisted via createInvoice with
+   *  combinedFromInvoiceIds set so the BE marks it as type=COMBINED. */
+  private openCombinePreviewDialog(preview: CombineInvoicesPreviewResponse): void {
+    if (!this.currentCompanyId) return;
+
+    // Build a synthetic Invoice the existing dialog can render in "edit" mode.
+    const syntheticInvoice = {
+      id: '',
+      companyId: this.currentCompanyId,
+      clientId: preview.clientId,
+      estimateId: null,
+      jobsiteId: preview.jobsiteId ?? undefined,
+      invoiceNumber: '',
+      title: preview.title,
+      status: 'DRAFT',
+      invoiceType: 'COMBINED',
+      currency: preview.currency,
+      subtotalAmount: preview.subtotalAmount,
+      taxAmount: preview.taxAmount,
+      totalAmount: preview.totalAmount,
+      paidAmount: 0,
+      remainingAmount: preview.totalAmount,
+      paymentPercentage: 0,
+      notes: preview.notes,
+      issuedAt: preview.issuedAt,
+      dueAt: preview.dueAt,
+      items: preview.items.map((it, i) => ({
+        id: `preview-${i}`,
+        sortOrder: it.sortOrder,
+        service: it.service,
+        description: it.description,
+        quantity: it.quantity,
+        unitPrice: it.unitPrice,
+        lineTotal: it.lineTotal,
+      })),
+      payments: [],
+      createdAt: preview.issuedAt,
+      updatedAt: preview.issuedAt,
+      pdfFileId: null,
+      sourceInvoiceId: null,
+      recipientCompanyId: null,
+    } as unknown as Invoice;
+
+    // Resolve client name for the dialog header — best-effort from the source
+    // invoices the user just selected.
+    const firstSource = this.invoices.find(i => i.clientId === preview.clientId);
+    const clientName = firstSource ? `Client ${firstSource.clientId.slice(0, 8)}` : 'Client';
+
+    const dialogRef = this.dialog.open(InvoiceDialogComponent, {
+      width: '780px',
+      maxWidth: '96vw',
+      maxHeight: '92vh',
+      disableClose: false,
+      autoFocus: true,
+      panelClass: 'invoice-dialog-container',
+      data: {
+        companyId: this.currentCompanyId,
+        clientId: preview.clientId,
+        clientName,
+        invoice: syntheticInvoice,
+      },
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: InvoiceDialogResult | undefined) => {
+      if (!result || !this.currentCompanyId) return;
+      // Dialog opens in "edit" mode for a synthetic invoice, so result.mode
+      // will be 'edit' but we treat the payload as a CREATE (id is empty).
+      const editPayload: any = result.payload;
+      const payload: CreateInvoiceInput = {
+        clientId: preview.clientId,
+        jobsiteId: editPayload.jobsiteId,
+        title: editPayload.title,
+        notes: editPayload.notes,
+        issuedAt: editPayload.issuedAt,
+        dueAt: editPayload.dueAt,
+        items: editPayload.items,
+        combinedFromInvoiceIds: preview.sourceInvoiceIds,
+        taxAmount: preview.taxAmount,
+      };
+
+      this.store.dispatch(createInvoice({ companyId: this.currentCompanyId, invoice: payload }));
+
+      this.actions$.pipe(
+        ofType(createInvoiceSuccess, createInvoiceFailure),
+        take(1),
+        takeUntil(this.destroy$),
+      ).subscribe(action => {
+        if (action.type === createInvoiceSuccess.type) {
+          this.snackBar.open(
+            `Combined invoice draft created for ${preview.sourceInvoiceIds.length} invoices.`,
+            'View',
+            { duration: 5000 }
+          ).onAction().subscribe(() => {
+            // Navigate to client invoices for the newly created draft.
+            this.router.navigate(['/clients', preview.clientId], {
+              queryParams: { tab: 'invoices' },
+            });
+          });
+          this.clearSelection();
+          this.store.dispatch(loadInvoices({
+            companyId: this.currentCompanyId!,
+            jobsiteId: this.jobsite.id,
+            page: 0,
+            size: 100,
+            includeReceived: true,
+          }));
+        } else {
+          this.snackBar.open('Failed to create combined invoice. Please try again.', 'Close', { duration: 4000 });
+        }
+      });
     });
   }
 }
