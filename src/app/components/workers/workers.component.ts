@@ -94,7 +94,14 @@ export class WorkersComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit(): void {
-    // Wait for company ID to be available, then clear and reload when company changes
+    // Synchronously clear any stale members loaded by other pages (Team Members,
+    // Jobsite Timesheets, etc.) and pin the role filter to WORKER *before* the
+    // template first renders. Otherwise the selector falls back to returning
+    // all items (OWNER/ACCOUNTANT/...) cached from those pages.
+    this._store.dispatch(clearMembers());
+    this._store.dispatch(updateFilters({ role: CompanyRole.WORKER, q: null }));
+
+    // Wait for company ID to be available, then reload when company changes
     this.selectedCompanyId$
       .pipe(
         filter(id => id !== null),
@@ -104,11 +111,7 @@ export class WorkersComponent implements OnInit, OnDestroy {
       .subscribe(companyId => {
         this.companyId = companyId;
 
-        // Clear stale data from previous company
-        this._store.dispatch(clearMembers());
-
-        // Load members for the new company
-        this._store.dispatch(updateFilters({ role: CompanyRole.WORKER, q: null }));
+        // Load members for the (new) company
         this._store.dispatch(
           loadMembers({
             companyId: companyId,
