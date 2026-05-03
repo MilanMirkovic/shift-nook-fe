@@ -304,3 +304,10 @@
 .invoice-row--selected {
   background: rgba(59, 130, 246, 0.06);
 }
+
+// Danger menu item
+::ng-deep .menu-item--danger {
+  color: #ef4444 !important;
+  mat-icon { color: #ef4444 !important; }
+  &:hover { background: rgba(239, 68, 68, 0.08) !important; }
+}

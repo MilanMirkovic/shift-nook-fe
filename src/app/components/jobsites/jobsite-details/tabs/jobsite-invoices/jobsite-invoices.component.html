@@ -168,6 +168,14 @@
                 <mat-icon>arrow_forward</mat-icon>
                 <span>View Client</span>
               </button>
+              <button
+                mat-menu-item
+                *ngIf="canDelete(invoice)"
+                class="menu-item--danger"
+                (click)="deleteInvoice(invoice)">
+                <mat-icon>delete_outline</mat-icon>
+                <span>Delete Invoice</span>
+              </button>
             </mat-menu>
           </td>
         </tr>

@@ -9,7 +9,7 @@ import { Actions, ofType } from '@ngrx/effects';
 
 import { Jobsite } from '../../../../../store/jobsites/jobsites.models';
 import { Invoice, CombineInvoicesPreviewResponse, CreateInvoiceInput } from '../../../../../store/invoices/invoices.models';
-import { loadInvoices, sendInvoice, createInvoice, createInvoiceSuccess, createInvoiceFailure, createPassThroughInvoiceSuccess, createPassThroughInvoiceFailure } from '../../../../../store/invoices/invoices.actions';
+import { loadInvoices, sendInvoice, createInvoice, createInvoiceSuccess, createInvoiceFailure, createPassThroughInvoiceSuccess, createPassThroughInvoiceFailure, deleteInvoice, deleteInvoiceSuccess, deleteInvoiceFailure } from '../../../../../store/invoices/invoices.actions';
 import { selectInvoices, selectInvoicesLoading } from '../../../../../store/invoices/invoices.selectors';
 import { selectSelectedCompanyId, selectCurrentUserRole } from '../../../../../store/user/user.selectors';
 import { PassThroughInvoiceDialogComponent } from '../../../../../shared/components/pass-through-invoice-dialog/pass-through-invoice-dialog.component';
@@ -214,6 +214,51 @@ export class JobsiteInvoicesComponent implements OnInit, OnDestroy {
   }
 
   // ───────────────────────── Combine flow ─────────────────────────
+
+  /** Whether the current user can delete this invoice. We only allow deleting
+   *  DRAFT invoices issued by the current company (the "Created" badge state). */
+  canDelete(invoice: Invoice): boolean {
+    if (!this.canCombine) return false; // OWNER/ACCOUNTANT only
+    if (invoice.status !== 'DRAFT') return false;
+    return this.isSentInvoice(invoice);
+  }
+
+  deleteInvoice(invoice: Invoice): void {
+    if (!this.currentCompanyId || !this.canDelete(invoice)) return;
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Delete Invoice',
+        message: `Permanently delete invoice #${invoice.invoiceNumber} (${invoice.title})? This cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+      },
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(confirmed => {
+      if (!confirmed || !this.currentCompanyId) return;
+
+      this.store.dispatch(deleteInvoice({
+        companyId: this.currentCompanyId,
+        invoiceId: invoice.id,
+      }));
+
+      this.actions$.pipe(
+        ofType(deleteInvoiceSuccess, deleteInvoiceFailure),
+        take(1),
+        takeUntil(this.destroy$),
+      ).subscribe(action => {
+        if (action.type === deleteInvoiceSuccess.type) {
+          this.snackBar.open('Invoice deleted.', 'Close', { duration: 3000 });
+          this.selectedInvoiceIds.delete(invoice.id);
+        } else {
+          this.snackBar.open('Failed to delete invoice. Please try again.', 'Close', { duration: 4000 });
+        }
+      });
+    });
+  }
+
 
   /** Selectable for combining: either a sent invoice we issued, or a received
    *  invoice from a subcontractor (multiple subcontractor invoices on the same
