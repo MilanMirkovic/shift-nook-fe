@@ -15,6 +15,7 @@ import {
   ReactiveFormsModule,
   Validators,
   AbstractControl,
+  FormsModule,
 } from '@angular/forms';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,6 +28,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Subject, takeUntil, map } from 'rxjs';
 import { CreateInvoiceInput, Invoice, UpdateInvoiceInput } from '../../../store/invoices/invoices.models';
 import { JobsitesStoreService } from '../../../store/jobsites/jobsites-store.service';
@@ -51,6 +53,7 @@ export type InvoiceDialogResult =
     CommonModule,
     CurrencyPipe,
     ReactiveFormsModule,
+    FormsModule,
     TextFieldModule,
     MatButtonModule,
     MatDialogModule,
@@ -62,6 +65,7 @@ export type InvoiceDialogResult =
     MatIconModule,
     MatTooltipModule,
     MatSelectModule,
+    MatCheckboxModule,
   ],
   templateUrl: './invoice-dialog.component.html',
   styleUrls: ['./invoice-dialog.component.scss'],
@@ -77,6 +81,12 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
   protected submitting = false;
   protected readonly form: FormGroup;
   protected readonly isEditMode: boolean;
+  /** When true, a checkbox is shown next to each line item so the user can
+   *  pick which lines to apply a markup to. */
+  protected markupMode = false;
+  /** The percentage value bound to the markup input while {@link markupMode}
+   *  is active. */
+  protected markupPercentInput: number | null = 10;
   protected jobsites$ = this.jobsitesStore.jobsites$.pipe(
     map(jobsites => jobsites.filter(j => j.clientId === this.data.clientId || j.clientId === null))
   );
@@ -130,6 +140,12 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
           ],
           quantity: [item.quantity, [Validators.required, Validators.min(0.01)]],
           unitPrice: [item.unitPrice, [Validators.required, Validators.min(0)]],
+          // Markup metadata: keep the pre-markup price so re-applying markup
+          // doesn't compound. Default originalUnitPrice = unitPrice.
+          markupPercentage: [item.markupPercentage ?? 0],
+          originalUnitPrice: [item.originalUnitPrice ?? item.unitPrice],
+          // Selection state for the markup tool (UI-only).
+          markupSelected: [false],
         });
         this.lineItems.push(group);
       }
@@ -162,6 +178,9 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
       description: ['', [Validators.required, Validators.maxLength(1000)]],
       quantity: [1, [Validators.required, Validators.min(0.01)]],
       unitPrice: [0, [Validators.required, Validators.min(0)]],
+      markupPercentage: [0],
+      originalUnitPrice: [0],
+      markupSelected: [false],
     });
     this.lineItems.push(item);
     this.cdr.markForCheck();
@@ -179,6 +198,80 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
     const qty = parseFloat(ctrl.get('quantity')?.value) || 0;
     const price = parseFloat(ctrl.get('unitPrice')?.value) || 0;
     return qty * price;
+  }
+
+  // ───────────────── Markup tool ─────────────────
+
+  toggleMarkupMode(): void {
+    this.markupMode = !this.markupMode;
+    if (!this.markupMode) {
+      // Clear selection state when leaving markup mode.
+      this.lineItems.controls.forEach(c => c.get('markupSelected')?.setValue(false));
+    }
+    this.cdr.markForCheck();
+  }
+
+  toggleAllMarkupSelected(checked: boolean): void {
+    this.lineItems.controls.forEach(c => c.get('markupSelected')?.setValue(checked));
+    this.cdr.markForCheck();
+  }
+
+  get allMarkupSelected(): boolean {
+    return this.lineItems.length > 0
+      && this.lineItems.controls.every(c => !!c.get('markupSelected')?.value);
+  }
+
+  get markupSelectionCount(): number {
+    return this.lineItems.controls.filter(c => !!c.get('markupSelected')?.value).length;
+  }
+
+  /** Applies the entered percentage to every selected line item. The unit
+   *  price is recomputed from the stored {@link originalUnitPrice} so the
+   *  markup never compounds on repeated applications. */
+  applyMarkup(): void {
+    const pct = Number(this.markupPercentInput);
+    if (!isFinite(pct)) return;
+
+    let touched = 0;
+    for (const ctrl of this.lineItems.controls) {
+      if (!ctrl.get('markupSelected')?.value) continue;
+
+      // Capture original price the first time we mark up this row.
+      let original = parseFloat(ctrl.get('originalUnitPrice')?.value);
+      const currentMarkup = parseFloat(ctrl.get('markupPercentage')?.value) || 0;
+      if (!original || currentMarkup === 0) {
+        original = parseFloat(ctrl.get('unitPrice')?.value) || 0;
+        ctrl.get('originalUnitPrice')?.setValue(original);
+      }
+
+      const newPrice = +(original * (1 + pct / 100)).toFixed(2);
+      ctrl.get('unitPrice')?.setValue(newPrice);
+      ctrl.get('markupPercentage')?.setValue(pct);
+      touched++;
+    }
+
+    if (touched > 0) {
+      // Visual feedback only — exit markup mode after applying.
+      this.markupMode = false;
+      this.lineItems.controls.forEach(c => c.get('markupSelected')?.setValue(false));
+    }
+    this.cdr.markForCheck();
+  }
+
+  /** Removes any previously-applied markup from a single row, restoring its
+   *  original unit price. Exposed in the row for quick undo. */
+  clearLineItemMarkup(index: number): void {
+    const ctrl = this.lineItems.at(index);
+    const original = parseFloat(ctrl.get('originalUnitPrice')?.value);
+    if (isFinite(original)) {
+      ctrl.get('unitPrice')?.setValue(original);
+    }
+    ctrl.get('markupPercentage')?.setValue(0);
+    this.cdr.markForCheck();
+  }
+
+  getLineItemMarkup(ctrl: AbstractControl): number {
+    return parseFloat(ctrl.get('markupPercentage')?.value) || 0;
   }
 
   getErrorMessage(controlName: string): string {
@@ -252,13 +345,21 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const items = raw.lineItems.map((item: any, i: number) => ({
-      sortOrder: i,
-      service: item.service?.trim() || undefined,
-      description: item.description.trim(),
-      quantity: parseFloat(item.quantity),
-      unitPrice: parseFloat(item.unitPrice),
-    }));
+    const items = raw.lineItems.map((item: any, i: number) => {
+      const markupPercentage = parseFloat(item.markupPercentage) || 0;
+      const originalUnitPrice = parseFloat(item.originalUnitPrice);
+      return {
+        sortOrder: i,
+        service: item.service?.trim() || undefined,
+        description: item.description.trim(),
+        quantity: parseFloat(item.quantity),
+        unitPrice: parseFloat(item.unitPrice),
+        ...(markupPercentage > 0 ? { markupPercentage } : {}),
+        ...(markupPercentage > 0 && isFinite(originalUnitPrice)
+          ? { originalUnitPrice }
+          : {}),
+      };
+    });
 
     if (this.isEditMode) {
       const result: InvoiceDialogResult = {

@@ -92,14 +92,87 @@
           <mat-icon class="form-card__icon">format_list_bulleted</mat-icon>
           <h3>Line Items</h3>
           <span class="item-count-badge">{{ lineItems.length }}</span>
+          <span class="form-card__spacer"></span>
+          <button
+            mat-stroked-button
+            color="accent"
+            type="button"
+            class="markup-toggle-btn"
+            (click)="toggleMarkupMode()">
+            <mat-icon>percent</mat-icon>
+            {{ markupMode ? 'Cancel Markup' : 'Add Markup' }}
+          </button>
         </div>
+
+        <!-- Markup tool panel -->
+        @if (markupMode) {
+          <div class="markup-panel">
+            <div class="markup-panel__row">
+              <mat-checkbox
+                [checked]="allMarkupSelected"
+                (change)="toggleAllMarkupSelected($event.checked)">
+                Select all
+              </mat-checkbox>
+              <span class="markup-panel__count">
+                {{ markupSelectionCount }} selected
+              </span>
+            </div>
+            <div class="markup-panel__row">
+              <mat-form-field appearance="outline" class="markup-panel__field">
+                <mat-label>Markup %</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  [(ngModel)]="markupPercentInput"
+                  [ngModelOptions]="{ standalone: true }" />
+                <span matSuffix>%</span>
+              </mat-form-field>
+              <button
+                mat-flat-button
+                color="primary"
+                type="button"
+                [disabled]="markupSelectionCount === 0 || markupPercentInput === null"
+                (click)="applyMarkup()">
+                <mat-icon>check</mat-icon>
+                Apply to {{ markupSelectionCount }} item{{ markupSelectionCount === 1 ? '' : 's' }}
+              </button>
+            </div>
+            <p class="markup-panel__hint">
+              Markup multiplies the original unit price. Re-applying replaces the
+              previous markup (does not compound).
+            </p>
+          </div>
+        }
 
         <div formArrayName="lineItems" class="line-items">
           @for (item of lineItems.controls; track $index) {
-            <div [formGroupName]="$index" class="line-item">
+            <div [formGroupName]="$index" class="line-item"
+                 [class.line-item--marked-up]="getLineItemMarkup(item) > 0">
 
               <div class="line-item__header">
+                @if (markupMode) {
+                  <mat-checkbox formControlName="markupSelected"
+                                class="line-item__select"></mat-checkbox>
+                }
                 <span class="line-item__number">{{ $index + 1 }}</span>
+                @if (getLineItemMarkup(item) > 0) {
+                  <span class="line-item__markup-badge"
+                        matTooltip="Markup applied to original unit price">
+                    <mat-icon>trending_up</mat-icon>
+                    +{{ getLineItemMarkup(item) }}%
+                    <button
+                      mat-icon-button
+                      type="button"
+                      class="line-item__markup-clear"
+                      matTooltip="Remove markup"
+                      (click)="clearLineItemMarkup($index)">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </span>
+                }
+                <span class="form-card__spacer"></span>
                 <button
                   mat-icon-button
                   type="button"

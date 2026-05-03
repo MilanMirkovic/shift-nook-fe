@@ -35,6 +35,14 @@ export interface InvoiceItem {
   quantity: number;
   unitPrice: number;
   lineTotal: number;
+  /** Markup percentage applied to the original unit price (0-100+). Optional;
+   *  used by the combine-invoices flow so users can mark up subcontractor
+   *  costs before issuing the combined invoice. The persisted {@link unitPrice}
+   *  already includes the markup. */
+  markupPercentage?: number;
+  /** Unit price BEFORE the markup was applied. When markup is non-zero,
+   *  unitPrice = originalUnitPrice * (1 + markupPercentage/100). */
+  originalUnitPrice?: number;
 }
 
 export interface Invoice {
@@ -79,6 +87,9 @@ export interface InvoiceItemInput {
   description: string;
   quantity: number;
   unitPrice: number;
+  /** Optional markup metadata (combine-invoices flow). */
+  markupPercentage?: number;
+  originalUnitPrice?: number;
 }
 
 export interface CreateInvoiceInput {

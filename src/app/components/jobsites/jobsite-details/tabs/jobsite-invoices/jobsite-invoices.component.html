@@ -82,10 +82,12 @@
               <span class="invoice-number">#{{ invoice.invoiceNumber }}</span>
               <span
                 *ngIf="isSentInvoice(invoice)"
-                class="direction-badge direction-badge--sent"
-                matTooltip="Invoice sent to client">
-                <mat-icon>call_made</mat-icon>
-                Sent
+                class="direction-badge"
+                [class.direction-badge--sent]="invoice.status !== 'DRAFT'"
+                [class.direction-badge--created]="invoice.status === 'DRAFT'"
+                [matTooltip]="invoice.status === 'DRAFT' ? 'Draft created — not yet sent to client' : 'Invoice sent to client'">
+                <mat-icon>{{ invoice.status === 'DRAFT' ? 'edit_note' : 'call_made' }}</mat-icon>
+                {{ invoice.status === 'DRAFT' ? 'Created' : 'Sent' }}
               </span>
               <span
                 *ngIf="isReceivedInvoice(invoice)"

@@ -251,6 +251,45 @@ mat-dialog-content {
     gap: 2px;
     padding-top: 12px;
   }
+
+  &--marked-up {
+    border-color: #a78bfa !important;
+    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%);
+  }
+
+  &__select {
+    margin-right: 6px;
+  }
+
+  &__markup-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 4px 2px 8px;
+    margin-left: 8px;
+    background: #ede9fe;
+    color: #6d28d9;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+
+    .line-item__markup-clear {
+      width: 22px;
+      height: 22px;
+      line-height: 22px;
+      mat-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+      }
+    }
+  }
 }
 
 .field-service,
@@ -409,3 +448,46 @@ mat-form-field {
   }
 }
 
+// ─── Markup tool ──────────────────────────────────────────────────────────────
+.form-card__spacer {
+  flex: 1 1 auto;
+}
+
+.markup-toggle-btn {
+  margin-left: auto;
+}
+
+.markup-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  margin: 8px 0 16px;
+  background: linear-gradient(135deg, #f5f3ff 0%, #eef2ff 100%);
+  border: 1px solid #c7d2fe;
+  border-radius: 12px;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  &__count {
+    color: #4f46e5;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  &__field {
+    width: 140px;
+    .mat-mdc-form-field-subscript-wrapper { display: none; }
+  }
+
+  &__hint {
+    margin: 0;
+    color: #6b7280;
+    font-size: 12px;
+  }
+}
