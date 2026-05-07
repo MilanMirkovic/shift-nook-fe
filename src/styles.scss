@@ -434,13 +434,13 @@ html {
 
 .invoice-dialog-container {
   .mat-mdc-dialog-container {
-    border-radius: 20px !important;
-    box-shadow: var(--sn-shadow-modal) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.2) !important;
     overflow: hidden !important;
     padding: 0 !important;
 
     .mdc-dialog__surface {
-      border-radius: 20px !important;
+      border-radius: 24px !important;
       overflow: hidden !important;
       padding: 0 !important;
     }
