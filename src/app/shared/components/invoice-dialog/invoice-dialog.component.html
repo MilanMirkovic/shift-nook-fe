@@ -140,16 +140,14 @@
               </button>
             </div>
             <p class="markup-panel__hint">
-              Markup multiplies the original unit price. Re-applying replaces the
-              previous markup (does not compound).
+              Markup calculates a percentage of selected items and adds it as a new line item.
             </p>
           </div>
         }
 
         <div formArrayName="lineItems" class="line-items">
           @for (item of lineItems.controls; track $index) {
-            <div [formGroupName]="$index" class="line-item"
-                 [class.line-item--marked-up]="getLineItemMarkup(item) > 0">
+            <div [formGroupName]="$index" class="line-item">
 
               <div class="line-item__header">
                 @if (markupMode) {
@@ -157,21 +155,6 @@
                                 class="line-item__select"></mat-checkbox>
                 }
                 <span class="line-item__number">{{ $index + 1 }}</span>
-                @if (getLineItemMarkup(item) > 0) {
-                  <span class="line-item__markup-badge"
-                        matTooltip="Markup applied to original unit price">
-                    <mat-icon>trending_up</mat-icon>
-                    +{{ getLineItemMarkup(item) }}%
-                    <button
-                      mat-icon-button
-                      type="button"
-                      class="line-item__markup-clear"
-                      matTooltip="Remove markup"
-                      (click)="clearLineItemMarkup($index)">
-                      <mat-icon>close</mat-icon>
-                    </button>
-                  </span>
-                }
                 <span class="form-card__spacer"></span>
                 <button
                   mat-icon-button

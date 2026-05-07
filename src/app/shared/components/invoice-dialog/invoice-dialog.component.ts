@@ -225,53 +225,48 @@ export class InvoiceDialogComponent implements OnInit, OnDestroy {
     return this.lineItems.controls.filter(c => !!c.get('markupSelected')?.value).length;
   }
 
-  /** Applies the entered percentage to every selected line item. The unit
-   *  price is recomputed from the stored {@link originalUnitPrice} so the
-   *  markup never compounds on repeated applications. */
+  /** Calculates the total markup from selected line items and creates a new
+   *  line item with the markup amount instead of modifying the original items. */
   applyMarkup(): void {
     const pct = Number(this.markupPercentInput);
-    if (!isFinite(pct)) return;
+    if (!isFinite(pct) || pct === 0) return;
 
+    let totalMarkup = 0;
     let touched = 0;
+
+    // Calculate total markup amount from selected line items
     for (const ctrl of this.lineItems.controls) {
       if (!ctrl.get('markupSelected')?.value) continue;
 
-      // Capture original price the first time we mark up this row.
-      let original = parseFloat(ctrl.get('originalUnitPrice')?.value);
-      const currentMarkup = parseFloat(ctrl.get('markupPercentage')?.value) || 0;
-      if (!original || currentMarkup === 0) {
-        original = parseFloat(ctrl.get('unitPrice')?.value) || 0;
-        ctrl.get('originalUnitPrice')?.setValue(original);
-      }
+      const qty = parseFloat(ctrl.get('quantity')?.value) || 0;
+      const unitPrice = parseFloat(ctrl.get('unitPrice')?.value) || 0;
+      const lineTotal = qty * unitPrice;
+      const markupAmount = lineTotal * (pct / 100);
 
-      const newPrice = +(original * (1 + pct / 100)).toFixed(2);
-      ctrl.get('unitPrice')?.setValue(newPrice);
-      ctrl.get('markupPercentage')?.setValue(pct);
+      totalMarkup += markupAmount;
       touched++;
     }
 
-    if (touched > 0) {
-      // Visual feedback only — exit markup mode after applying.
+    if (touched > 0 && totalMarkup > 0) {
+      // Create new line item for the markup
+      const markupLineItem = this.fb.group({
+        sortOrder: [this.lineItems.length],
+        service: ['Markup'],
+        description: [`Markup (${pct}%)`, [Validators.required, Validators.maxLength(1000)]],
+        quantity: [1, [Validators.required, Validators.min(0.01)]],
+        unitPrice: [+totalMarkup.toFixed(2), [Validators.required, Validators.min(0)]],
+        markupPercentage: [0],
+        originalUnitPrice: [+totalMarkup.toFixed(2)],
+        markupSelected: [false],
+      });
+
+      this.lineItems.push(markupLineItem);
+
+      // Exit markup mode and clear selections
       this.markupMode = false;
       this.lineItems.controls.forEach(c => c.get('markupSelected')?.setValue(false));
     }
     this.cdr.markForCheck();
-  }
-
-  /** Removes any previously-applied markup from a single row, restoring its
-   *  original unit price. Exposed in the row for quick undo. */
-  clearLineItemMarkup(index: number): void {
-    const ctrl = this.lineItems.at(index);
-    const original = parseFloat(ctrl.get('originalUnitPrice')?.value);
-    if (isFinite(original)) {
-      ctrl.get('unitPrice')?.setValue(original);
-    }
-    ctrl.get('markupPercentage')?.setValue(0);
-    this.cdr.markForCheck();
-  }
-
-  getLineItemMarkup(ctrl: AbstractControl): number {
-    return parseFloat(ctrl.get('markupPercentage')?.value) || 0;
   }
 
   getErrorMessage(controlName: string): string {
