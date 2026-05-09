@@ -1,0 +1,30 @@
+<app-accountant-team-stats-card
+  [stats]="(stats$ | async)"
+  [loading]="(loading$ | async) ?? false"
+></app-accountant-team-stats-card>
+
+<app-list-page
+  [loading]="(loading$ | async) ?? false"
+  title="My Accountants"
+  subtitle="Manage your accounting team, assign companies, and track performance."
+  [rows]="(accountants$ | async) ?? []"
+  [columns]="columns"
+  [actions]="actions"
+  searchPlaceholder="Search accountants"
+  [pageSize]="20"
+  [serverSidePagination]="true"
+  [totalItems]="(total$ | async) ?? 0"
+  [currentPage]="0"
+  [pageChange]="onPageChange"
+  [pageSizeChange]="onPageSizeChange"
+  [queryChange]="onQueryChange"
+  [clientSideSearch]="false"
+  (rowClick)="onRowClick($event)"
+>
+  <ng-template #pageActions>
+    <button mat-flat-button color="primary" type="button" (click)="openInviteDialog()">
+      <mat-icon>person_add</mat-icon>
+      Invite Accountant
+    </button>
+  </ng-template>
+</app-list-page>

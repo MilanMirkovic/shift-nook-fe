@@ -1,0 +1,87 @@
+<div class="dialog-wrapper">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="dialog-header__icon">
+      <mat-icon>business</mat-icon>
+    </div>
+    <div class="dialog-header__text">
+      <h2 class="dialog-header__title">Assign Companies</h2>
+      <p class="dialog-header__subtitle">
+        {{ data.accountant.firstName }} {{ data.accountant.lastName }}
+      </p>
+    </div>
+    <button
+      mat-icon-button
+      class="dialog-header__close"
+      (click)="onCancel()"
+      type="button"
+      matTooltip="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Content -->
+  <mat-dialog-content>
+    <p class="dialog-description">
+      Select which companies this accountant can access. They will only be able to view and manage data for the selected companies.
+    </p>
+
+    @if ((error$ | async)) {
+      <div class="error-banner">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ error$ | async }}</span>
+      </div>
+    }
+
+    <div class="companies-list">
+      @if (data.availableCompanies.length === 0) {
+        <div class="empty-state">
+          <mat-icon>info_outline</mat-icon>
+          <p>No companies available to assign.</p>
+        </div>
+      } @else {
+        @for (company of data.availableCompanies; track company.companyId) {
+          <div class="company-item">
+            <mat-checkbox
+              [checked]="isAssigned(company.companyId)"
+              (change)="toggleCompany(company.companyId, $event.checked)">
+              <div class="company-item__content">
+                <mat-icon class="company-item__icon">business</mat-icon>
+                <span class="company-item__name">{{ company.companyName }}</span>
+              </div>
+            </mat-checkbox>
+          </div>
+        }
+      }
+    </div>
+
+    <div class="selected-count">
+      {{ selectedCompanyIds.size }} {{ selectedCompanyIds.size === 1 ? 'company' : 'companies' }} selected
+    </div>
+  </mat-dialog-content>
+
+  <!-- Actions -->
+  <mat-dialog-actions align="end">
+    <button
+      mat-button
+      class="btn-cancel"
+      (click)="onCancel()"
+      [disabled]="(assigning$ | async) ?? false">
+      Cancel
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      class="btn-save"
+      (click)="onSave()"
+      [disabled]="(assigning$ | async) ?? false">
+      @if (assigning$ | async) {
+        <mat-spinner diameter="18"></mat-spinner>
+        <span>Saving...</span>
+      } @else {
+        <mat-icon>check</mat-icon>
+        <span>Save Assignments</span>
+      }
+    </button>
+  </mat-dialog-actions>
+</div>

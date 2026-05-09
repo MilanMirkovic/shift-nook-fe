@@ -276,8 +276,8 @@ export class JobsiteInvoicesComponent implements OnInit, OnDestroy {
 
     // Sent invoices need a clientId (target client). Received invoices use the
     // jobsite's end client which is resolved by the backend.
-    if (isSent && !invoice.clientId) return false;
-    return true;
+    return !(isSent && !invoice.clientId);
+
   }
 
   isSelected(invoice: Invoice): boolean {

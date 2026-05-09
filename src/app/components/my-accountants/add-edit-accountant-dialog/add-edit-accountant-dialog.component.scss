@@ -1,0 +1,87 @@
+.dialog-container {
+  min-width: 500px;
+  max-width: 600px;
+
+  @media (max-width: 768px) {
+    min-width: 300px;
+  }
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 16px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  margin-bottom: 24px;
+
+  h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .close-button {
+    color: rgba(0, 0, 0, 0.54);
+  }
+}
+
+mat-dialog-content {
+  padding: 0 24px;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.accountant-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.name-row {
+  display: flex;
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+
+.half-width {
+  flex: 1;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+mat-dialog-actions {
+  padding: 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  margin-top: 24px;
+  gap: 12px;
+
+  button {
+    min-width: 100px;
+
+    mat-icon {
+      margin-right: 8px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+mat-form-field {
+  mat-icon[matPrefix] {
+    margin-right: 12px;
+    color: rgba(0, 0, 0, 0.54);
+  }
+}

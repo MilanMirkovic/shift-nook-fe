@@ -1,0 +1,41 @@
+<div class="metrics-card">
+  <div class="metric">
+    <div class="metric__icon">
+      <mat-icon>schedule</mat-icon>
+    </div>
+    <div class="metric__content">
+      <div class="metric__value">{{ metrics.hoursWorked }}</div>
+      <div class="metric__label">Hours Worked</div>
+    </div>
+  </div>
+
+  <div class="metric">
+    <div class="metric__icon">
+      <mat-icon>receipt_long</mat-icon>
+    </div>
+    <div class="metric__content">
+      <div class="metric__value">{{ metrics.invoicesCreated }}</div>
+      <div class="metric__label">Invoices Created</div>
+    </div>
+  </div>
+
+  <div class="metric">
+    <div class="metric__icon">
+      <mat-icon>attach_money</mat-icon>
+    </div>
+    <div class="metric__content">
+      <div class="metric__value">${{ metrics.invoicesValue | number:'1.0-0' }}</div>
+      <div class="metric__label">Invoice Value</div>
+    </div>
+  </div>
+
+  <div class="metric">
+    <div class="metric__icon">
+      <mat-icon>business</mat-icon>
+    </div>
+    <div class="metric__content">
+      <div class="metric__value">{{ metrics.companiesAssigned }}</div>
+      <div class="metric__label">Companies</div>
+    </div>
+  </div>
+</div>

@@ -50,6 +50,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   protected canSeeSubcontractors = false;   // OWNER or ADMIN of a company
   protected canSeePrincipalCompanies = false; // OWNER or SUBCONTRACTOR of a company
   protected canSeeWorkTime = false; // Only show Work Time for ACCOUNTANT
+  protected canSeeMyAccountants = false; // Only show My Accountants for ACCOUNTING_MANAGER
   protected isPlatformAdmin = false; // Show Admin section for platform ADMIN role
   protected isAccountant = false; // Show work session timer for ACCOUNTANT
 
@@ -158,6 +159,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
       )
       .subscribe(canSee => {
         this.canSeeWorkTime = canSee;
+      });
+
+    // My Accountants tab — only for ACCOUNTING_MANAGER
+    this.userStore.currentCompany$
+      .pipe(
+        map(company => company?.role === CompanyRole.ACCOUNTING_MANAGER),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(canSee => {
+        this.canSeeMyAccountants = canSee;
       });
 
     // Determine if user is a WORKER (to show Check In button)

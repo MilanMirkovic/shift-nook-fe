@@ -1,0 +1,122 @@
+<div class="detail-container">
+  <!-- Header -->
+  <div class="detail-header">
+    <button mat-icon-button (click)="goBack()" matTooltip="Back to list">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1 class="detail-header__title">Accountant Details</h1>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading$ | async) {
+    <div class="loading-state">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading accountant details...</p>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (accountant$ | async; as accountant) {
+    <div class="detail-content">
+      <!-- Personal Info Card -->
+      <div class="info-card">
+        <div class="info-card__header">
+          <mat-icon class="info-card__icon">person</mat-icon>
+          <h2>Personal Information</h2>
+        </div>
+        <div class="info-card__content">
+          <div class="info-row">
+            <span class="info-row__label">Name</span>
+            <span class="info-row__value">{{ accountant.firstName }} {{ accountant.lastName }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row__label">Email</span>
+            <span class="info-row__value">{{ accountant.email }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row__label">Role</span>
+            <span class="info-row__value">{{ accountant.role }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row__label">Member Since</span>
+            <span class="info-row__value">{{ accountant.memberSince | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics Card -->
+      <div class="metrics-section">
+        <h2 class="section-title">Performance Metrics</h2>
+        <app-accountant-metrics-card [metrics]="accountant.metrics"></app-accountant-metrics-card>
+      </div>
+
+      <!-- Assigned Companies Card -->
+      <div class="info-card">
+        <div class="info-card__header">
+          <mat-icon class="info-card__icon">business</mat-icon>
+          <h2>Assigned Companies</h2>
+          <span class="info-card__badge">{{ accountant.assignedCompanies.length }}</span>
+        </div>
+        <div class="info-card__content">
+          @if (accountant.assignedCompanies.length === 0) {
+            <div class="empty-state">
+              <mat-icon>info_outline</mat-icon>
+              <p>No companies assigned yet.</p>
+            </div>
+          } @else {
+            <div class="companies-list">
+              @for (company of accountant.assignedCompanies; track company.companyId) {
+                <div class="company-item">
+                  <div class="company-item__icon">
+                    <mat-icon>business</mat-icon>
+                  </div>
+                  <div class="company-item__content">
+                    <span class="company-item__name">{{ company.companyName }}</span>
+                    <span class="company-item__meta">
+                      Assigned {{ company.assignedAt | date:'mediumDate' }}
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Recent Activity Card -->
+      @if (accountant.recentActivity && accountant.recentActivity.length > 0) {
+        <div class="info-card">
+          <div class="info-card__header">
+            <mat-icon class="info-card__icon">history</mat-icon>
+            <h2>Recent Activity</h2>
+          </div>
+          <div class="info-card__content">
+            <div class="activity-timeline">
+              @for (activity of accountant.recentActivity; track activity.id) {
+                <div class="activity-item">
+                  <div class="activity-item__icon">
+                    @switch (activity.type) {
+                      @case ('invoice_created') {
+                        <mat-icon>receipt_long</mat-icon>
+                      }
+                      @case ('timesheet_submitted') {
+                        <mat-icon>schedule</mat-icon>
+                      }
+                      @case ('company_assigned') {
+                        <mat-icon>business</mat-icon>
+                      }
+                    }
+                  </div>
+                  <div class="activity-item__content">
+                    <p class="activity-item__description">{{ activity.description }}</p>
+                    <span class="activity-item__time">{{ activity.timestamp | date:'medium' }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

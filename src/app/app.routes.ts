@@ -22,6 +22,7 @@ import { subcontractorsReducer } from './store/subcontractors/subcontractors.red
 import { adminDashboardReducer } from './store/admin-dashboard/admin-dashboard.reducer';
 import { adminUsersReducer } from './store/admin-users/admin-users.reducer';
 import { adminCompaniesReducer } from './store/admin-companies/admin-companies.reducer';
+import { accountantTeamReducer } from './store/accountant-team/accountant-team.reducer';
 
 // Import feature keys from selectors
 import { TIMESHEETS_FEATURE_KEY } from './store/timesheets/timesheets.selectors';
@@ -37,6 +38,7 @@ import { SUBCONTRACTORS_FEATURE_KEY } from './store/subcontractors/subcontractor
 import { ADMIN_DASHBOARD_FEATURE_KEY } from './store/admin-dashboard/admin-dashboard.reducer';
 import { ADMIN_USERS_FEATURE_KEY } from './store/admin-users/admin-users.reducer';
 import { ADMIN_COMPANIES_FEATURE_KEY } from './store/admin-companies/admin-companies.reducer';
+import { ACCOUNTANT_TEAM_FEATURE_KEY } from './store/accountant-team/accountant-team.models';
 
 // Import effects
 import { TimesheetsEffects } from './store/timesheets/timesheets.effects';
@@ -53,6 +55,7 @@ import { SubcontractorsEffects } from './store/subcontractors/subcontractors.eff
 import { AdminDashboardEffects } from './store/admin-dashboard/admin-dashboard.effects';
 import { AdminUsersEffects } from './store/admin-users/admin-users.effects';
 import { AdminCompaniesEffects } from './store/admin-companies/admin-companies.effects';
+import { AccountantTeamEffects } from './store/accountant-team/accountant-team.effects';
 
 // Define COMPANY_WORK_SESSIONS_FEATURE_KEY if not exported from elsewhere
 export const COMPANY_WORK_SESSIONS_FEATURE_KEY = 'companyWorkSessions';
@@ -304,6 +307,32 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/company-redirect.page').then((m) => m.CompanyRedirectPage),
+  },
+  // ── My Accountants: accountant team management ────────────────────────────
+  {
+    path: 'my-accountants',
+    canActivate: [authGuard, roleGuard(CompanyRole.OWNER)],
+    data: { preload: true },
+    providers: [
+      provideState(ACCOUNTANT_TEAM_FEATURE_KEY, accountantTeamReducer),
+      provideEffects(AccountantTeamEffects),
+    ],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./components/my-accountants/my-accountants.component').then(
+            (m) => m.MyAccountantsComponent
+          ),
+      },
+      {
+        path: ':userId',
+        loadComponent: () =>
+          import('./components/my-accountants/accountant-detail/accountant-detail.component').then(
+            (m) => m.AccountantDetailComponent
+          ),
+      },
+    ],
   },
   // ── Platform Admin: user management ───────────────────────────────────────
   {

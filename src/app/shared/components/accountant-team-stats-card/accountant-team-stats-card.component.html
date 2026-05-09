@@ -1,0 +1,48 @@
+<div class="stats-card" *ngIf="!loading && stats; else loadingTemplate">
+  <div class="stat">
+    <div class="stat__icon stat__icon--primary">
+      <mat-icon>people</mat-icon>
+    </div>
+    <div class="stat__content">
+      <div class="stat__value">{{ stats.totalAccountants }}</div>
+      <div class="stat__label">Total Accountants</div>
+    </div>
+  </div>
+
+  <div class="stat">
+    <div class="stat__icon stat__icon--success">
+      <mat-icon>check_circle</mat-icon>
+    </div>
+    <div class="stat__content">
+      <div class="stat__value">{{ stats.activeAccountants }}</div>
+      <div class="stat__label">Active</div>
+    </div>
+  </div>
+
+  <div class="stat">
+    <div class="stat__icon stat__icon--warning">
+      <mat-icon>hourglass_empty</mat-icon>
+    </div>
+    <div class="stat__content">
+      <div class="stat__value">{{ stats.pendingInvites }}</div>
+      <div class="stat__label">Pending Invites</div>
+    </div>
+  </div>
+
+  <div class="stat">
+    <div class="stat__icon stat__icon--info">
+      <mat-icon>business</mat-icon>
+    </div>
+    <div class="stat__content">
+      <div class="stat__value">{{ stats.companiesManaged }}</div>
+      <div class="stat__label">Companies Managed</div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loadingTemplate>
+  <div class="loading-state">
+    <mat-icon class="spinning">refresh</mat-icon>
+    <span>Loading statistics...</span>
+  </div>
+</ng-template>
