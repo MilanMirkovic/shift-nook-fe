@@ -44,7 +44,7 @@ export const dashboardRoleGuard: CanActivateFn = () => {
 
       // Use the selected company's role (falls back to first company if none selected)
       const role = currentCompany?.role ?? user.companies[0].role;
-      const allowed = [CompanyRole.OWNER, CompanyRole.ACCOUNTANT];
+      const allowed = [CompanyRole.OWNER, CompanyRole.ACCOUNTANT, CompanyRole.ACCOUNTING_MANAGER];
       if (allowed.includes(role)) {
         return true;
       }

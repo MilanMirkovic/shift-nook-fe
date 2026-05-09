@@ -42,17 +42,17 @@ export class SidebarComponent implements OnInit, OnDestroy {
   protected currentCompany: CompanyMembership | null = null;
   protected hasMultipleCompanies = false;
   protected canSeeWorkers = true; // Only show Workers menu if user is not a WORKER
-  protected canSeeClients = false; // Only show Clients menu for OWNER and ACCOUNTANT
-  protected canSeeDashboard = false; // Only show Dashboard for OWNER and ACCOUNTANT
-  protected canSeeFinancials = false; // Only show Financials for OWNER and ACCOUNTANT
+  protected canSeeClients = false; // Only show Clients menu for OWNER, ACCOUNTANT, and ACCOUNTING_MANAGER
+  protected canSeeDashboard = false; // Only show Dashboard for OWNER, ACCOUNTANT, and ACCOUNTING_MANAGER
+  protected canSeeFinancials = false; // Only show Financials for OWNER, ACCOUNTANT, and ACCOUNTING_MANAGER
   protected isWorker = false; // Show Check In button only for WORKER role
   protected isAuthenticated = false;
   protected canSeeSubcontractors = false;   // OWNER or ADMIN of a company
   protected canSeePrincipalCompanies = false; // OWNER or SUBCONTRACTOR of a company
-  protected canSeeWorkTime = false; // Only show Work Time for ACCOUNTANT
+  protected canSeeWorkTime = false; // Only show Work Time for ACCOUNTANT and ACCOUNTING_MANAGER
   protected canSeeMyAccountants = false; // Only show My Accountants for ACCOUNTING_MANAGER
   protected isPlatformAdmin = false; // Show Admin section for platform ADMIN role
-  protected isAccountant = false; // Show work session timer for ACCOUNTANT
+  protected isAccountant = false; // Show work session timer for ACCOUNTANT and ACCOUNTING_MANAGER
 
   ngOnInit(): void {
     // Check if user is authenticated
@@ -91,12 +91,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       this.canSeeWorkers = canSee;
     });
 
-    // Determine if user can see Clients menu (only OWNER and ACCOUNTANT)
+    // Determine if user can see Clients menu (only OWNER, ACCOUNTANT, and ACCOUNTING_MANAGER)
     this.userStore.currentCompany$
       .pipe(
         map(company => {
           if (!company) return false;
-          return company.role === CompanyRole.OWNER || company.role === CompanyRole.ACCOUNTANT;
+          return company.role === CompanyRole.OWNER || company.role === CompanyRole.ACCOUNTANT || company.role === CompanyRole.ACCOUNTING_MANAGER;
         }),
         takeUntil(this.destroy$)
       )
@@ -104,12 +104,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.canSeeClients = canSee;
       });
 
-    // Determine if user can see Dashboard (only OWNER and ACCOUNTANT)
+    // Determine if user can see Dashboard (only OWNER, ACCOUNTANT, and ACCOUNTING_MANAGER)
     this.userStore.currentCompany$
       .pipe(
         map(company => {
           if (!company) return false;
-          return company.role === CompanyRole.OWNER || company.role === CompanyRole.ACCOUNTANT;
+          return company.role === CompanyRole.OWNER || company.role === CompanyRole.ACCOUNTANT || company.role === CompanyRole.ACCOUNTING_MANAGER;
         }),
         takeUntil(this.destroy$)
       )
@@ -117,12 +117,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.canSeeDashboard = canSee;
       });
 
-    // Determine if user can see Financials (only OWNER and ACCOUNTANT)
+    // Determine if user can see Financials (only OWNER, ACCOUNTANT, and ACCOUNTING_MANAGER)
     this.userStore.currentCompany$
       .pipe(
         map(company => {
           if (!company) return false;
-          return company.role === CompanyRole.OWNER || company.role === CompanyRole.ACCOUNTANT;
+          return company.role === CompanyRole.OWNER || company.role === CompanyRole.ACCOUNTANT || company.role === CompanyRole.ACCOUNTING_MANAGER;
         }),
         takeUntil(this.destroy$)
       )
@@ -151,10 +151,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.canSeePrincipalCompanies = canSee;
       });
 
-    // Work Time tab — only for ACCOUNTANT
+    // Work Time tab — only for ACCOUNTANT and ACCOUNTING_MANAGER
     this.userStore.currentCompany$
       .pipe(
-        map(company => company?.role === CompanyRole.ACCOUNTANT),
+        map(company => company?.role === CompanyRole.ACCOUNTANT || company?.role === CompanyRole.ACCOUNTING_MANAGER),
         takeUntil(this.destroy$)
       )
       .subscribe(canSee => {
@@ -191,10 +191,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.isPlatformAdmin = isAdmin;
       });
 
-    // Determine if user is an ACCOUNTANT (to show work session timer)
+    // Determine if user is an ACCOUNTANT or ACCOUNTING_MANAGER (to show work session timer)
     this.userStore.currentCompany$
       .pipe(
-        map(company => company?.role === CompanyRole.ACCOUNTANT),
+        map(company => company?.role === CompanyRole.ACCOUNTANT || company?.role === CompanyRole.ACCOUNTING_MANAGER),
         takeUntil(this.destroy$)
       )
       .subscribe(isAccountant => {
@@ -212,8 +212,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   protected onSwitchCompany(): void {
-    // Only show confirmation dialog if user is an ACCOUNTANT with an active session
-    if (this.currentCompany?.role === CompanyRole.ACCOUNTANT) {
+    // Only show confirmation dialog if user is an ACCOUNTANT or ACCOUNTING_MANAGER with an active session
+    if (this.currentCompany?.role === CompanyRole.ACCOUNTANT || this.currentCompany?.role === CompanyRole.ACCOUNTING_MANAGER) {
       this.workSessionStore.getActiveSession()
         .pipe(take(1))
         .subscribe(activeSession => {
@@ -261,8 +261,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   protected onSignOut(): void {
-    // Only stop work session if user is an ACCOUNTANT
-    if (this.currentCompany?.role === CompanyRole.ACCOUNTANT) {
+    // Only stop work session if user is an ACCOUNTANT or ACCOUNTING_MANAGER
+    if (this.currentCompany?.role === CompanyRole.ACCOUNTANT || this.currentCompany?.role === CompanyRole.ACCOUNTING_MANAGER) {
       this.workSessionStore.stopWorkSession();
     }
 

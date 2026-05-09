@@ -311,7 +311,7 @@ export const routes: Routes = [
   // ── My Accountants: accountant team management ────────────────────────────
   {
     path: 'my-accountants',
-    canActivate: [authGuard, roleGuard(CompanyRole.OWNER)],
+    canActivate: [authGuard, roleGuard(CompanyRole.ACCOUNTING_MANAGER)],
     data: { preload: true },
     providers: [
       provideState(ACCOUNTANT_TEAM_FEATURE_KEY, accountantTeamReducer),

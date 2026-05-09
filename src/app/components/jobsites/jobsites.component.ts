@@ -78,12 +78,12 @@ export class JobsitesComponent implements OnInit, OnDestroy {
   ];
 
   ngOnInit(): void {
-    // Check if user is owner or accountant
+    // Check if user is owner, accountant, or accounting manager
     this.currentCompany$
       .pipe(takeUntil(this.destroy$))
       .subscribe(company => {
         this.isOwner = company?.role === CompanyRole.OWNER;
-        this.canManageJobsites = company?.role === CompanyRole.OWNER || company?.role === CompanyRole.ACCOUNTANT;
+        this.canManageJobsites = company?.role === CompanyRole.OWNER || company?.role === CompanyRole.ACCOUNTANT || company?.role === CompanyRole.ACCOUNTING_MANAGER;
       });
 
     // Wait for company ID, then clear and reload when company changes

@@ -72,8 +72,8 @@ export class CompanySelectionComponent implements OnInit, OnDestroy {
   }
 
   selectCompany(company: CompanyMembership): void {
-    // Only stop/start work sessions for ACCOUNTANT role
-    if (company.role === CompanyRole.ACCOUNTANT) {
+    // Only stop/start work sessions for ACCOUNTANT and ACCOUNTING_MANAGER roles
+    if (company.role === CompanyRole.ACCOUNTANT || company.role === CompanyRole.ACCOUNTING_MANAGER) {
       // Check if there's an active session first
       this.workSessionStore.getActiveSession()
         .pipe(take(1))
@@ -111,7 +111,7 @@ export class CompanySelectionComponent implements OnInit, OnDestroy {
     // Store selected company in state
     this.userStore.selectCompany(company.companyId);
 
-    // Start work session tracking for the new company (only called for ACCOUNTANT)
+    // Start work session tracking for the new company (only called for ACCOUNTANT and ACCOUNTING_MANAGER)
     this.workSessionStore.startWorkSession(company.companyId);
 
     console.log('Switched company and started new work session:', company);
