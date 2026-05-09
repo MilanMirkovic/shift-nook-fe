@@ -31,9 +31,19 @@ const COMPANY_ROLES: CompanyRole[] = [
   CompanyRole.OWNER,
   CompanyRole.ADMIN,
   CompanyRole.ACCOUNTANT,
+  CompanyRole.ACCOUNTING_MANAGER,
   CompanyRole.WORKER,
   CompanyRole.SUBCONTRACTOR,
 ];
+
+const ROLE_LABELS: Record<CompanyRole, string> = {
+  [CompanyRole.OWNER]: 'Owner',
+  [CompanyRole.ADMIN]: 'Admin',
+  [CompanyRole.ACCOUNTANT]: 'Accountant',
+  [CompanyRole.ACCOUNTING_MANAGER]: 'Accounting Manager',
+  [CompanyRole.WORKER]: 'Worker',
+  [CompanyRole.SUBCONTRACTOR]: 'Subcontractor',
+};
 
 @Component({
   selector: 'app-admin-assign-company-dialog',
@@ -61,6 +71,7 @@ export class AdminAssignCompanyDialogComponent implements OnInit {
   private readonly actions$ = inject(Actions);
 
   readonly companyRoles = COMPANY_ROLES;
+  readonly roleLabels = ROLE_LABELS;
   readonly companies$ = this.store.select(selectAdminCompanies);
   readonly companiesLoading$ = this.store.select(selectAdminCompaniesLoading);
 

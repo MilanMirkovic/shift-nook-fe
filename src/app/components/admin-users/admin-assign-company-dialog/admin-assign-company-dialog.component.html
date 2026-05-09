@@ -63,7 +63,7 @@
           <mat-icon matPrefix>badge</mat-icon>
           <mat-select formControlName="role">
             @for (role of companyRoles; track role) {
-              <mat-option [value]="role">{{ role }}</mat-option>
+              <mat-option [value]="role">{{ roleLabels[role] }}</mat-option>
             }
           </mat-select>
           @if (getErrorMessage('role')) {

@@ -57,11 +57,13 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
         const roleMap: Record<string, string> = {
           OWNER: 'Owner', ADMIN: 'Admin', ACCOUNTANT: 'Accountant',
+          ACCOUNTING_MANAGER: 'Accounting Manager',
           WORKER: 'Worker', SUBCONTRACTOR: 'Subcontractor',
         };
         const badgeMap: Record<string, string> = {
           OWNER: 'role--owner', ADMIN: 'role--admin',
-          ACCOUNTANT: 'role--accountant', WORKER: 'role--worker',
+          ACCOUNTANT: 'role--accountant', ACCOUNTING_MANAGER: 'role--accountant',
+          WORKER: 'role--worker',
         };
         this.roleLabel     = roleMap[company?.role ?? ''] ?? (company?.role ?? '');
         this.roleBadgeClass = badgeMap[company?.role ?? ''] ?? '';
