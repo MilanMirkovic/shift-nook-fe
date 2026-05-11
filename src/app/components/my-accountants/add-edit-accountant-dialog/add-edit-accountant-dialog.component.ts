@@ -16,9 +16,8 @@ export interface AddEditAccountantDialogData {
 
 export interface AddEditAccountantDialogResult {
   email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 @Component({
@@ -40,12 +39,6 @@ export interface AddEditAccountantDialogResult {
 export class AddEditAccountantDialogComponent implements OnInit {
   form: FormGroup;
   isEditMode: boolean;
-
-  availableRoles = [
-    { value: 'accountant', label: 'Accountant' },
-    { value: 'senior_accountant', label: 'Senior Accountant' },
-    { value: 'accounting_manager', label: 'Accounting Manager' },
-  ];
 
   constructor(
     private fb: FormBuilder,
@@ -73,14 +66,13 @@ export class AddEditAccountantDialogComponent implements OnInit {
   private createForm(): FormGroup {
     return this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
-      role: ['accountant', Validators.required],
+      firstName: [''],
+      lastName: [''],
     });
   }
 
   get title(): string {
-    return this.isEditMode ? 'Edit Accountant' : 'Add New Accountant';
+    return this.isEditMode ? 'Edit Accountant' : 'Invite Accountant';
   }
 
   get submitButtonText(): string {

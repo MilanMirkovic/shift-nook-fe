@@ -50,18 +50,6 @@
         </mat-form-field>
       </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Role</mat-label>
-        <mat-select formControlName="role">
-          <mat-option *ngFor="let role of availableRoles" [value]="role.value">
-            {{ role.label }}
-          </mat-option>
-        </mat-select>
-        <mat-icon matPrefix>work</mat-icon>
-        <mat-error *ngIf="form.get('role')?.hasError('required')">
-          Role is required
-        </mat-error>
-      </mat-form-field>
     </form>
   </mat-dialog-content>
 

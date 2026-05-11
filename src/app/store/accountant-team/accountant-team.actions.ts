@@ -141,7 +141,6 @@ export const updateAccountant = createAction(
     updates: {
       firstName: string;
       lastName: string;
-      role: string;
     };
   }>()
 );

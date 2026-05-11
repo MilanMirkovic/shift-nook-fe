@@ -19,17 +19,19 @@ import {
   selectStats,
   loadAccountants,
   loadStats,
-  inviteAccountant,
   updateAccountant,
   updateFilters,
   updatePage,
   clearAccountants,
   AccountantTeamMember,
 } from '../../store/accountant-team';
+import { sendInvitation, resetSendState } from '../../store/invitations/invitations.actions';
+import { selectInvitationsSendSuccess, selectInvitationsSendError } from '../../store/invitations/invitations.selectors';
 import { selectSelectedCompanyId, selectCurrentCompany } from '../../store/user/user.selectors';
 import { CompanyRole } from '../../shared/models/company-role';
 import { AssignCompaniesDialogComponent, AssignCompaniesDialogData } from './assign-companies-dialog/assign-companies-dialog.component';
 import { AddEditAccountantDialogComponent, AddEditAccountantDialogData, AddEditAccountantDialogResult } from './add-edit-accountant-dialog/add-edit-accountant-dialog.component';
+import { NotificationService } from '../../shared/services/notification.service';
 
 @Component({
   selector: 'app-my-accountants',
@@ -49,6 +51,7 @@ export class MyAccountantsComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly notifications = inject(NotificationService);
   private readonly destroy$ = new Subject<void>();
 
   readonly selectedCompanyId$ = this.store.select(selectSelectedCompanyId);
@@ -190,9 +193,46 @@ export class MyAccountantsComponent implements OnInit, OnDestroy {
         );
         this.store.dispatch(loadStats({ companyId }));
       });
+
+    // Listen for invitation success
+    this.store.select(selectInvitationsSendSuccess)
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(Boolean)
+      )
+      .subscribe(() => {
+        this.notifications.success('Invitation sent successfully');
+
+        // Reload accountants list
+        if (this.companyId) {
+          this.store.dispatch(
+            loadAccountants({
+              companyId: this.companyId,
+              page: this.currentPage,
+              size: this.pageSize,
+              q: this.currentQuery
+            })
+          );
+          this.store.dispatch(loadStats({ companyId: this.companyId }));
+        }
+
+        // Reset invitation state
+        this.store.dispatch(resetSendState());
+      });
+
+    // Listen for invitation errors
+    this.store.select(selectInvitationsSendError)
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((error): error is string => error !== null)
+      )
+      .subscribe((error) => {
+        this.notifications.error(error || 'Failed to send invitation');
+      });
   }
 
   ngOnDestroy(): void {
+    this.store.dispatch(resetSendState());
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -254,13 +294,14 @@ export class MyAccountantsComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result: AddEditAccountantDialogResult | undefined) => {
       if (result && this.companyId) {
+        // Send invitation with ACCOUNTANT role
         this.store.dispatch(
-          inviteAccountant({
+          sendInvitation({
             companyId: this.companyId,
-            email: result.email,
-            firstName: result.firstName,
-            lastName: result.lastName,
-            role: result.role
+            request: {
+              email: result.email,
+              role: CompanyRole.ACCOUNTANT
+            }
           })
         );
       }
@@ -277,15 +318,14 @@ export class MyAccountantsComponent implements OnInit, OnDestroy {
     });
 
     dialogRef.afterClosed().subscribe((result: AddEditAccountantDialogResult | undefined) => {
-      if (result && this.companyId) {
+      if (result && this.companyId && result.firstName && result.lastName) {
         this.store.dispatch(
           updateAccountant({
             companyId: this.companyId,
             userId: accountant.userId,
             updates: {
               firstName: result.firstName,
-              lastName: result.lastName,
-              role: result.role
+              lastName: result.lastName
             }
           })
         );
