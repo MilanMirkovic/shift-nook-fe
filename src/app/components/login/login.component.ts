@@ -6,6 +6,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { UserStoreService } from '../../store/user/user-store.service';
 import { catchError, tap } from 'rxjs/operators';
 import { CompanyRole } from '../../shared/models/company-role';
+import { CompanyWorkSessionsStoreService } from '../../store/company-work-sessions/company-work-sessions-store.service';
 
 @Component({
   selector: 'app-login',
@@ -27,6 +28,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private authService: AuthService,
     private userStore: UserStoreService,
+    private workSessionStore: CompanyWorkSessionsStoreService,
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -114,9 +116,17 @@ export class LoginComponent implements OnInit, OnDestroy {
             return;
           }
 
-          // User has at least one company - go to dashboard
-          // (Even if they're not an owner, they might be a subcontractor/worker with access)
+          // User has at least one company - select it and go to dashboard
+          // For accountants, also start work session timer
           console.log('Branch: user has companies, navigating to /dashboard');
+          const firstCompany = user.companies[0];
+          this.userStore.selectCompany(firstCompany.companyId);
+
+          if (firstCompany.role === CompanyRole.ACCOUNTANT || firstCompany.role === CompanyRole.ACCOUNTING_MANAGER) {
+            console.log('Starting work session for accountant');
+            this.workSessionStore.startWorkSession(firstCompany.companyId);
+          }
+
           this.router.navigate(['/dashboard']);
         });
     } catch (err: any) {

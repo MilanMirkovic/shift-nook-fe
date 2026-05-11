@@ -1,9 +1,10 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Subject, takeUntil, combineLatest } from 'rxjs';
+import { Subject, takeUntil, combineLatest, take } from 'rxjs';
 
 import { UserStoreService } from '../../store/user/user-store.service';
 import { TimesheetsStoreService } from '../../store/timesheets/timesheets-store.service';
 import { JobsitesStoreService } from '../../store/jobsites/jobsites-store.service';
+import { CompanyWorkSessionsStoreService } from '../../store/company-work-sessions/company-work-sessions-store.service';
 import { Store } from '@ngrx/store';
 import { selectTotal as selectClientsTotal } from '../../store/clients/clients.selectors';
 import { selectTotal as selectMembersTotal, selectMembers } from '../../store/company-members/company-members.selectors';
@@ -11,6 +12,7 @@ import { loadClients } from '../../store/clients/clients.actions';
 import { loadMembers } from '../../store/company-members/company-members.actions';
 import { Timesheet } from '../../store/timesheets/timesheets.models';
 import { CompanyMember } from '../../store/company-members/company-members.models';
+import { CompanyRole } from '../../shared/models/company-role';
 
 @Component({
   selector: 'app-dashboard',
@@ -23,6 +25,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly userStore = inject(UserStoreService);
   private readonly timesheetsStore = inject(TimesheetsStoreService);
   private readonly jobsitesStore = inject(JobsitesStoreService);
+  private readonly workSessionStore = inject(CompanyWorkSessionsStoreService);
   private readonly store = inject(Store);
   private readonly destroy$ = new Subject<void>();
 
@@ -48,6 +51,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
       month: 'short',
       day: 'numeric'
     });
+
+    // Ensure work session is started for accountants on dashboard load
+    this.userStore.currentCompany$
+      .pipe(take(1))
+      .subscribe(company => {
+        if (company && (company.role === CompanyRole.ACCOUNTANT || company.role === CompanyRole.ACCOUNTING_MANAGER)) {
+          // Check if there's an active session
+          this.workSessionStore.getActiveSession()
+            .pipe(take(1))
+            .subscribe(activeSession => {
+              if (!activeSession || !activeSession.isActive) {
+                // No active session, start one
+                this.workSessionStore.startWorkSession(company.companyId);
+              }
+            });
+        }
+      });
 
     // Load data when company is available
     this.userStore.selectedCompanyId$
