@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import {
   AccountantTeamMember,
   AccountantDetail,
+  AccountantTeamStats,
   PagedResponse,
   AssignCompaniesRequest,
 } from './accountant-team.models';
@@ -30,6 +31,12 @@ export class AccountantTeamApiService {
   getAccountantDetail(companyId: string, userId: string): Observable<AccountantDetail> {
     return this.http.get<AccountantDetail>(
       `${this.baseUrl}/${companyId}/accountants/${userId}`
+    );
+  }
+
+  getStats(companyId: string): Observable<AccountantTeamStats> {
+    return this.http.get<AccountantTeamStats>(
+      `${this.baseUrl}/${companyId}/accountants/stats`
     );
   }
 

@@ -94,6 +94,27 @@ export class AccountantTeamEffects {
     )
   );
 
+  // ─── Load Stats ─────────────────────────────────────────────────────────────
+  loadStats$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AccountantTeamActions.loadStats),
+      switchMap(({ companyId }) =>
+        this.api.getStats(companyId).pipe(
+          map((stats) =>
+            AccountantTeamActions.loadStatsSuccess({ stats })
+          ),
+          catchError((err) =>
+            of(
+              AccountantTeamActions.loadStatsFailure({
+                error: this.toErrorMessage(err),
+              })
+            )
+          )
+        )
+      )
+    )
+  );
+
   // ─── Helpers ────────────────────────────────────────────────────────────────
   private toErrorMessage(err: any): string {
     if (typeof err === 'string') return err;
