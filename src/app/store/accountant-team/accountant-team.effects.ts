@@ -14,20 +14,32 @@ export class AccountantTeamEffects {
   loadAccountants$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AccountantTeamActions.loadAccountants),
-      switchMap(({ companyId, page, size, q }) =>
-        this.api.listAccountants(companyId, { page, size, q }).pipe(
-          map((response) =>
-            AccountantTeamActions.loadAccountantsSuccess({ response })
-          ),
-          catchError((err) =>
-            of(
+      switchMap(({ companyId, page, size, q }) => {
+        console.log('🔵 [AccountantTeam Effect] loadAccountants triggered:', {
+          companyId,
+          page,
+          size,
+          q
+        });
+        return this.api.listAccountants(companyId, { page, size, q }).pipe(
+          map((response) => {
+            console.log('✅ [AccountantTeam Effect] loadAccountants SUCCESS:', {
+              total: response.total,
+              itemsCount: response.items?.length,
+              items: response.items
+            });
+            return AccountantTeamActions.loadAccountantsSuccess({ response });
+          }),
+          catchError((err) => {
+            console.error('❌ [AccountantTeam Effect] loadAccountants FAILED:', err);
+            return of(
               AccountantTeamActions.loadAccountantsFailure({
                 error: this.toErrorMessage(err),
               })
-            )
-          )
-        )
-      )
+            );
+          })
+        );
+      })
     )
   );
 

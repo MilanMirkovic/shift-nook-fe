@@ -170,6 +170,7 @@ export class MyAccountantsComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit(): void {
+    console.log('🔷 [MyAccountants Component] ngOnInit called');
     this.selectedCompanyId$
       .pipe(
         filter((id): id is string => id !== null),
@@ -177,12 +178,20 @@ export class MyAccountantsComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe((companyId) => {
+        console.log('🔷 [MyAccountants Component] Company selected:', companyId);
         this.companyId = companyId;
 
         // Clear stale data from previous company
+        console.log('🔷 [MyAccountants Component] Dispatching clearAccountants');
         this.store.dispatch(clearAccountants());
 
         // Load accountants and stats for the new company
+        console.log('🔷 [MyAccountants Component] Dispatching loadAccountants:', {
+          companyId,
+          page: this.currentPage,
+          size: this.pageSize,
+          q: this.currentQuery
+        });
         this.store.dispatch(
           loadAccountants({
             companyId,
@@ -191,6 +200,7 @@ export class MyAccountantsComponent implements OnInit, OnDestroy {
             q: this.currentQuery
           })
         );
+        console.log('🔷 [MyAccountants Component] Dispatching loadStats');
         this.store.dispatch(loadStats({ companyId }));
       });
 

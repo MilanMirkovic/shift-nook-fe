@@ -22,10 +22,13 @@ export class AccountantTeamApiService {
     if (params.q) {
       cleanParams.q = params.q;
     }
-    return this.http.get<PagedResponse<AccountantTeamMember>>(
-      `${this.baseUrl}/${companyId}/accountants`,
-      { params: cleanParams }
-    );
+    const url = `${this.baseUrl}/${companyId}/accountants`;
+    console.log('🌐 [AccountantTeam API] GET request:', {
+      url,
+      params: cleanParams,
+      companyId
+    });
+    return this.http.get<PagedResponse<AccountantTeamMember>>(url, { params: cleanParams });
   }
 
   getAccountantDetail(companyId: string, userId: string): Observable<AccountantDetail> {
