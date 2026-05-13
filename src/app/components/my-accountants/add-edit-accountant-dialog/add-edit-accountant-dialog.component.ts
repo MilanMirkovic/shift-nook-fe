@@ -7,17 +7,25 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AccountantTeamMember } from '../../../store/accountant-team/accountant-team.models';
+
+export interface CompanyOption {
+  companyId: string;
+  companyName: string;
+}
 
 export interface AddEditAccountantDialogData {
   accountant?: AccountantTeamMember;
   mode: 'add' | 'edit';
+  availableCompanies?: CompanyOption[];
 }
 
 export interface AddEditAccountantDialogResult {
   email: string;
   firstName?: string;
   lastName?: string;
+  assignedCompanyIds?: string[];
 }
 
 @Component({
@@ -32,6 +40,7 @@ export interface AddEditAccountantDialogResult {
     MatButtonModule,
     MatSelectModule,
     MatIconModule,
+    MatCheckboxModule,
   ],
   templateUrl: './add-edit-accountant-dialog.component.html',
   styleUrls: ['./add-edit-accountant-dialog.component.scss'],
@@ -68,6 +77,7 @@ export class AddEditAccountantDialogComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       firstName: [''],
       lastName: [''],
+      assignedCompanyIds: [[]]
     });
   }
 
@@ -77,6 +87,30 @@ export class AddEditAccountantDialogComponent implements OnInit {
 
   get submitButtonText(): string {
     return this.isEditMode ? 'Update' : 'Send Invite';
+  }
+
+  get availableCompanies(): CompanyOption[] {
+    return this.data.availableCompanies ?? [];
+  }
+
+  get showCompanySelection(): boolean {
+    return !this.isEditMode && this.availableCompanies.length > 0;
+  }
+
+  isCompanySelected(companyId: string): boolean {
+    const selected = this.form.get('assignedCompanyIds')?.value || [];
+    return selected.includes(companyId);
+  }
+
+  onCompanyToggle(companyId: string, checked: boolean): void {
+    const control = this.form.get('assignedCompanyIds');
+    const currentValue = control?.value || [];
+
+    if (checked) {
+      control?.setValue([...currentValue, companyId]);
+    } else {
+      control?.setValue(currentValue.filter((id: string) => id !== companyId));
+    }
   }
 
   onSubmit(): void {

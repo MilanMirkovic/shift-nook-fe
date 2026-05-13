@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { Subject, takeUntil, filter, distinctUntilChanged } from 'rxjs';
+import { Subject, takeUntil, filter, distinctUntilChanged, take } from 'rxjs';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,7 +27,7 @@ import {
 } from '../../store/accountant-team';
 import { sendInvitation, resetSendState } from '../../store/invitations/invitations.actions';
 import { selectInvitationsSendSuccess, selectInvitationsSendError } from '../../store/invitations/invitations.selectors';
-import { selectSelectedCompanyId, selectCurrentCompany } from '../../store/user/user.selectors';
+import { selectSelectedCompanyId, selectCurrentCompany, selectUserCompanies } from '../../store/user/user.selectors';
 import { CompanyRole } from '../../shared/models/company-role';
 import { AssignCompaniesDialogComponent, AssignCompaniesDialogData } from './assign-companies-dialog/assign-companies-dialog.component';
 import { AddEditAccountantDialogComponent, AddEditAccountantDialogData, AddEditAccountantDialogResult } from './add-edit-accountant-dialog/add-edit-accountant-dialog.component';
@@ -61,6 +61,7 @@ export class MyAccountantsComponent implements OnInit, OnDestroy {
   readonly loaded$ = this.store.select(selectLoaded);
   readonly stats$ = this.store.select(selectStats);
   readonly currentCompany$ = this.store.select(selectCurrentCompany);
+  readonly userCompanies$ = this.store.select(selectUserCompanies);
 
   protected readonly CompanyRole = CompanyRole;
 
@@ -295,26 +296,37 @@ export class MyAccountantsComponent implements OnInit, OnDestroy {
   }
 
   openInviteDialog(): void {
-    const dialogRef = this.dialog.open(AddEditAccountantDialogComponent, {
-      width: '600px',
-      data: {
-        mode: 'add'
-      } as AddEditAccountantDialogData
-    });
+    // Get the user's companies to show in the dialog
+    this.userCompanies$.pipe(
+      filter(companies => companies !== null && companies.length > 0),
+      take(1)
+    ).subscribe(companies => {
+      const dialogRef = this.dialog.open(AddEditAccountantDialogComponent, {
+        width: '600px',
+        data: {
+          mode: 'add',
+          availableCompanies: companies.map(c => ({
+            companyId: c.companyId,
+            companyName: c.companyName
+          }))
+        } as AddEditAccountantDialogData
+      });
 
-    dialogRef.afterClosed().subscribe((result: AddEditAccountantDialogResult | undefined) => {
-      if (result && this.companyId) {
-        // Send invitation with ACCOUNTANT role
-        this.store.dispatch(
-          sendInvitation({
-            companyId: this.companyId,
-            request: {
-              email: result.email,
-              role: CompanyRole.ACCOUNTANT
-            }
-          })
-        );
-      }
+      dialogRef.afterClosed().subscribe((result: AddEditAccountantDialogResult | undefined) => {
+        if (result && this.companyId) {
+          // Send invitation with ACCOUNTANT role
+          this.store.dispatch(
+            sendInvitation({
+              companyId: this.companyId,
+              request: {
+                email: result.email,
+                role: CompanyRole.ACCOUNTANT,
+                assignedCompanyIds: result.assignedCompanyIds
+              }
+            })
+          );
+        }
+      });
     });
   }
 

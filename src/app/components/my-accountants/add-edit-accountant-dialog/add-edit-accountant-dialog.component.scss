@@ -85,3 +85,40 @@ mat-form-field {
     color: rgba(0, 0, 0, 0.54);
   }
 }
+
+.company-selection {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+
+  .section-title {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .section-hint {
+    margin: 0 0 16px 0;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .company-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .company-checkbox {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+      }
+    }
+  }
+}

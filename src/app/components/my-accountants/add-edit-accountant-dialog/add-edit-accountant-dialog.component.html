@@ -50,6 +50,22 @@
         </mat-form-field>
       </div>
 
+      <div class="company-selection" *ngIf="showCompanySelection">
+        <h3 class="section-title">Assign to Companies</h3>
+        <p class="section-hint">Select which companies this accountant will have access to</p>
+
+        <div class="company-list">
+          <mat-checkbox
+            *ngFor="let company of availableCompanies"
+            [checked]="isCompanySelected(company.companyId)"
+            (change)="onCompanyToggle(company.companyId, $event.checked)"
+            class="company-checkbox"
+          >
+            {{ company.companyName }}
+          </mat-checkbox>
+        </div>
+      </div>
+
     </form>
   </mat-dialog-content>
 

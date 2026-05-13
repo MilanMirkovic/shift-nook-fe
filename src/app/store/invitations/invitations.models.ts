@@ -11,6 +11,7 @@ export interface Invitation {
 export interface InviteRequest {
   email: string;
   role: CompanyRole;
+  assignedCompanyIds?: string[];
 }
 
 export interface AcceptInviteResponse {
