@@ -261,11 +261,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   protected onSignOut(): void {
-    // Only stop work session if user is an ACCOUNTANT or ACCOUNTING_MANAGER
-    if (this.currentCompany?.role === CompanyRole.ACCOUNTANT || this.currentCompany?.role === CompanyRole.ACCOUNTING_MANAGER) {
-      this.workSessionStore.stopWorkSession();
-    }
-
     const dialogData: ConfirmationDialogData = {
       title: 'Sign Out',
       message: 'Are you sure you want to sign out?',
@@ -292,6 +287,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(async result => {
       if (result === true) {
+        // Stop work session before signing out (only for ACCOUNTANT or ACCOUNTING_MANAGER)
+        if (this.currentCompany?.role === CompanyRole.ACCOUNTANT || this.currentCompany?.role === CompanyRole.ACCOUNTING_MANAGER) {
+          this.workSessionStore.stopWorkSession();
+        }
+
         // Sign out from Cognito first, then clear the store and redirect
         await this.authService.signOut();
         this.userStore.logout();
