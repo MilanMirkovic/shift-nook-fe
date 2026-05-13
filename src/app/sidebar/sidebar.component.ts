@@ -161,10 +161,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.canSeeWorkTime = canSee;
       });
 
-    // My Accountants tab — only for ACCOUNTING_MANAGER
-    this.userStore.currentCompany$
+    // My Accountants tab — only for users who are ACCOUNTING_MANAGER in ANY company
+    this.userStore.companies$
       .pipe(
-        map(company => company?.role === CompanyRole.ACCOUNTING_MANAGER),
+        map(companies => companies.some(c => c.role === CompanyRole.ACCOUNTING_MANAGER)),
         takeUntil(this.destroy$)
       )
       .subscribe(canSee => {
