@@ -315,10 +315,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
       disableClose: false,
       autoFocus: true,
       panelClass: 'confirmation-dialog-panel',
-      position: {
-        top: '1%',
-
-      },
       hasBackdrop: true,
       backdropClass: 'confirmation-dialog-backdrop'
     });

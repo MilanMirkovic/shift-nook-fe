@@ -92,7 +92,6 @@ export class AdminUserDetailComponent implements OnInit, OnDestroy {
       maxWidth: '95vw',
       data: { userId: user.id, currentRole: user.role },
       panelClass: 'admin-dialog-container',
-      position: { top: '15%' },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -108,7 +107,6 @@ export class AdminUserDetailComponent implements OnInit, OnDestroy {
       maxWidth: '95vw',
       data: { userId: user.id },
       panelClass: 'admin-dialog-container',
-      position: { top: '15%' },
     });
 
     dialogRef.afterClosed().subscribe((result) => {

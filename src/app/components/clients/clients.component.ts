@@ -153,10 +153,7 @@ export class ClientsComponent implements OnInit, OnDestroy {
       maxHeight: '90vh',
       disableClose: false,
       autoFocus: true,
-      panelClass: 'client-dialog-container',
-      position: {
-       top: '15%'
-      }
+      panelClass: 'client-dialog-container'
     });
 
     dialogRef.afterClosed().subscribe(result => {

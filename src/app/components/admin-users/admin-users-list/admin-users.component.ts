@@ -121,8 +121,7 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
       maxHeight: '90vh',
       disableClose: false,
       autoFocus: true,
-      panelClass: 'admin-dialog-container',
-      position: { top: '10%' },
+      panelClass: 'admin-dialog-container'
     });
 
     dialogRef.afterClosed().subscribe((result) => {
