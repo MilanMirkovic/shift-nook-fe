@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import {
   AccountantTeamMember,
   AccountantDetail,
@@ -12,7 +13,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class AccountantTeamApiService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = '/api/companies';
+  private readonly baseUrl = `${environment.apiBaseUrl}/companies`;
 
   listAccountants(
     companyId: string,
