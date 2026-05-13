@@ -1,17 +1,11 @@
 <div class="stop-session-dialog">
   <div class="dialog-header dialog-header--warning">
-    <mat-icon class="dialog-icon">swap_horiz</mat-icon>
-    <h2 mat-dialog-title class="dialog-title">Switch Client</h2>
+    <mat-icon class="dialog-icon">{{ dialogIcon }}</mat-icon>
+    <h2 mat-dialog-title class="dialog-title">{{ dialogTitle }}</h2>
   </div>
 
   <mat-dialog-content class="dialog-content">
-    <p class="dialog-message">
-      Are you sure you want to switch clients? Your current session
-      @if (data.currentCompanyName) {
-        with <strong>{{ data.currentCompanyName }}</strong>
-      }
-      will be stopped.
-    </p>
+    <p class="dialog-message" [innerHTML]="dialogMessage"></p>
 
     <form [formGroup]="form" class="description-form">
       <div class="form-field">
@@ -36,7 +30,7 @@
       (click)="onConfirm()"
       type="button"
     >
-      Switch Client
+      {{ confirmButtonText }}
     </button>
   </mat-dialog-actions>
 </div>

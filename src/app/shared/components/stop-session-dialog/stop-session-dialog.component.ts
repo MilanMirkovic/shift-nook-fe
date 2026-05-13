@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 export interface StopSessionDialogData {
   currentCompanyName?: string;
   newCompanyName?: string;
+  actionType?: 'switch-company' | 'sign-out';
 }
 
 export interface StopSessionDialogResult {
@@ -44,6 +45,33 @@ export class StopSessionDialogComponent {
     this.form = this.fb.group({
       description: ['']
     });
+  }
+
+  get isSignOut(): boolean {
+    return this.data.actionType === 'sign-out';
+  }
+
+  get dialogIcon(): string {
+    return this.isSignOut ? 'logout' : 'swap_horiz';
+  }
+
+  get dialogTitle(): string {
+    return this.isSignOut ? 'Sign Out' : 'Switch Client';
+  }
+
+  get dialogMessage(): string {
+    const companyName = this.data.currentCompanyName
+      ? ` with <strong>${this.data.currentCompanyName}</strong>`
+      : '';
+
+    if (this.isSignOut) {
+      return `Are you sure you want to sign out? Your current session${companyName} will be stopped.`;
+    }
+    return `Are you sure you want to switch clients? Your current session${companyName} will be stopped.`;
+  }
+
+  get confirmButtonText(): string {
+    return this.isSignOut ? 'Sign Out' : 'Switch Client';
   }
 
   onConfirm(): void {

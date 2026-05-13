@@ -223,7 +223,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
               width: '450px',
               maxWidth: '90vw',
               data: {
-                currentCompanyName: activeSession.companyName
+                currentCompanyName: activeSession.companyName,
+                actionType: 'switch-company'
               },
               autoFocus: false,
               panelClass: 'stop-session-dialog-panel'
@@ -261,6 +262,44 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   protected onSignOut(): void {
+    // Check if user is an ACCOUNTANT or ACCOUNTING_MANAGER with an active session
+    if (this.currentCompany?.role === CompanyRole.ACCOUNTANT || this.currentCompany?.role === CompanyRole.ACCOUNTING_MANAGER) {
+      this.workSessionStore.getActiveSession()
+        .pipe(take(1))
+        .subscribe(activeSession => {
+          if (activeSession?.isActive) {
+            // Show stop session dialog with description field
+            const dialogRef = this.dialog.open(StopSessionDialogComponent, {
+              width: '450px',
+              maxWidth: '90vw',
+              data: {
+                currentCompanyName: activeSession.companyName,
+                actionType: 'sign-out'
+              },
+              autoFocus: false,
+              panelClass: 'stop-session-dialog-panel'
+            });
+
+            dialogRef.afterClosed().subscribe(async (result: StopSessionDialogResult | undefined) => {
+              if (result?.confirmed) {
+                // Stop the current session with description
+                this.workSessionStore.stopWorkSession(result.description);
+                // Sign out
+                await this.performSignOut();
+              }
+            });
+          } else {
+            // No active session, show regular confirmation dialog
+            this.showRegularSignOutDialog();
+          }
+        });
+    } else {
+      // For non-ACCOUNTANT roles, show regular confirmation dialog
+      this.showRegularSignOutDialog();
+    }
+  }
+
+  private showRegularSignOutDialog(): void {
     const dialogData: ConfirmationDialogData = {
       title: 'Sign Out',
       message: 'Are you sure you want to sign out?',
@@ -280,24 +319,21 @@ export class SidebarComponent implements OnInit, OnDestroy {
         top: '1%',
 
       },
-      // This will center the dialog
       hasBackdrop: true,
       backdropClass: 'confirmation-dialog-backdrop'
     });
 
     dialogRef.afterClosed().subscribe(async result => {
       if (result === true) {
-        // Stop work session before signing out (only for ACCOUNTANT or ACCOUNTING_MANAGER)
-        if (this.currentCompany?.role === CompanyRole.ACCOUNTANT || this.currentCompany?.role === CompanyRole.ACCOUNTING_MANAGER) {
-          this.workSessionStore.stopWorkSession();
-        }
-
-        // Sign out from Cognito first, then clear the store and redirect
-        await this.authService.signOut();
-        this.userStore.logout();
-        this.linkClicked.emit();
-        this.router.navigate(['/login']);
+        await this.performSignOut();
       }
     });
+  }
+
+  private async performSignOut(): Promise<void> {
+    await this.authService.signOut();
+    this.userStore.logout();
+    this.linkClicked.emit();
+    this.router.navigate(['/login']);
   }
 }
