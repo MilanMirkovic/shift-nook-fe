@@ -50,7 +50,7 @@ export class AccountantTeamApiService {
     request: AssignCompaniesRequest
   ): Observable<void> {
     return this.http.post<void>(
-      `${this.baseUrl}/${companyId}/accountants/${userId}/companies`,
+      `${this.baseUrl}/${companyId}/accountants/${userId}/assign-companies`,
       request
     );
   }
