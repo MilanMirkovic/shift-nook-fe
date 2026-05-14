@@ -15,6 +15,21 @@ export class AccountantTeamApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/companies`;
 
+  listAllMyAccountants(
+    params: { page: number; size: number; q?: string | null }
+  ): Observable<PagedResponse<AccountantTeamMember>> {
+    const cleanParams: any = { page: params.page, size: params.size };
+    if (params.q) {
+      cleanParams.q = params.q;
+    }
+    const url = `${environment.apiBaseUrl}/accountants/my-team`;
+    console.log('🌐 [AccountantTeam API] GET all my accountants:', {
+      url,
+      params: cleanParams
+    });
+    return this.http.get<PagedResponse<AccountantTeamMember>>(url, { params: cleanParams });
+  }
+
   listAccountants(
     companyId: string,
     params: { page: number; size: number; q?: string | null }

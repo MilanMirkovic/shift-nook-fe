@@ -15,13 +15,13 @@ export class AccountantTeamEffects {
     this.actions$.pipe(
       ofType(AccountantTeamActions.loadAccountants),
       switchMap(({ companyId, page, size, q }) => {
-        console.log('🔵 [AccountantTeam Effect] loadAccountants triggered:', {
-          companyId,
+        console.log('🔵 [AccountantTeam Effect] loadAccountants triggered (loading ALL accountants):', {
           page,
           size,
           q
         });
-        return this.api.listAccountants(companyId, { page, size, q }).pipe(
+        // Load all accountants across all companies for the ACCOUNTING_MANAGER
+        return this.api.listAllMyAccountants({ page, size, q }).pipe(
           map((response) => {
             console.log('✅ [AccountantTeam Effect] loadAccountants SUCCESS:', {
               total: response.total,
