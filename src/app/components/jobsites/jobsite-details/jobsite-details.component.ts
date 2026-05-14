@@ -247,7 +247,6 @@ export class JobsiteDetailsComponent implements OnInit, OnDestroy {
           disableClose: false,
           autoFocus: true,
           panelClass: 'task-dialog-container',
-          position: { top: '15%' },
           data: {
             jobsiteId: jobsite.id,
             jobsiteName: jobsite.name
@@ -437,7 +436,6 @@ export class JobsiteDetailsComponent implements OnInit, OnDestroy {
           disableClose: false,
           autoFocus: true,
           panelClass: 'task-dialog-container',
-          position: { top: '15%' },
           data: {
             jobsiteId: jobsite.id,
             jobsiteName: jobsite.name,
@@ -488,7 +486,6 @@ export class JobsiteDetailsComponent implements OnInit, OnDestroy {
         cancelText: 'Cancel',
         type: 'danger'
       },
-      position: { top: '80px' }
     });
 
     dialogRef.afterClosed().subscribe(confirmed => {

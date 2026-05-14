@@ -322,7 +322,6 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
         cancelText: 'Cancel',
         type: 'danger',
       },
-      position: { top: '80px' },
     });
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(confirmed => {
@@ -382,7 +381,6 @@ export class ClientEstimatesComponent implements OnInit, OnDestroy {
         cancelText: 'Cancel',
         type: 'primary',
       },
-      position: { top: '80px' },
     });
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(confirmed => {
