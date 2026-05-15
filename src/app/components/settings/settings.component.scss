@@ -72,6 +72,7 @@
   &:nth-child(1) { animation-delay: 0.04s; }
   &:nth-child(2) { animation-delay: 0.08s; }
   &:nth-child(3) { animation-delay: 0.12s; }
+  &:nth-child(4) { animation-delay: 0.16s; }
 
   &:hover:not(.setting-card--disabled) {
     box-shadow: var(--sn-shadow-hover);
@@ -103,6 +104,7 @@
   &.icon--blue   { background: rgba(37,99,235,.10);  mat-icon { color: var(--sn-blue); } }
   &.icon--violet { background: rgba(124,58,237,.10); mat-icon { color: var(--sn-violet); } }
   &.icon--green  { background: rgba(5,150,105,.10);  mat-icon { color: var(--sn-green); } }
+  &.icon--purple { background: rgba(147,51,234,.10); mat-icon { color: #9333ea; } }
 }
 
 // ─── Card body ────────────────────────────────────────────────────────────────

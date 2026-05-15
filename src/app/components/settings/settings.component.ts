@@ -105,6 +105,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
         meta: this.userName || undefined,
         chevron: true,
       },
+      {
+        route: 'quickbooks-customer-mappings',
+        icon: 'sync',
+        iconClass: 'icon--purple',
+        title: 'QuickBooks Mappings',
+        description: 'Map clients to QuickBooks customers for invoice sync.',
+        chevron: true,
+      },
     ];
   }
 
