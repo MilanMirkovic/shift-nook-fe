@@ -171,6 +171,13 @@ export const routes: Routes = [
             (m) => m.SettingsProfileComponent,
           ),
       },
+      {
+        path: 'quickbooks-customer-mappings',
+        loadComponent: () =>
+          import('./pages/quickbooks-customer-mappings/qb-customer-mappings.page').then(
+            (m) => m.QBCustomerMappingsPage,
+          ),
+      },
     ],
   },
   {

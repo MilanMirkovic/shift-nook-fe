@@ -16,6 +16,8 @@ import { reducer as userReducer } from './store/user/user.reducer';
 import { UserEffects } from './store/user/user.effects';
 import { companyWorkSessionsReducer } from './store/company-work-sessions/company-work-sessions.reducer';
 import { CompanyWorkSessionsEffects } from './store/company-work-sessions/company-work-sessions.effects';
+import { qbCustomerMappingsReducer } from './store/quickbooks-customer-mappings/qb-customer-mappings.reducer';
+import { QBCustomerMappingsEffects } from './store/quickbooks-customer-mappings/qb-customer-mappings.effects';
 
 // Import feature keys
 import { USER_FEATURE_KEY } from './store/user/user.selectors';
@@ -30,10 +32,12 @@ export const appConfig: ApplicationConfig = {
     provideStore({
       [USER_FEATURE_KEY]: userReducer,
       companyWorkSessions: companyWorkSessionsReducer,
+      qbCustomerMappings: qbCustomerMappingsReducer,
     }),
     provideEffects([
       UserEffects,
       CompanyWorkSessionsEffects,
+      QBCustomerMappingsEffects,
     ]),
     provideStoreDevtools({
       maxAge: 25,
