@@ -18,9 +18,12 @@ import { companyWorkSessionsReducer } from './store/company-work-sessions/compan
 import { CompanyWorkSessionsEffects } from './store/company-work-sessions/company-work-sessions.effects';
 import { qbCustomerMappingsReducer } from './store/quickbooks-customer-mappings/qb-customer-mappings.reducer';
 import { QBCustomerMappingsEffects } from './store/quickbooks-customer-mappings/qb-customer-mappings.effects';
+import { quickbooksConnectionReducer } from './store/quickbooks-connection/quickbooks-connection.reducer';
+import { QuickBooksConnectionEffects } from './store/quickbooks-connection/quickbooks-connection.effects';
 
 // Import feature keys
 import { USER_FEATURE_KEY } from './store/user/user.selectors';
+import { QUICKBOOKS_CONNECTION_FEATURE_KEY } from './store/quickbooks-connection/quickbooks-connection.models';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -33,11 +36,13 @@ export const appConfig: ApplicationConfig = {
       [USER_FEATURE_KEY]: userReducer,
       companyWorkSessions: companyWorkSessionsReducer,
       qbCustomerMappings: qbCustomerMappingsReducer,
+      [QUICKBOOKS_CONNECTION_FEATURE_KEY]: quickbooksConnectionReducer,
     }),
     provideEffects([
       UserEffects,
       CompanyWorkSessionsEffects,
       QBCustomerMappingsEffects,
+      QuickBooksConnectionEffects,
     ]),
     provideStoreDevtools({
       maxAge: 25,

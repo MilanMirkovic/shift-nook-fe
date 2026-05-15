@@ -172,7 +172,18 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'quickbooks',
+        loadComponent: () =>
+          import('./components/settings/quickbooks/settings-quickbooks.component').then(
+            (m) => m.SettingsQuickBooksComponent,
+          ),
+      },
+      {
         path: 'quickbooks-customer-mappings',
+        providers: [
+          provideState(CLIENTS_FEATURE_KEY, clientsReducer),
+          provideEffects(ClientsEffects),
+        ],
         loadComponent: () =>
           import('./pages/quickbooks-customer-mappings/qb-customer-mappings.page').then(
             (m) => m.QBCustomerMappingsPage,

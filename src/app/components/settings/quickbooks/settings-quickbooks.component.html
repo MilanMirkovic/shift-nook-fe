@@ -1,0 +1,147 @@
+<button mat-button class="back-btn" (click)="goBack()">
+  <mat-icon>arrow_back</mat-icon> Settings
+</button>
+
+<div class="settings-quickbooks">
+    <div class="header">
+      <div class="header-text">
+        <h1>QuickBooks Integration</h1>
+        <p class="subtitle">Connect your QuickBooks Online account to sync invoices automatically</p>
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <div *ngIf="loading$ | async" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading connection status...</p>
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="error$ | async as error" class="error-card">
+      <mat-icon color="warn">error</mat-icon>
+      <div class="error-content">
+        <h3>Error</h3>
+        <p>{{ error }}</p>
+      </div>
+      <button mat-button (click)="clearError()">Dismiss</button>
+    </div>
+
+    <!-- Not connected state -->
+    <mat-card *ngIf="!(loading$ | async) && !(isConnected$ | async)" class="connection-card">
+      <mat-card-content>
+        <div class="not-connected">
+          <div class="icon-container">
+            <mat-icon class="qb-icon">account_balance</mat-icon>
+          </div>
+          <h2>QuickBooks Not Connected</h2>
+          <p>Connect your QuickBooks Online account to automatically sync invoices from ShiftNook to QuickBooks.</p>
+
+          <div class="benefits">
+            <h3>Benefits:</h3>
+            <ul>
+              <li>
+                <mat-icon>check_circle</mat-icon>
+                <span>Automatic invoice synchronization</span>
+              </li>
+              <li>
+                <mat-icon>check_circle</mat-icon>
+                <span>Map clients to QuickBooks customers</span>
+              </li>
+              <li>
+                <mat-icon>check_circle</mat-icon>
+                <span>Keep your books up to date</span>
+              </li>
+              <li>
+                <mat-icon>check_circle</mat-icon>
+                <span>Reduce manual data entry</span>
+              </li>
+            </ul>
+          </div>
+
+          <button
+            mat-raised-button
+            color="primary"
+            class="connect-btn"
+            (click)="connectToQuickBooks()"
+            [disabled]="connecting$ | async"
+          >
+            <mat-spinner *ngIf="connecting$ | async" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!(connecting$ | async)">link</mat-icon>
+            {{ (connecting$ | async) ? 'Connecting...' : 'Connect to QuickBooks' }}
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Connected state -->
+    <div *ngIf="!(loading$ | async) && (isConnected$ | async)" class="connected-container">
+      <mat-card class="status-card">
+        <mat-card-content>
+          <div class="connected-status">
+            <div class="status-header">
+              <div class="icon-container connected">
+                <mat-icon class="qb-icon">check_circle</mat-icon>
+              </div>
+              <div class="status-text">
+                <h2>QuickBooks Connected</h2>
+                <p>Your ShiftNook account is connected to QuickBooks Online</p>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="connection-details" *ngIf="connection$ | async as connection">
+              <div class="detail-row">
+                <span class="label">Company ID (Realm ID)</span>
+                <span class="value">{{ connection.realmId }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Connected Since</span>
+                <span class="value">{{ connection.connectedAt | date:'medium' }}</span>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="actions">
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="goToCustomerMappings()"
+              >
+                <mat-icon>sync</mat-icon>
+                Manage Customer Mappings
+              </button>
+
+              <button
+                mat-stroked-button
+                color="warn"
+                (click)="disconnect()"
+                [disabled]="disconnecting$ | async"
+              >
+                <mat-spinner *ngIf="disconnecting$ | async" diameter="20"></mat-spinner>
+                <mat-icon *ngIf="!(disconnecting$ | async)">link_off</mat-icon>
+                {{ (disconnecting$ | async) ? 'Disconnecting...' : 'Disconnect QuickBooks' }}
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Info card -->
+      <mat-card class="info-card">
+        <mat-card-content>
+          <h3>
+            <mat-icon>info</mat-icon>
+            How it works
+          </h3>
+          <ol>
+            <li>Map your ShiftNook clients to QuickBooks customers</li>
+            <li>Create invoices in ShiftNook as usual</li>
+            <li>Sync invoices to QuickBooks with one click</li>
+            <li>Invoice appears in QuickBooks under the mapped customer</li>
+          </ol>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>

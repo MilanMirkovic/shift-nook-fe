@@ -106,6 +106,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
         chevron: true,
       },
       {
+        route: 'quickbooks',
+        icon: 'account_balance',
+        iconClass: 'icon--violet',
+        title: 'QuickBooks Integration',
+        description: 'Connect your QuickBooks Online account to sync invoices.',
+        chevron: true,
+      },
+      {
         route: 'quickbooks-customer-mappings',
         icon: 'sync',
         iconClass: 'icon--purple',
