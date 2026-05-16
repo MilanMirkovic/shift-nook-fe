@@ -37,20 +37,24 @@ export class QuickBooksConnectionEffects {
   connectToQuickBooks$ = createEffect(() =>
     this.actions$.pipe(
       ofType(QuickBooksConnectionActions.connectToQuickBooks),
-      switchMap(({ companyId }) =>
-        this.api.getAuthorizationUrl(companyId).pipe(
+      tap(({ companyId }) => console.log('[QuickBooks Effect] connectToQuickBooks action received, companyId:', companyId)),
+      switchMap(({ companyId }) => {
+        console.log('[QuickBooks Effect] Calling API getAuthorizationUrl');
+        return this.api.getAuthorizationUrl(companyId).pipe(
+          tap((response) => console.log('[QuickBooks Effect] API response:', response)),
           map(({ url }) =>
             QuickBooksConnectionActions.connectToQuickBooksSuccess({ authUrl: url })
           ),
-          catchError((error) =>
-            of(
+          catchError((error) => {
+            console.error('[QuickBooks Effect] API error:', error);
+            return of(
               QuickBooksConnectionActions.connectToQuickBooksFailure({
                 error: this.toErrorMessage(error),
               })
-            )
-          )
-        )
-      )
+            );
+          })
+        );
+      })
     )
   );
 
@@ -59,6 +63,7 @@ export class QuickBooksConnectionEffects {
       this.actions$.pipe(
         ofType(QuickBooksConnectionActions.connectToQuickBooksSuccess),
         tap(({ authUrl }) => {
+          console.log('[QuickBooks Effect] Success! Redirecting to:', authUrl);
           // Redirect to QuickBooks authorization URL
           window.location.href = authUrl;
         })

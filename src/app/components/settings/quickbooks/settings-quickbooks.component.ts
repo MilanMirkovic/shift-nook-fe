@@ -93,8 +93,12 @@ export class SettingsQuickBooksComponent implements OnInit, OnDestroy {
   }
 
   connectToQuickBooks(): void {
+    console.log('[QuickBooks] Connect button clicked, companyId:', this.companyId);
     if (this.companyId) {
+      console.log('[QuickBooks] Dispatching connectToQuickBooks action');
       this.store.dispatch(QuickBooksConnectionActions.connectToQuickBooks({ companyId: this.companyId }));
+    } else {
+      console.error('[QuickBooks] No companyId available!');
     }
   }
 
