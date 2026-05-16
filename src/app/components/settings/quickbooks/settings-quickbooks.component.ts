@@ -55,6 +55,11 @@ export class SettingsQuickBooksComponent implements OnInit, OnDestroy {
           duration: 5000,
           panelClass: 'success-snackbar',
         });
+        // Reload connection status to show connected state
+        const companyId = params['companyId'] || this.companyId;
+        if (companyId) {
+          this.store.dispatch(QuickBooksConnectionActions.loadConnectionStatus({ companyId }));
+        }
         // Remove query params from URL
         this.router.navigate([], {
           relativeTo: this.route,
@@ -93,12 +98,8 @@ export class SettingsQuickBooksComponent implements OnInit, OnDestroy {
   }
 
   connectToQuickBooks(): void {
-    console.log('[QuickBooks] Connect button clicked, companyId:', this.companyId);
     if (this.companyId) {
-      console.log('[QuickBooks] Dispatching connectToQuickBooks action');
       this.store.dispatch(QuickBooksConnectionActions.connectToQuickBooks({ companyId: this.companyId }));
-    } else {
-      console.error('[QuickBooks] No companyId available!');
     }
   }
 
