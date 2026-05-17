@@ -97,13 +97,24 @@
         .rate-input {
           flex: 1;
           border: none;
-          background: transparent;
+          background: rgba(255, 255, 255, 0.15);
           color: white;
           font-size: 20px;
           font-weight: 700;
           outline: none;
           width: 60px;
-          padding: 0;
+          padding: 4px 8px;
+          border-radius: 4px;
+          cursor: text;
+          transition: background 0.2s;
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.2);
+          }
+
+          &:focus {
+            background: rgba(255, 255, 255, 0.25);
+          }
 
           &::placeholder {
             color: rgba(255, 255, 255, 0.5);

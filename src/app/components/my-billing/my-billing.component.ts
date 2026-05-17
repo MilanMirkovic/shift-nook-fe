@@ -356,7 +356,8 @@ export class MyBillingComponent implements OnInit {
     });
   }
 
-  viewInvoice(invoiceId: string): void {
-    this.router.navigate(['/invoices', invoiceId]);
+  viewInvoice(invoice: Invoice): void {
+    // Navigate to the client's detail page where the invoice can be viewed
+    this.router.navigate(['/clients', invoice.clientId]);
   }
 }
