@@ -222,6 +222,24 @@
                 <mat-icon>visibility</mat-icon>
                 View Client & Invoice
               </button>
+              <button
+                mat-raised-button
+                color="accent"
+                (click)="syncToQuickBooks(invoice)"
+                [disabled]="!canSync(invoice)"
+                *ngIf="!isSynced(invoice)">
+                <mat-icon *ngIf="!isSyncing(invoice.id)">sync</mat-icon>
+                <mat-icon *ngIf="isSyncing(invoice.id)" class="spinning">sync</mat-icon>
+                {{ isSyncing(invoice.id) ? 'Syncing...' : 'Sync to QuickBooks' }}
+              </button>
+              <button
+                mat-button
+                color="accent"
+                disabled
+                *ngIf="isSynced(invoice)">
+                <mat-icon>check_circle</mat-icon>
+                Synced to QuickBooks
+              </button>
             </mat-card-actions>
           </mat-card>
         </div>

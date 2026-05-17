@@ -493,6 +493,20 @@
   }
 }
 
+// Spinning animation for sync icon
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
 // Mobile responsive
 @media (max-width: 768px) {
   .billing-container {

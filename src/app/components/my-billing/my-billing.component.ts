@@ -49,6 +49,15 @@ interface Invoice {
   dueAt: string;
   status: string;
   invoiceType: string;
+  quickbooksSyncStatus?: string;
+  quickbooksDocNumber?: string;
+}
+
+interface QuickBooksSyncStatus {
+  syncStatus: string;
+  quickbooksDocNumber?: string;
+  syncErrorMessage?: string;
+  canRetry: boolean;
 }
 
 @Component({
@@ -93,6 +102,7 @@ export class MyBillingComponent implements OnInit {
 
   invoices: Invoice[] = [];
   loadingInvoices = false;
+  syncingInvoices = new Set<string>(); // Track which invoices are being synced
 
   myCompanyId: string | null = null;
 
@@ -206,6 +216,10 @@ export class MyBillingComponent implements OnInit {
           .sort((a: Invoice, b: Invoice) =>
             new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime()
           );
+
+        // Load sync status for each invoice
+        this.invoices.forEach(invoice => this.loadSyncStatus(invoice));
+
         this.loadingInvoices = false;
       },
       error: (err) => {
@@ -359,5 +373,67 @@ export class MyBillingComponent implements OnInit {
   viewInvoice(invoice: Invoice): void {
     // Navigate to the client's detail page where the invoice can be viewed
     this.router.navigate(['/clients', invoice.clientId]);
+  }
+
+  syncToQuickBooks(invoice: Invoice): void {
+    if (!this.myCompanyId || this.syncingInvoices.has(invoice.id)) {
+      return;
+    }
+
+    this.syncingInvoices.add(invoice.id);
+
+    this.http.post<QuickBooksSyncStatus>(
+      `${environment.apiBaseUrl}/companies/${this.myCompanyId}/quickbooks/invoices/${invoice.id}/sync`,
+      {}
+    ).subscribe({
+      next: (syncStatus) => {
+        this.snackBar.open(
+          `Invoice #${invoice.invoiceNumber} synced to QuickBooks successfully!`,
+          'Close',
+          { duration: 5000 }
+        );
+
+        // Update invoice with sync status
+        invoice.quickbooksSyncStatus = syncStatus.syncStatus;
+        invoice.quickbooksDocNumber = syncStatus.quickbooksDocNumber;
+
+        this.syncingInvoices.delete(invoice.id);
+      },
+      error: (err) => {
+        console.error('Failed to sync invoice to QuickBooks', err);
+        const message = err.error?.message || err.error?.syncErrorMessage || 'Failed to sync to QuickBooks';
+        this.snackBar.open(message, 'Close', { duration: 7000 });
+        this.syncingInvoices.delete(invoice.id);
+      }
+    });
+  }
+
+  isSyncing(invoiceId: string): boolean {
+    return this.syncingInvoices.has(invoiceId);
+  }
+
+  isSynced(invoice: Invoice): boolean {
+    return invoice.quickbooksSyncStatus === 'SYNCED';
+  }
+
+  canSync(invoice: Invoice): boolean {
+    return !this.isSynced(invoice) && !this.isSyncing(invoice.id);
+  }
+
+  loadSyncStatus(invoice: Invoice): void {
+    if (!this.myCompanyId) return;
+
+    this.http.get<QuickBooksSyncStatus>(
+      `${environment.apiBaseUrl}/companies/${this.myCompanyId}/quickbooks/invoices/${invoice.id}/sync-status`
+    ).subscribe({
+      next: (syncStatus) => {
+        invoice.quickbooksSyncStatus = syncStatus.syncStatus;
+        invoice.quickbooksDocNumber = syncStatus.quickbooksDocNumber;
+      },
+      error: () => {
+        // Sync status not found - invoice not synced yet
+        invoice.quickbooksSyncStatus = undefined;
+      }
+    });
   }
 }
