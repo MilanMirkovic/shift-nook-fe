@@ -1,8 +1,13 @@
 export interface QuickBooksConnection {
+  id: string;
   companyId: string;
   realmId: string;
+  environment: string;
+  connected: boolean;
   connectedAt: string;
-  isConnected: boolean;
+  lastTokenRefreshAt: string;
+  tokenExpiresAt: string;
+  tokenExpiringSoon: boolean;
 }
 
 export interface QuickBooksConnectionState {

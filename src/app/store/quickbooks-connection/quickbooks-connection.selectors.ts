@@ -12,7 +12,7 @@ export const selectConnection = createSelector(
 
 export const selectIsConnected = createSelector(
   selectConnection,
-  (connection) => connection?.isConnected ?? false
+  (connection) => connection?.connected ?? false
 );
 
 export const selectLoading = createSelector(
