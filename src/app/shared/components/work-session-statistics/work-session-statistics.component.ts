@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Subject, combineLatest, map, takeUntil } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
+import { Store } from '@ngrx/store';
 import {
   CompanyWorkSessionsStoreService
 } from '../../../store/company-work-sessions/company-work-sessions-store.service';
@@ -10,6 +10,7 @@ import {
   ExportTimesheetDialogComponent,
   ExportTimesheetDialogResult
 } from '../export-timesheet-dialog/export-timesheet-dialog.component';
+import { selectSelectedCompanyId, selectCurrentCompany } from '../../../store/user/user.selectors';
 
 type PeriodType = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
@@ -23,11 +24,8 @@ export class WorkSessionStatisticsComponent implements OnInit, OnDestroy {
   private readonly workSessionStore = inject(CompanyWorkSessionsStoreService);
   private readonly workSessionApi = inject(CompanyWorkSessionsApiService);
   private readonly dialog = inject(MatDialog);
+  private readonly store = inject(Store);
   private readonly destroy$ = new Subject<void>();
-  private readonly STORAGE_KEY = 'work-session-statistics-selected-company';
-  private readonly selectedCompanyId$ = new BehaviorSubject<string | null>(
-    this.loadSelectedCompanyFromStorage()
-  );
 
   exportingPdf = false;
 
@@ -36,19 +34,16 @@ export class WorkSessionStatisticsComponent implements OnInit, OnDestroy {
   error$ = this.workSessionStore.getStatisticsError();
   companiesWorkTime$ = this.workSessionStore.getCompaniesByWorkTime();
 
+  // Get selected company from store
+  readonly selectedCompanyId$ = this.store.select(selectSelectedCompanyId);
+  readonly currentCompany$ = this.store.select(selectCurrentCompany);
+
+  selectedCompanyName: string = '';
+
   selectedPeriod: PeriodType = 'daily';
   selectedDate: Date = new Date();
 
-  get selectedCompanyId(): string | null {
-    return this.selectedCompanyId$.value;
-  }
-
-  set selectedCompanyId(value: string | null) {
-    this.selectedCompanyId$.next(value);
-    this.saveSelectedCompanyToStorage(value);
-  }
-
-  // Filtered statistics based on selected company
+  // Filtered statistics based on selected company from store
   filteredStatistics$ = combineLatest([
     this.statistics$,
     this.selectedCompanyId$
@@ -70,34 +65,27 @@ export class WorkSessionStatisticsComponent implements OnInit, OnDestroy {
     })
   );
 
-  // Get available companies for the filter dropdown
-  availableCompanies$ = this.statistics$.pipe(
-    map(stats => stats?.byCompany || [])
-  );
-
   private readonly timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   ngOnInit(): void {
+    // Get selected company name for display
+    this.currentCompany$.pipe(takeUntil(this.destroy$)).subscribe(company => {
+      if (company) {
+        this.selectedCompanyName = company.companyName;
+      }
+    });
+
     this.loadStatistics();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-    this.selectedCompanyId$.complete();
   }
 
   onPeriodChange(period: PeriodType): void {
     this.selectedPeriod = period;
     this.loadStatistics();
-  }
-
-  onCompanyFilterChange(companyId: string | null): void {
-    this.selectedCompanyId = companyId;
-  }
-
-  clearCompanyFilter(): void {
-    this.selectedCompanyId = null;
   }
 
   onDateChange(date: Date): void {
@@ -326,27 +314,5 @@ export class WorkSessionStatisticsComponent implements OnInit, OnDestroy {
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const seconds = String(date.getSeconds()).padStart(2, '0');
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
-  }
-
-  private loadSelectedCompanyFromStorage(): string | null {
-    try {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
-      return stored;
-    } catch (error) {
-      console.warn('Failed to load selected company from storage:', error);
-      return null;
-    }
-  }
-
-  private saveSelectedCompanyToStorage(companyId: string | null): void {
-    try {
-      if (companyId) {
-        localStorage.setItem(this.STORAGE_KEY, companyId);
-      } else {
-        localStorage.removeItem(this.STORAGE_KEY);
-      }
-    } catch (error) {
-      console.warn('Failed to save selected company to storage:', error);
-    }
   }
 }
