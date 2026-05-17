@@ -18,8 +18,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { Router } from '@angular/router';
 
-import { selectSelectedCompanyId, selectUserCompanies } from '../../store/user/user.selectors';
+import { selectSelectedCompanyId, selectUserCompanies, selectCurrentCompany } from '../../store/user/user.selectors';
 import { environment } from '../../../environments/environment';
+import { CompanyRole } from '../../shared/models/company-role';
 
 interface WorkSession {
   id: string;
@@ -31,11 +32,6 @@ interface WorkSession {
   description?: string;
   invoiceId?: string;
   invoicedAt?: string;
-}
-
-interface CompanyOption {
-  companyId: string;
-  companyName: string;
 }
 
 interface Invoice {
@@ -87,11 +83,14 @@ export class MyBillingComponent implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
 
-  readonly myCompanyId$ = this.store.select(selectSelectedCompanyId);
+  readonly selectedCompanyId$ = this.store.select(selectSelectedCompanyId); // Company we're billing
+  readonly currentCompany$ = this.store.select(selectCurrentCompany); // Full company info
+  readonly userCompanies$ = this.store.select(selectUserCompanies); // All user's companies
 
   selectedTabIndex = 0;
-  availableCompanies: CompanyOption[] = [];
-  selectedCompanyId: string | null = null;
+  clientCompanyId: string | null = null; // The company we're billing (selected company)
+  clientCompanyName: string = '';
+  myAccountingFirmId: string | null = null; // Accountant's own firm
   fromDate: Date;
   toDate: Date;
 
@@ -104,8 +103,6 @@ export class MyBillingComponent implements OnInit {
   loadingInvoices = false;
   syncingInvoices = new Set<string>(); // Track which invoices are being synced
 
-  myCompanyId: string | null = null;
-
   constructor() {
     // Default to last 3 months
     const now = new Date();
@@ -114,60 +111,44 @@ export class MyBillingComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Get my company ID (accountant's company)
-    this.myCompanyId$.pipe(take(1)).subscribe(id => {
-      this.myCompanyId = id;
+    // Get the selected company (the client we're billing)
+    this.selectedCompanyId$.pipe(take(1)).subscribe(id => {
+      this.clientCompanyId = id;
     });
 
-    // Load companies I've worked for
-    this.loadAvailableCompanies();
+    // Get selected company info for display
+    this.currentCompany$.pipe(take(1)).subscribe(company => {
+      if (company) {
+        this.clientCompanyName = company.companyName;
+      }
+    });
+
+    // Find accountant's own firm (where they are ACCOUNTING_MANAGER)
+    this.userCompanies$.pipe(take(1)).subscribe(companies => {
+      const accountingFirm = companies.find(c =>
+        c.role === CompanyRole.ACCOUNTING_MANAGER || c.role === CompanyRole.ACCOUNTANT
+      );
+
+      if (accountingFirm) {
+        this.myAccountingFirmId = accountingFirm.companyId;
+      }
+    });
+
+    // Load work sessions for the selected company
+    this.loadWorkSessions();
 
     // Load invoices
     this.loadInvoices();
   }
 
-  loadAvailableCompanies(): void {
-    // Fetch work sessions to get unique companies
-    const threeYearsAgo = new Date();
-    threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
-
-    this.http.get<WorkSession[]>(`${environment.apiBaseUrl}/company-work-sessions/for-billing`, {
-      params: {
-        from: threeYearsAgo.toISOString(),
-        to: new Date().toISOString()
-      }
-    }).subscribe({
-      next: (sessions) => {
-        // Get unique companies
-        const companiesMap = new Map<string, string>();
-        sessions.forEach(session => {
-          companiesMap.set(session.companyId, session.companyName);
-        });
-
-        this.availableCompanies = Array.from(companiesMap.entries())
-          .map(([companyId, companyName]) => ({ companyId, companyName }))
-          .sort((a, b) => a.companyName.localeCompare(b.companyName));
-      },
-      error: (err) => {
-        console.error('Failed to load companies', err);
-        this.snackBar.open('Failed to load companies', 'Close', { duration: 5000 });
-      }
-    });
-  }
-
-  onCompanyChange(): void {
-    this.selectedSessions.clear();
-    this.loadWorkSessions();
-  }
-
   onDateChange(): void {
-    if (this.selectedCompanyId) {
+    if (this.clientCompanyId) {
       this.loadWorkSessions();
     }
   }
 
   loadWorkSessions(): void {
-    if (!this.selectedCompanyId) {
+    if (!this.clientCompanyId) {
       this.workSessions = [];
       return;
     }
@@ -181,9 +162,9 @@ export class MyBillingComponent implements OnInit {
       }
     }).subscribe({
       next: (sessions) => {
-        // Filter to selected company only
+        // Filter to the company we're billing (selected company)
         this.workSessions = sessions
-          .filter(s => s.companyId === this.selectedCompanyId)
+          .filter(s => s.companyId === this.clientCompanyId)
           .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
         this.loading = false;
       },
@@ -196,12 +177,12 @@ export class MyBillingComponent implements OnInit {
   }
 
   loadInvoices(): void {
-    if (!this.myCompanyId) return;
+    if (!this.myAccountingFirmId) return;
 
     this.loadingInvoices = true;
 
     // Load invoices from work sessions for this accountant
-    this.http.get<any>(`${environment.apiBaseUrl}/companies/${this.myCompanyId}/invoices`, {
+    this.http.get<any>(`${environment.apiBaseUrl}/companies/${this.myAccountingFirmId}/invoices`, {
       params: {
         size: '100' // Get up to 100 invoices
       }
@@ -298,29 +279,29 @@ export class MyBillingComponent implements OnInit {
       return;
     }
 
-    if (!this.myCompanyId) {
-      this.snackBar.open('Company ID not found', 'Close', { duration: 3000 });
+    if (!this.myAccountingFirmId) {
+      this.snackBar.open('Accounting firm not found. Please ensure you have an accounting company set up.', 'Close', { duration: 5000 });
       return;
     }
 
-    if (!this.selectedCompanyId) {
-      this.snackBar.open('Please select a company', 'Close', { duration: 3000 });
+    if (!this.clientCompanyId) {
+      this.snackBar.open('No company selected to bill', 'Close', { duration: 3000 });
       return;
     }
 
     this.loading = true;
 
     const request = {
-      clientId: this.selectedCompanyId, // The company we worked for (client)
+      clientId: this.clientCompanyId, // The company we worked for (currently selected company)
       workSessionIds: selectedIds,
       hourlyRate: this.hourlyRate,
       title: `Accounting Services - ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`,
       notes: 'Thank you for your business'
     };
 
-    // Use MY company ID (accountant's company) in the URL
+    // Use accountant's firm ID in the URL
     this.http.post<any>(
-      `${environment.apiBaseUrl}/companies/${this.myCompanyId}/invoices/from-work-sessions`,
+      `${environment.apiBaseUrl}/companies/${this.myAccountingFirmId}/invoices/from-work-sessions`,
       request
     ).subscribe({
       next: (invoice) => {
@@ -376,14 +357,14 @@ export class MyBillingComponent implements OnInit {
   }
 
   syncToQuickBooks(invoice: Invoice): void {
-    if (!this.myCompanyId || this.syncingInvoices.has(invoice.id)) {
+    if (!this.myAccountingFirmId || this.syncingInvoices.has(invoice.id)) {
       return;
     }
 
     this.syncingInvoices.add(invoice.id);
 
     this.http.post<QuickBooksSyncStatus>(
-      `${environment.apiBaseUrl}/companies/${this.myCompanyId}/quickbooks/invoices/${invoice.id}/sync`,
+      `${environment.apiBaseUrl}/companies/${this.myAccountingFirmId}/quickbooks/invoices/${invoice.id}/sync`,
       {}
     ).subscribe({
       next: (syncStatus) => {
@@ -438,10 +419,10 @@ export class MyBillingComponent implements OnInit {
   }
 
   loadSyncStatus(invoice: Invoice): void {
-    if (!this.myCompanyId) return;
+    if (!this.myAccountingFirmId) return;
 
     this.http.get<QuickBooksSyncStatus>(
-      `${environment.apiBaseUrl}/companies/${this.myCompanyId}/quickbooks/invoices/${invoice.id}/sync-status`
+      `${environment.apiBaseUrl}/companies/${this.myAccountingFirmId}/quickbooks/invoices/${invoice.id}/sync-status`
     ).subscribe({
       next: (syncStatus) => {
         invoice.quickbooksSyncStatus = syncStatus.syncStatus;

@@ -54,11 +54,6 @@
     align-items: flex-start;
     flex-wrap: wrap;
 
-    .company-select {
-      flex: 1;
-      min-width: 250px;
-    }
-
     .date-field {
       min-width: 180px;
     }
@@ -517,7 +512,6 @@
     .filter-row {
       flex-direction: column;
 
-      .company-select,
       .date-field,
       .rate-card {
         width: 100%;

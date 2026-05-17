@@ -1,7 +1,8 @@
 <div class="billing-container">
   <div class="header">
     <h1>My Billing</h1>
-    <p class="subtitle">Manage your billing and invoices</p>
+    <p class="subtitle" *ngIf="clientCompanyName">Creating invoices for: <strong>{{ clientCompanyName }}</strong></p>
+    <p class="subtitle" *ngIf="!clientCompanyName">Manage your billing and invoices</p>
   </div>
 
   <!-- Tabs -->
@@ -12,16 +13,6 @@
         <!-- Filters -->
         <div class="filters-card">
           <div class="filter-row">
-            <!-- Company Selector -->
-            <mat-form-field appearance="outline" class="company-select">
-              <mat-label>Select Company to Bill</mat-label>
-              <mat-select [(ngModel)]="selectedCompanyId" (selectionChange)="onCompanyChange()">
-                <mat-option *ngFor="let company of availableCompanies" [value]="company.companyId">
-                  {{ company.companyName }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-
             <!-- Date Range -->
             <mat-form-field appearance="outline" class="date-field">
               <mat-label>From Date</mat-label>
@@ -55,22 +46,15 @@
           <p>Loading work sessions...</p>
         </div>
 
-        <!-- Empty state - no company selected -->
-        <div *ngIf="!loading && !selectedCompanyId" class="empty-state">
-          <mat-icon>business</mat-icon>
-          <h2>Select a Company</h2>
-          <p>Choose a company from the dropdown above to view work sessions and create invoices</p>
-        </div>
-
         <!-- Empty state - no sessions -->
-        <div *ngIf="!loading && selectedCompanyId && workSessions.length === 0" class="empty-state">
+        <div *ngIf="!loading && workSessions.length === 0" class="empty-state">
           <mat-icon>schedule</mat-icon>
           <h2>No work sessions found</h2>
-          <p>No work sessions found for the selected company and date range</p>
+          <p>No work sessions found for {{ clientCompanyName }} in the selected date range</p>
         </div>
 
         <!-- Work sessions for selected company -->
-        <div *ngIf="!loading && selectedCompanyId && workSessions.length > 0" class="sessions-section">
+        <div *ngIf="!loading && workSessions.length > 0" class="sessions-section">
           <!-- Stats Summary -->
           <div class="stats-summary">
             <div class="stat-card">
