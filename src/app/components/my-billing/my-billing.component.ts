@@ -227,6 +227,20 @@ export class MyBillingComponent implements OnInit {
       .map(s => s.id);
   }
 
+  getUnbilledSessions(): WorkSession[] {
+    return this.workSessions.filter(s => !s.invoiceId);
+  }
+
+  selectAllUnbilled(): void {
+    this.getUnbilledSessions().forEach(session => {
+      this.selectedSessions.add(session.id);
+    });
+  }
+
+  clearSelection(): void {
+    this.selectedSessions.clear();
+  }
+
   getTotalHours(): number {
     const totalMinutes = this.workSessions.reduce((sum, s) => sum + s.durationMinutes, 0);
     return totalMinutes / 60;
