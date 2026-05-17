@@ -59,6 +59,7 @@
           </div>
 
           <button
+            *ngIf="canManageConnection"
             mat-raised-button
             color="primary"
             class="connect-btn"
@@ -69,6 +70,11 @@
             <mat-icon *ngIf="!(connecting$ | async)">link</mat-icon>
             {{ (connecting$ | async) ? 'Connecting...' : 'Connect to QuickBooks' }}
           </button>
+
+          <div *ngIf="!canManageConnection" class="read-only-notice">
+            <mat-icon>info</mat-icon>
+            <p>Contact your company owner or accounting manager to connect QuickBooks.</p>
+          </div>
         </div>
       </mat-card-content>
     </mat-card>
@@ -114,6 +120,7 @@
               </button>
 
               <button
+                *ngIf="canManageConnection"
                 mat-stroked-button
                 color="warn"
                 (click)="disconnect()"

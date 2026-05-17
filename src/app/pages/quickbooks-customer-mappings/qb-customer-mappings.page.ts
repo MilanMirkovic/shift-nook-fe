@@ -19,7 +19,8 @@ import {
   QuickBooksCustomer,
   QuickBooksCustomerMapping
 } from '../../store/quickbooks-customer-mappings/qb-customer-mappings.models';
-import { selectSelectedCompanyId } from '../../store/user/user.selectors';
+import { selectSelectedCompanyId, selectCurrentCompany } from '../../store/user/user.selectors';
+import { CompanyRole } from '../../shared/models/company-role';
 
 import { CreateMappingDialogComponent } from './create-mapping-dialog.component';
 
@@ -66,11 +67,15 @@ import { CreateMappingDialogComponent } from './create-mapping-dialog.component'
 
           <!-- Mappings table -->
           <div *ngIf="!(mappingsLoading$ | async) && !(error$ | async)" class="table-container">
-            <div class="table-actions">
+            <div class="table-actions" *ngIf="canManageMappings">
               <button mat-raised-button color="primary" (click)="openCreateMappingDialog()">
                 <mat-icon>add</mat-icon>
                 Create Mapping
               </button>
+            </div>
+            <div class="read-only-notice" *ngIf="!canManageMappings">
+              <mat-icon>info</mat-icon>
+              <p>You can view mappings but cannot create or delete them. Contact your company owner or accounting manager.</p>
             </div>
 
             <table mat-table [dataSource]="(mappings$ | async) || []" class="mappings-table">
@@ -125,8 +130,9 @@ import { CreateMappingDialogComponent } from './create-mapping-dialog.component'
                   <div class="empty-state-content">
                     <mat-icon>link_off</mat-icon>
                     <h3>No mappings yet</h3>
-                    <p>Create your first mapping to start syncing invoices to QuickBooks</p>
-                    <button mat-raised-button color="primary" (click)="openCreateMappingDialog()">
+                    <p *ngIf="canManageMappings">Create your first mapping to start syncing invoices to QuickBooks</p>
+                    <p *ngIf="!canManageMappings">No QuickBooks customer mappings have been configured yet.</p>
+                    <button *ngIf="canManageMappings" mat-raised-button color="primary" (click)="openCreateMappingDialog()">
                       <mat-icon>add</mat-icon>
                       Create Mapping
                     </button>
@@ -209,6 +215,30 @@ import { CreateMappingDialogComponent } from './create-mapping-dialog.component'
       margin: 0;
       color: rgba(0, 0, 0, 0.6);
     }
+
+    .read-only-notice {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background-color: rgba(59, 130, 246, 0.05);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    .read-only-notice mat-icon {
+      color: #3b82f6;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .read-only-notice p {
+      margin: 0;
+      font-size: 0.9375rem;
+    }
   `]
 })
 export class QBCustomerMappingsPage implements OnInit {
@@ -216,7 +246,7 @@ export class QBCustomerMappingsPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
-  displayedColumns: string[] = ['clientId', 'quickbooksCustomer', 'createdAt', 'actions'];
+  displayedColumns: string[] = [];
 
   companyId$: Observable<string | null>;
   mappings$: Observable<QuickBooksCustomerMapping[]>;
@@ -224,6 +254,7 @@ export class QBCustomerMappingsPage implements OnInit {
   quickbooksCustomers$: Observable<QuickBooksCustomer[]>;
   deletingMapping$: Observable<boolean>;
   error$: Observable<string | null>;
+  canManageMappings = false;
 
   constructor() {
     this.companyId$ = this.store.select(selectSelectedCompanyId);
@@ -240,6 +271,16 @@ export class QBCustomerMappingsPage implements OnInit {
         this.store.dispatch(QBCustomerMappingsActions.loadMappings({ companyId }));
         this.store.dispatch(QBCustomerMappingsActions.loadQuickBooksCustomers({ companyId }));
       }
+    });
+
+    this.store.select(selectCurrentCompany).subscribe((company) => {
+      // Only OWNER and ACCOUNTING_MANAGER can create/delete mappings
+      this.canManageMappings = company?.role === CompanyRole.OWNER || company?.role === CompanyRole.ACCOUNTING_MANAGER;
+
+      // Set displayed columns based on permissions
+      this.displayedColumns = this.canManageMappings
+        ? ['clientId', 'quickbooksCustomer', 'createdAt', 'actions']
+        : ['clientId', 'quickbooksCustomer', 'createdAt'];
     });
   }
 

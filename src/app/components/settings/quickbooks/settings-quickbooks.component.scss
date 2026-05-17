@@ -332,6 +332,31 @@
   }
 }
 
+.read-only-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background-color: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+  margin-top: 16px;
+
+  mat-icon {
+    color: #3b82f6;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--sn-text);
+  }
+}
+
 @media (max-width: 640px) {
   .settings-quickbooks {
     padding: 16px;

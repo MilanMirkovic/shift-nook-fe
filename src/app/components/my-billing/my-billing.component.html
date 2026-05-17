@@ -1,23 +1,23 @@
 <div class="billing-container">
   <div class="header">
-    <h1>My Billing</h1>
-    <p class="subtitle">Create invoices from your work sessions</p>
-  </div>
-
-  <div class="billing-settings">
-    <mat-card>
-      <mat-card-content>
-        <mat-form-field appearance="outline">
+    <div class="header-content">
+      <div>
+        <h1>My Billing</h1>
+        <p class="subtitle">Create invoices from your work sessions</p>
+      </div>
+      <div class="rate-input">
+        <mat-form-field appearance="outline" class="hourly-rate-field">
           <mat-label>Hourly Rate</mat-label>
-          <input matInput type="number" [(ngModel)]="hourlyRate" step="0.01" min="0">
-          <span matPrefix>$&nbsp;</span>
-          <mat-hint>Your billing rate per hour</mat-hint>
+          <input matInput type="number" [(ngModel)]="hourlyRate" step="5" min="0">
+          <span matPrefix>$</span>
+          <span matSuffix>/hr</span>
         </mat-form-field>
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </div>
   </div>
 
   <div *ngIf="loading" class="loading">
+    <mat-icon>hourglass_empty</mat-icon>
     <p>Loading work sessions...</p>
   </div>
 
@@ -28,93 +28,83 @@
   </div>
 
   <div *ngFor="let stats of workStats" class="company-section">
-    <mat-card>
+    <mat-card class="company-card">
       <mat-card-header>
-        <mat-card-title>{{ stats.companyName }}</mat-card-title>
-        <mat-card-subtitle>
-          <span class="stats">
-            Total: {{ stats.totalHours.toFixed(2) }}h
-            <span class="separator">•</span>
-            Unbilled: {{ stats.unbilledHours.toFixed(2) }}h
-          </span>
-        </mat-card-subtitle>
+        <div class="company-header">
+          <div class="company-info">
+            <h2 class="company-name">{{ stats.companyName }}</h2>
+            <div class="company-stats">
+              <div class="stat-item">
+                <span class="stat-label">Total Hours</span>
+                <span class="stat-value">{{ stats.totalHours.toFixed(1) }}h</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-item highlight">
+                <span class="stat-label">Unbilled</span>
+                <span class="stat-value">{{ stats.unbilledHours.toFixed(1) }}h</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-item">
+                <span class="stat-label">Potential</span>
+                <span class="stat-value">${{ (stats.unbilledHours * hourlyRate).toFixed(0) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </mat-card-header>
 
       <mat-card-content>
-        <table mat-table [dataSource]="stats.sessions" class="work-sessions-table">
-          <!-- Checkbox Column -->
-          <ng-container matColumnDef="select">
-            <th mat-header-cell *matHeaderCellDef>
-              <mat-checkbox
-                [checked]="getSelectedSessionsForCompany(stats.companyId).length === stats.sessions.filter(s => !s.invoiceId).length"
-                [indeterminate]="getSelectedSessionsForCompany(stats.companyId).length > 0 && getSelectedSessionsForCompany(stats.companyId).length < stats.sessions.filter(s => !s.invoiceId).length"
-                (change)="$event.checked ? stats.sessions.filter(s => !s.invoiceId).forEach(s => selectedSessions.add(s.id)) : stats.sessions.forEach(s => selectedSessions.delete(s.id))"
-                [disabled]="stats.sessions.filter(s => !s.invoiceId).length === 0">
-              </mat-checkbox>
-            </th>
-            <td mat-cell *matCellDef="let session">
+        <div class="sessions-list">
+          <div *ngFor="let session of stats.sessions"
+               class="session-item"
+               [class.session-invoiced]="session.invoiceId"
+               [class.session-selected]="isSelected(session.id)">
+            <div class="session-checkbox">
               <mat-checkbox
                 [checked]="isSelected(session.id)"
                 (change)="toggleSession(session.id)"
                 [disabled]="session.invoiceId">
               </mat-checkbox>
-            </td>
-          </ng-container>
-
-          <!-- Date Column -->
-          <ng-container matColumnDef="date">
-            <th mat-header-cell *matHeaderCellDef>Date & Time</th>
-            <td mat-cell *matCellDef="let session">
-              {{ formatDate(session.startTime) }}
-            </td>
-          </ng-container>
-
-          <!-- Duration Column -->
-          <ng-container matColumnDef="duration">
-            <th mat-header-cell *matHeaderCellDef>Duration</th>
-            <td mat-cell *matCellDef="let session">
-              <span class="duration">{{ formatDuration(session.durationMinutes) }}</span>
-            </td>
-          </ng-container>
-
-          <!-- Description Column -->
-          <ng-container matColumnDef="description">
-            <th mat-header-cell *matHeaderCellDef>Description</th>
-            <td mat-cell *matCellDef="let session">
-              <span class="description">{{ session.description || '—' }}</span>
-            </td>
-          </ng-container>
-
-          <!-- Status Column -->
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let session">
-              <span *ngIf="session.invoiceId" class="status-invoiced">
+            </div>
+            <div class="session-content">
+              <div class="session-main">
+                <div class="session-date">{{ formatDate(session.startTime) }}</div>
+                <div class="session-duration">{{ formatDuration(session.durationMinutes) }}</div>
+              </div>
+              <div class="session-description" *ngIf="session.description">
+                {{ session.description }}
+              </div>
+            </div>
+            <div class="session-status">
+              <span *ngIf="session.invoiceId" class="status-badge invoiced">
                 <mat-icon>check_circle</mat-icon>
                 Invoiced
               </span>
-              <span *ngIf="!session.invoiceId" class="status-unbilled">
+              <span *ngIf="!session.invoiceId" class="status-badge unbilled">
                 Unbilled
               </span>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-              [class.invoiced-row]="row.invoiceId"></tr>
-        </table>
+            </div>
+          </div>
+        </div>
       </mat-card-content>
 
-      <mat-card-actions *ngIf="getSelectedSessionsForCompany(stats.companyId).length > 0">
+      <mat-card-actions *ngIf="getSelectedSessionsForCompany(stats.companyId).length > 0" class="invoice-actions">
         <div class="invoice-summary">
-          <div class="summary-text">
-            <strong>Selected:</strong> {{ calculateSelectedHours(stats.companyId).toFixed(2) }}h
-            <span class="separator">×</span>
-            ${{ hourlyRate.toFixed(2) }}/h
-            <span class="separator">=</span>
-            <span class="total-amount">${{ calculateSelectedAmount(stats.companyId).toFixed(2) }}</span>
+          <div class="summary-details">
+            <div class="summary-line">
+              <span class="summary-label">Selected sessions:</span>
+              <span class="summary-value">{{ getSelectedSessionsForCompany(stats.companyId).length }}</span>
+            </div>
+            <div class="summary-line">
+              <span class="summary-label">Hours:</span>
+              <span class="summary-value">{{ calculateSelectedHours(stats.companyId).toFixed(2) }}</span>
+            </div>
+            <div class="summary-line total">
+              <span class="summary-label">Total:</span>
+              <span class="summary-value">${{ calculateSelectedAmount(stats.companyId).toFixed(2) }}</span>
+            </div>
           </div>
-          <button mat-raised-button color="primary" (click)="createInvoice(stats)" [disabled]="loading">
+          <button mat-raised-button color="primary" (click)="createInvoice(stats)" [disabled]="loading" class="create-invoice-btn">
             <mat-icon>receipt</mat-icon>
             Create Invoice
           </button>

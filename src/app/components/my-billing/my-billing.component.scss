@@ -1,30 +1,52 @@
 .billing-container {
-  padding: 24px;
-  max-width: 1400px;
+  padding: 32px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 .header {
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
 
   h1 {
     margin: 0;
     font-size: 32px;
-    font-weight: 500;
+    font-weight: 600;
+    color: #1a1a1a;
   }
 
   .subtitle {
     margin: 8px 0 0;
-    color: rgba(0, 0, 0, 0.6);
+    font-size: 16px;
+    color: #666;
   }
-}
 
-.billing-settings {
-  margin-bottom: 24px;
+  .rate-input {
+    .hourly-rate-field {
+      width: 180px;
 
-  mat-card {
-    mat-form-field {
-      width: 200px;
+      ::ng-deep {
+        .mat-mdc-form-field-subscript-wrapper {
+          display: none;
+        }
+
+        .mat-mdc-text-field-wrapper {
+          background-color: #f8f9fa;
+        }
+
+        input {
+          font-size: 20px;
+          font-weight: 600;
+          text-align: right;
+        }
+      }
     }
   }
 }
@@ -32,127 +54,291 @@
 .loading,
 .empty-state {
   text-align: center;
-  padding: 48px 24px;
-  color: rgba(0, 0, 0, 0.6);
+  padding: 80px 24px;
+  color: #666;
 
   mat-icon {
-    font-size: 64px;
-    width: 64px;
-    height: 64px;
-    color: rgba(0, 0, 0, 0.3);
+    font-size: 72px;
+    width: 72px;
+    height: 72px;
+    color: #ccc;
+    margin-bottom: 16px;
   }
 
   h2 {
-    margin-top: 16px;
+    margin: 0 0 8px;
     font-size: 24px;
-    font-weight: 400;
+    font-weight: 500;
+    color: #333;
   }
 
   p {
-    margin: 8px 0 0;
+    margin: 0;
+    font-size: 16px;
   }
 }
 
 .company-section {
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 
-  mat-card-header {
-    margin-bottom: 16px;
+  .company-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.2s;
 
-    .stats {
-      font-size: 14px;
-      color: rgba(0, 0, 0, 0.6);
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+  }
+}
 
-      .separator {
-        margin: 0 8px;
-        color: rgba(0, 0, 0, 0.3);
+.company-header {
+  width: 100%;
+
+  .company-info {
+    .company-name {
+      margin: 0 0 16px;
+      font-size: 24px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .company-stats {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+
+      .stat-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        &.highlight {
+          .stat-value {
+            color: #1976d2;
+          }
+        }
+
+        .stat-label {
+          font-size: 12px;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          color: #999;
+        }
+
+        .stat-value {
+          font-size: 20px;
+          font-weight: 600;
+          color: #333;
+        }
+      }
+
+      .stat-divider {
+        width: 1px;
+        height: 32px;
+        background-color: #e0e0e0;
       }
     }
   }
 }
 
-.work-sessions-table {
-  width: 100%;
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
 
-  .mat-column-select {
-    flex: 0 0 60px;
-  }
-
-  .mat-column-date {
-    flex: 0 0 180px;
-  }
-
-  .mat-column-duration {
-    flex: 0 0 120px;
-  }
-
-  .mat-column-status {
-    flex: 0 0 140px;
-  }
-
-  .duration {
-    font-weight: 500;
-  }
-
-  .description {
-    color: rgba(0, 0, 0, 0.7);
-    font-size: 14px;
-  }
-
-  .status-invoiced {
+  .session-item {
     display: flex;
     align-items: center;
-    gap: 4px;
-    color: #4caf50;
-    font-size: 14px;
+    gap: 16px;
+    padding: 16px;
+    background-color: white;
+    transition: all 0.2s;
 
-    mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
+    &:hover:not(.session-invoiced) {
+      background-color: #f8f9fa;
     }
-  }
 
-  .status-unbilled {
-    color: rgba(0, 0, 0, 0.4);
-    font-size: 14px;
-  }
+    &.session-selected {
+      background-color: #e3f2fd;
+    }
 
-  .invoiced-row {
-    opacity: 0.6;
-    background-color: rgba(0, 0, 0, 0.02);
+    &.session-invoiced {
+      opacity: 0.6;
+      background-color: #fafafa;
+    }
+
+    .session-checkbox {
+      flex-shrink: 0;
+    }
+
+    .session-content {
+      flex: 1;
+      min-width: 0;
+
+      .session-main {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 4px;
+
+        .session-date {
+          font-size: 14px;
+          font-weight: 500;
+          color: #333;
+        }
+
+        .session-duration {
+          font-size: 14px;
+          font-weight: 600;
+          color: #1976d2;
+          padding: 2px 8px;
+          background-color: #e3f2fd;
+          border-radius: 4px;
+        }
+      }
+
+      .session-description {
+        font-size: 13px;
+        color: #666;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    .session-status {
+      flex-shrink: 0;
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+
+        &.invoiced {
+          background-color: #e8f5e9;
+          color: #2e7d32;
+        }
+
+        &.unbilled {
+          background-color: #fff3e0;
+          color: #e65100;
+        }
+      }
+    }
   }
 }
 
-mat-card-actions {
-  padding: 16px;
-  background-color: rgba(0, 0, 0, 0.02);
-  border-top: 1px solid rgba(0, 0, 0, 0.12);
+.invoice-actions {
+  background-color: #f8f9fa;
+  border-top: 2px solid #e0e0e0;
+  padding: 20px !important;
 
   .invoice-summary {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 24px;
 
-    .summary-text {
-      font-size: 16px;
+    .summary-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
 
-      .separator {
-        margin: 0 8px;
-        color: rgba(0, 0, 0, 0.4);
-      }
+      .summary-line {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
 
-      .total-amount {
-        font-size: 20px;
-        font-weight: 500;
-        color: #1976d2;
+        &.total {
+          margin-top: 8px;
+          padding-top: 12px;
+          border-top: 2px solid #e0e0e0;
+          font-size: 18px;
+          font-weight: 600;
+
+          .summary-value {
+            color: #1976d2;
+          }
+        }
+
+        .summary-label {
+          color: #666;
+        }
+
+        .summary-value {
+          font-weight: 600;
+          color: #333;
+        }
       }
     }
 
-    button {
+    .create-invoice-btn {
+      height: 48px;
+      padding: 0 32px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+
       mat-icon {
         margin-right: 8px;
       }
+
+      &:hover {
+        box-shadow: 0 4px 12px rgba(25, 118, 210, 0.4);
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .billing-container {
+    padding: 16px;
+  }
+
+  .header {
+    .header-content {
+      flex-direction: column;
+      align-items: stretch;
+
+      .rate-input {
+        .hourly-rate-field {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  .company-stats {
+    flex-wrap: wrap;
+
+    .stat-divider {
+      display: none;
+    }
+  }
+
+  .invoice-summary {
+    flex-direction: column;
+    align-items: stretch !important;
+
+    .create-invoice-btn {
+      width: 100%;
     }
   }
 }

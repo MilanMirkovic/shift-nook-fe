@@ -7,7 +7,6 @@ import { map } from 'rxjs/operators';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -21,11 +20,13 @@ import { environment } from '../../../environments/environment';
 interface WorkSession {
   id: string;
   companyId: string;
+  companyName: string;
   startTime: string;
   endTime: string;
   durationMinutes: number;
   description?: string;
   invoiceId?: string;
+  invoicedAt?: string;
 }
 
 interface CompanyWorkStats {
@@ -44,7 +45,6 @@ interface CompanyWorkStats {
     MatButtonModule,
     MatIconModule,
     MatCardModule,
-    MatTableModule,
     MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
@@ -67,24 +67,26 @@ export class MyBillingComponent implements OnInit {
   hourlyRate: number = 75.00;
   loading = false;
 
-  displayedColumns = ['select', 'date', 'duration', 'description', 'status'];
-
   ngOnInit(): void {
     this.loadWorkSessions();
   }
 
   loadWorkSessions(): void {
     this.loading = true;
-    // For now, load monthly statistics - in production this would be more sophisticated
-    const year = new Date().getFullYear();
-    const month = new Date().getMonth() + 1;
 
-    this.http.get<any>(`${environment.apiBaseUrl}/company-work-sessions/statistics/monthly`, {
-      params: { year: year.toString(), month: month.toString() }
+    // Load work sessions for the past 3 months
+    const now = new Date();
+    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+
+    const fromDate = threeMonthsAgo.toISOString();
+    const toDate = now.toISOString();
+
+    this.http.get<WorkSession[]>(`${environment.apiBaseUrl}/company-work-sessions/for-billing`, {
+      params: { from: fromDate, to: toDate }
     }).subscribe({
-      next: (response) => {
-        // Transform the response to group sessions by company
-        this.workStats = response.companySessions || [];
+      next: (sessions) => {
+        // Group sessions by company
+        this.workStats = this.groupSessionsByCompany(sessions);
         this.loading = false;
       },
       error: (err) => {
@@ -93,6 +95,34 @@ export class MyBillingComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  private groupSessionsByCompany(sessions: WorkSession[]): CompanyWorkStats[] {
+    const grouped = new Map<string, WorkSession[]>();
+
+    sessions.forEach(session => {
+      if (!grouped.has(session.companyId)) {
+        grouped.set(session.companyId, []);
+      }
+      grouped.get(session.companyId)!.push(session);
+    });
+
+    return Array.from(grouped.entries()).map(([companyId, sessions]) => {
+      const totalMinutes = sessions.reduce((sum, s) => sum + s.durationMinutes, 0);
+      const unbilledMinutes = sessions
+        .filter(s => !s.invoiceId)
+        .reduce((sum, s) => sum + s.durationMinutes, 0);
+
+      return {
+        companyId,
+        companyName: sessions[0]?.companyName || 'Unknown',
+        totalHours: totalMinutes / 60,
+        unbilledHours: unbilledMinutes / 60,
+        sessions: sessions.sort((a, b) =>
+          new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+        )
+      };
+    }).sort((a, b) => b.unbilledHours - a.unbilledHours);
   }
 
   toggleSession(sessionId: string): void {

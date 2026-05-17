@@ -11,10 +11,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
-import { selectSelectedCompanyId } from '../../../store/user/user.selectors';
+import { selectSelectedCompanyId, selectCurrentCompany } from '../../../store/user/user.selectors';
 import * as QuickBooksConnectionActions from '../../../store/quickbooks-connection/quickbooks-connection.actions';
 import * as QuickBooksConnectionSelectors from '../../../store/quickbooks-connection/quickbooks-connection.selectors';
 import { QuickBooksConnection } from '../../../store/quickbooks-connection/quickbooks-connection.models';
+import { CompanyRole } from '../../../shared/models/company-role';
 
 @Component({
   selector: 'app-settings-quickbooks',
@@ -46,6 +47,7 @@ export class SettingsQuickBooksComponent implements OnInit, OnDestroy {
   error$ = this.store.select(QuickBooksConnectionSelectors.selectError);
 
   companyId: string | null = null;
+  canManageConnection = false;
 
   ngOnInit(): void {
     // Handle OAuth callback query parameters
@@ -89,6 +91,14 @@ export class SettingsQuickBooksComponent implements OnInit, OnDestroy {
           this.companyId = companyId;
           this.store.dispatch(QuickBooksConnectionActions.loadConnectionStatus({ companyId }));
         }
+      });
+
+    this.store
+      .select(selectCurrentCompany)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((company) => {
+        // Only OWNER and ACCOUNTING_MANAGER can connect/disconnect QuickBooks
+        this.canManageConnection = company?.role === CompanyRole.OWNER || company?.role === CompanyRole.ACCOUNTING_MANAGER;
       });
   }
 
