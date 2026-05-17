@@ -48,6 +48,7 @@ interface Invoice {
   issuedAt: string;
   dueAt: string;
   status: string;
+  invoiceType: string;
 }
 
 @Component({
@@ -190,15 +191,21 @@ export class MyBillingComponent implements OnInit {
     this.loadingInvoices = true;
 
     // Load invoices from work sessions for this accountant
-    this.http.get<Invoice[]>(`${environment.apiBaseUrl}/companies/${this.myCompanyId}/invoices`, {
+    this.http.get<any>(`${environment.apiBaseUrl}/companies/${this.myCompanyId}/invoices`, {
       params: {
-        type: 'FROM_WORK_SESSIONS'
+        size: '100' // Get up to 100 invoices
       }
     }).subscribe({
-      next: (invoices) => {
-        this.invoices = invoices.sort((a, b) =>
-          new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime()
-        );
+      next: (response) => {
+        // Backend returns paginated response, extract content array
+        const allInvoices = response.content || [];
+
+        // Filter to only show invoices created from work sessions
+        this.invoices = allInvoices
+          .filter((inv: Invoice) => inv.invoiceType === 'FROM_WORK_SESSIONS')
+          .sort((a: Invoice, b: Invoice) =>
+            new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime()
+          );
         this.loadingInvoices = false;
       },
       error: (err) => {
