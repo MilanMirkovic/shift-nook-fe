@@ -401,8 +401,25 @@ export class MyBillingComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to sync invoice to QuickBooks', err);
-        const message = err.error?.message || err.error?.syncErrorMessage || 'Failed to sync to QuickBooks';
-        this.snackBar.open(message, 'Close', { duration: 7000 });
+
+        // Extract error message from various possible locations
+        let message = 'Failed to sync to QuickBooks';
+
+        if (err.error?.message) {
+          // Spring Boot error response
+          message = err.error.message;
+
+          // Clean up "Failed to sync invoice to QuickBooks: " prefix if present
+          if (message.startsWith('Failed to sync invoice to QuickBooks: ')) {
+            message = message.substring('Failed to sync invoice to QuickBooks: '.length);
+          }
+        } else if (err.error?.syncErrorMessage) {
+          message = err.error.syncErrorMessage;
+        } else if (err.message) {
+          message = err.message;
+        }
+
+        this.snackBar.open(message, 'Close', { duration: 10000 });
         this.syncingInvoices.delete(invoice.id);
       }
     });
