@@ -1,115 +1,217 @@
 <div class="billing-container">
   <div class="header">
-    <div class="header-content">
-      <div>
-        <h1>My Billing</h1>
-        <p class="subtitle">Create invoices from your work sessions</p>
+    <h1>My Billing</h1>
+    <p class="subtitle">Manage your billing and invoices</p>
+  </div>
+
+  <!-- Tabs -->
+  <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="billing-tabs">
+    <!-- Billing Tab -->
+    <mat-tab label="Billing">
+      <div class="tab-content">
+        <!-- Filters -->
+        <div class="filters-card">
+          <div class="filter-row">
+            <!-- Company Selector -->
+            <mat-form-field appearance="outline" class="company-select">
+              <mat-label>Select Company to Bill</mat-label>
+              <mat-select [(ngModel)]="selectedCompanyId" (selectionChange)="onCompanyChange()">
+                <mat-option *ngFor="let company of availableCompanies" [value]="company.companyId">
+                  {{ company.companyName }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <!-- Date Range -->
+            <mat-form-field appearance="outline" class="date-field">
+              <mat-label>From Date</mat-label>
+              <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" (dateChange)="onDateChange()">
+              <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fromPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="date-field">
+              <mat-label>To Date</mat-label>
+              <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" (dateChange)="onDateChange()">
+              <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+              <mat-datepicker #toPicker></mat-datepicker>
+            </mat-form-field>
+
+            <!-- Hourly Rate -->
+            <div class="rate-card">
+              <div class="rate-label">Hourly Rate</div>
+              <div class="rate-input-wrapper">
+                <span class="currency">$</span>
+                <input type="number" [(ngModel)]="hourlyRate" step="5" min="0" class="rate-input" placeholder="75">
+                <span class="rate-suffix">/hr</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading state -->
+        <div *ngIf="loading" class="loading">
+          <mat-icon>hourglass_empty</mat-icon>
+          <p>Loading work sessions...</p>
+        </div>
+
+        <!-- Empty state - no company selected -->
+        <div *ngIf="!loading && !selectedCompanyId" class="empty-state">
+          <mat-icon>business</mat-icon>
+          <h2>Select a Company</h2>
+          <p>Choose a company from the dropdown above to view work sessions and create invoices</p>
+        </div>
+
+        <!-- Empty state - no sessions -->
+        <div *ngIf="!loading && selectedCompanyId && workSessions.length === 0" class="empty-state">
+          <mat-icon>schedule</mat-icon>
+          <h2>No work sessions found</h2>
+          <p>No work sessions found for the selected company and date range</p>
+        </div>
+
+        <!-- Work sessions for selected company -->
+        <div *ngIf="!loading && selectedCompanyId && workSessions.length > 0" class="sessions-section">
+          <!-- Stats Summary -->
+          <div class="stats-summary">
+            <div class="stat-card">
+              <div class="stat-label">Total Hours</div>
+              <div class="stat-value">{{ getTotalHours().toFixed(1) }}h</div>
+            </div>
+            <div class="stat-card highlight">
+              <div class="stat-label">Unbilled Hours</div>
+              <div class="stat-value">{{ getUnbilledHours().toFixed(1) }}h</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Potential Revenue</div>
+              <div class="stat-value">${{ (getUnbilledHours() * hourlyRate).toFixed(0) }}</div>
+            </div>
+          </div>
+
+          <!-- Sessions List -->
+          <mat-card class="sessions-card">
+            <mat-card-header>
+              <mat-card-title>Work Sessions</mat-card-title>
+              <mat-card-subtitle>{{ workSessions.length }} sessions found</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="sessions-list">
+                <div *ngFor="let session of workSessions"
+                     class="session-item"
+                     [class.session-invoiced]="session.invoiceId"
+                     [class.session-selected]="isSelected(session.id)">
+                  <div class="session-checkbox">
+                    <mat-checkbox
+                      [checked]="isSelected(session.id)"
+                      (change)="toggleSession(session.id)"
+                      [disabled]="session.invoiceId">
+                    </mat-checkbox>
+                  </div>
+                  <div class="session-content">
+                    <div class="session-main">
+                      <div class="session-date">{{ formatDate(session.startTime) }}</div>
+                      <div class="session-duration">{{ formatDuration(session.durationMinutes) }}</div>
+                    </div>
+                    <div class="session-description" *ngIf="session.description">
+                      {{ session.description }}
+                    </div>
+                  </div>
+                  <div class="session-status">
+                    <span *ngIf="session.invoiceId" class="status-badge invoiced">
+                      <mat-icon>check_circle</mat-icon>
+                      Invoiced
+                    </span>
+                    <span *ngIf="!session.invoiceId" class="status-badge unbilled">
+                      Unbilled
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+
+            <mat-card-actions *ngIf="getSelectedSessions().length > 0" class="invoice-actions">
+              <div class="invoice-summary">
+                <div class="summary-details">
+                  <div class="summary-line">
+                    <span class="summary-label">Selected sessions:</span>
+                    <span class="summary-value">{{ getSelectedSessions().length }}</span>
+                  </div>
+                  <div class="summary-line">
+                    <span class="summary-label">Hours:</span>
+                    <span class="summary-value">{{ calculateSelectedHours().toFixed(2) }}</span>
+                  </div>
+                  <div class="summary-line total">
+                    <span class="summary-label">Total:</span>
+                    <span class="summary-value">${{ calculateSelectedAmount().toFixed(2) }}</span>
+                  </div>
+                </div>
+                <button mat-raised-button color="primary" (click)="createInvoice()" [disabled]="loading" class="create-invoice-btn">
+                  <mat-icon>receipt</mat-icon>
+                  Create Invoice
+                </button>
+              </div>
+            </mat-card-actions>
+          </mat-card>
+        </div>
       </div>
-      <div class="rate-input">
-        <mat-form-field appearance="outline" class="hourly-rate-field">
-          <mat-label>Hourly Rate</mat-label>
-          <input matInput type="number" [(ngModel)]="hourlyRate" step="5" min="0">
-          <span matPrefix>$</span>
-          <span matSuffix>/hr</span>
-        </mat-form-field>
+    </mat-tab>
+
+    <!-- Invoices Tab -->
+    <mat-tab label="Invoices">
+      <div class="tab-content">
+        <!-- Loading state -->
+        <div *ngIf="loadingInvoices" class="loading">
+          <mat-icon>hourglass_empty</mat-icon>
+          <p>Loading invoices...</p>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="!loadingInvoices && invoices.length === 0" class="empty-state">
+          <mat-icon>receipt_long</mat-icon>
+          <h2>No invoices yet</h2>
+          <p>Invoices you create will appear here</p>
+        </div>
+
+        <!-- Invoices List -->
+        <div *ngIf="!loadingInvoices && invoices.length > 0" class="invoices-list">
+          <mat-card *ngFor="let invoice of invoices" class="invoice-card">
+            <mat-card-header>
+              <div class="invoice-header">
+                <div class="invoice-info">
+                  <h3>Invoice #{{ invoice.invoiceNumber }}</h3>
+                  <p class="client-name">{{ invoice.clientName }}</p>
+                </div>
+                <div class="invoice-amount">
+                  <div class="amount-label">Total</div>
+                  <div class="amount-value">${{ invoice.total.toFixed(2) }}</div>
+                </div>
+              </div>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="invoice-details">
+                <div class="detail-item">
+                  <mat-icon>calendar_today</mat-icon>
+                  <span>{{ invoice.issuedAt | date:'mediumDate' }}</span>
+                </div>
+                <div class="detail-item">
+                  <mat-icon>schedule</mat-icon>
+                  <span>Due: {{ invoice.dueAt | date:'mediumDate' }}</span>
+                </div>
+                <div class="detail-item">
+                  <mat-icon>description</mat-icon>
+                  <span>{{ invoice.title }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-button color="primary" (click)="viewInvoice(invoice.id)">
+                <mat-icon>visibility</mat-icon>
+                View Details
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
       </div>
-    </div>
-  </div>
-
-  <div *ngIf="loading" class="loading">
-    <mat-icon>hourglass_empty</mat-icon>
-    <p>Loading work sessions...</p>
-  </div>
-
-  <div *ngIf="!loading && workStats.length === 0" class="empty-state">
-    <mat-icon>schedule</mat-icon>
-    <h2>No work sessions found</h2>
-    <p>Start tracking your time to create invoices</p>
-  </div>
-
-  <div *ngFor="let stats of workStats" class="company-section">
-    <mat-card class="company-card">
-      <mat-card-header>
-        <div class="company-header">
-          <div class="company-info">
-            <h2 class="company-name">{{ stats.companyName }}</h2>
-            <div class="company-stats">
-              <div class="stat-item">
-                <span class="stat-label">Total Hours</span>
-                <span class="stat-value">{{ stats.totalHours.toFixed(1) }}h</span>
-              </div>
-              <div class="stat-divider"></div>
-              <div class="stat-item highlight">
-                <span class="stat-label">Unbilled</span>
-                <span class="stat-value">{{ stats.unbilledHours.toFixed(1) }}h</span>
-              </div>
-              <div class="stat-divider"></div>
-              <div class="stat-item">
-                <span class="stat-label">Potential</span>
-                <span class="stat-value">${{ (stats.unbilledHours * hourlyRate).toFixed(0) }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </mat-card-header>
-
-      <mat-card-content>
-        <div class="sessions-list">
-          <div *ngFor="let session of stats.sessions"
-               class="session-item"
-               [class.session-invoiced]="session.invoiceId"
-               [class.session-selected]="isSelected(session.id)">
-            <div class="session-checkbox">
-              <mat-checkbox
-                [checked]="isSelected(session.id)"
-                (change)="toggleSession(session.id)"
-                [disabled]="session.invoiceId">
-              </mat-checkbox>
-            </div>
-            <div class="session-content">
-              <div class="session-main">
-                <div class="session-date">{{ formatDate(session.startTime) }}</div>
-                <div class="session-duration">{{ formatDuration(session.durationMinutes) }}</div>
-              </div>
-              <div class="session-description" *ngIf="session.description">
-                {{ session.description }}
-              </div>
-            </div>
-            <div class="session-status">
-              <span *ngIf="session.invoiceId" class="status-badge invoiced">
-                <mat-icon>check_circle</mat-icon>
-                Invoiced
-              </span>
-              <span *ngIf="!session.invoiceId" class="status-badge unbilled">
-                Unbilled
-              </span>
-            </div>
-          </div>
-        </div>
-      </mat-card-content>
-
-      <mat-card-actions *ngIf="getSelectedSessionsForCompany(stats.companyId).length > 0" class="invoice-actions">
-        <div class="invoice-summary">
-          <div class="summary-details">
-            <div class="summary-line">
-              <span class="summary-label">Selected sessions:</span>
-              <span class="summary-value">{{ getSelectedSessionsForCompany(stats.companyId).length }}</span>
-            </div>
-            <div class="summary-line">
-              <span class="summary-label">Hours:</span>
-              <span class="summary-value">{{ calculateSelectedHours(stats.companyId).toFixed(2) }}</span>
-            </div>
-            <div class="summary-line total">
-              <span class="summary-label">Total:</span>
-              <span class="summary-value">${{ calculateSelectedAmount(stats.companyId).toFixed(2) }}</span>
-            </div>
-          </div>
-          <button mat-raised-button color="primary" (click)="createInvoice(stats)" [disabled]="loading" class="create-invoice-btn">
-            <mat-icon>receipt</mat-icon>
-            Create Invoice
-          </button>
-        </div>
-      </mat-card-actions>
-    </mat-card>
-  </div>
+    </mat-tab>
+  </mat-tab-group>
 </div>

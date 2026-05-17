@@ -3,18 +3,22 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { Router } from '@angular/router';
 
-import { selectSelectedCompanyId } from '../../store/user/user.selectors';
+import { selectSelectedCompanyId, selectUserCompanies } from '../../store/user/user.selectors';
 import { environment } from '../../../environments/environment';
 
 interface WorkSession {
@@ -29,12 +33,21 @@ interface WorkSession {
   invoicedAt?: string;
 }
 
-interface CompanyWorkStats {
+interface CompanyOption {
   companyId: string;
   companyName: string;
-  totalHours: number;
-  unbilledHours: number;
-  sessions: WorkSession[];
+}
+
+interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  clientId: string;
+  clientName: string;
+  title: string;
+  total: number;
+  issuedAt: string;
+  dueAt: string;
+  status: string;
 }
 
 @Component({
@@ -46,9 +59,13 @@ interface CompanyWorkStats {
     MatIconModule,
     MatCardModule,
     MatCheckboxModule,
+    MatSnackBarModule,
+    MatTabsModule,
+    MatSelectModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSnackBarModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     FormsModule
   ],
   templateUrl: './my-billing.component.html',
@@ -60,33 +77,103 @@ export class MyBillingComponent implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
 
-  readonly selectedCompanyId$ = this.store.select(selectSelectedCompanyId);
+  readonly myCompanyId$ = this.store.select(selectSelectedCompanyId);
 
-  workStats: CompanyWorkStats[] = [];
+  selectedTabIndex = 0;
+  availableCompanies: CompanyOption[] = [];
+  selectedCompanyId: string | null = null;
+  fromDate: Date;
+  toDate: Date;
+
+  workSessions: WorkSession[] = [];
   selectedSessions: Set<string> = new Set();
   hourlyRate: number = 75.00;
   loading = false;
 
+  invoices: Invoice[] = [];
+  loadingInvoices = false;
+
+  myCompanyId: string | null = null;
+
+  constructor() {
+    // Default to last 3 months
+    const now = new Date();
+    this.toDate = now;
+    this.fromDate = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+  }
+
   ngOnInit(): void {
+    // Get my company ID (accountant's company)
+    this.myCompanyId$.pipe(take(1)).subscribe(id => {
+      this.myCompanyId = id;
+    });
+
+    // Load companies I've worked for
+    this.loadAvailableCompanies();
+
+    // Load invoices
+    this.loadInvoices();
+  }
+
+  loadAvailableCompanies(): void {
+    // Fetch work sessions to get unique companies
+    const threeYearsAgo = new Date();
+    threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+
+    this.http.get<WorkSession[]>(`${environment.apiBaseUrl}/company-work-sessions/for-billing`, {
+      params: {
+        from: threeYearsAgo.toISOString(),
+        to: new Date().toISOString()
+      }
+    }).subscribe({
+      next: (sessions) => {
+        // Get unique companies
+        const companiesMap = new Map<string, string>();
+        sessions.forEach(session => {
+          companiesMap.set(session.companyId, session.companyName);
+        });
+
+        this.availableCompanies = Array.from(companiesMap.entries())
+          .map(([companyId, companyName]) => ({ companyId, companyName }))
+          .sort((a, b) => a.companyName.localeCompare(b.companyName));
+      },
+      error: (err) => {
+        console.error('Failed to load companies', err);
+        this.snackBar.open('Failed to load companies', 'Close', { duration: 5000 });
+      }
+    });
+  }
+
+  onCompanyChange(): void {
+    this.selectedSessions.clear();
     this.loadWorkSessions();
   }
 
+  onDateChange(): void {
+    if (this.selectedCompanyId) {
+      this.loadWorkSessions();
+    }
+  }
+
   loadWorkSessions(): void {
+    if (!this.selectedCompanyId) {
+      this.workSessions = [];
+      return;
+    }
+
     this.loading = true;
 
-    // Load work sessions for the past 3 months
-    const now = new Date();
-    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
-
-    const fromDate = threeMonthsAgo.toISOString();
-    const toDate = now.toISOString();
-
     this.http.get<WorkSession[]>(`${environment.apiBaseUrl}/company-work-sessions/for-billing`, {
-      params: { from: fromDate, to: toDate }
+      params: {
+        from: this.fromDate.toISOString(),
+        to: this.toDate.toISOString()
+      }
     }).subscribe({
       next: (sessions) => {
-        // Group sessions by company
-        this.workStats = this.groupSessionsByCompany(sessions);
+        // Filter to selected company only
+        this.workSessions = sessions
+          .filter(s => s.companyId === this.selectedCompanyId)
+          .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
         this.loading = false;
       },
       error: (err) => {
@@ -97,32 +184,29 @@ export class MyBillingComponent implements OnInit {
     });
   }
 
-  private groupSessionsByCompany(sessions: WorkSession[]): CompanyWorkStats[] {
-    const grouped = new Map<string, WorkSession[]>();
+  loadInvoices(): void {
+    if (!this.myCompanyId) return;
 
-    sessions.forEach(session => {
-      if (!grouped.has(session.companyId)) {
-        grouped.set(session.companyId, []);
+    this.loadingInvoices = true;
+
+    // Load invoices from work sessions for this accountant
+    this.http.get<Invoice[]>(`${environment.apiBaseUrl}/companies/${this.myCompanyId}/invoices`, {
+      params: {
+        type: 'FROM_WORK_SESSIONS'
       }
-      grouped.get(session.companyId)!.push(session);
+    }).subscribe({
+      next: (invoices) => {
+        this.invoices = invoices.sort((a, b) =>
+          new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime()
+        );
+        this.loadingInvoices = false;
+      },
+      error: (err) => {
+        console.error('Failed to load invoices', err);
+        // Don't show error snackbar, just log it
+        this.loadingInvoices = false;
+      }
     });
-
-    return Array.from(grouped.entries()).map(([companyId, sessions]) => {
-      const totalMinutes = sessions.reduce((sum, s) => sum + s.durationMinutes, 0);
-      const unbilledMinutes = sessions
-        .filter(s => !s.invoiceId)
-        .reduce((sum, s) => sum + s.durationMinutes, 0);
-
-      return {
-        companyId,
-        companyName: sessions[0]?.companyName || 'Unknown',
-        totalHours: totalMinutes / 60,
-        unbilledHours: unbilledMinutes / 60,
-        sessions: sessions.sort((a, b) =>
-          new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
-        )
-      };
-    }).sort((a, b) => b.unbilledHours - a.unbilledHours);
   }
 
   toggleSession(sessionId: string): void {
@@ -137,15 +221,37 @@ export class MyBillingComponent implements OnInit {
     return this.selectedSessions.has(sessionId);
   }
 
-  getSelectedSessionsForCompany(companyId: string): string[] {
-    const companySessions = this.workStats.find(s => s.companyId === companyId)?.sessions || [];
-    return companySessions
-      .filter(s => this.selectedSessions.has(s.id))
+  getSelectedSessions(): string[] {
+    return this.workSessions
+      .filter(s => this.selectedSessions.has(s.id) && !s.invoiceId)
       .map(s => s.id);
   }
 
-  createInvoice(stats: CompanyWorkStats): void {
-    const selectedIds = this.getSelectedSessionsForCompany(stats.companyId);
+  getTotalHours(): number {
+    const totalMinutes = this.workSessions.reduce((sum, s) => sum + s.durationMinutes, 0);
+    return totalMinutes / 60;
+  }
+
+  getUnbilledHours(): number {
+    const unbilledMinutes = this.workSessions
+      .filter(s => !s.invoiceId)
+      .reduce((sum, s) => sum + s.durationMinutes, 0);
+    return unbilledMinutes / 60;
+  }
+
+  calculateSelectedHours(): number {
+    const selectedMinutes = this.workSessions
+      .filter(s => this.selectedSessions.has(s.id))
+      .reduce((sum, s) => sum + s.durationMinutes, 0);
+    return selectedMinutes / 60;
+  }
+
+  calculateSelectedAmount(): number {
+    return this.calculateSelectedHours() * this.hourlyRate;
+  }
+
+  createInvoice(): void {
+    const selectedIds = this.getSelectedSessions();
 
     if (selectedIds.length === 0) {
       this.snackBar.open('Please select at least one work session', 'Close', { duration: 3000 });
@@ -157,54 +263,61 @@ export class MyBillingComponent implements OnInit {
       return;
     }
 
+    if (!this.myCompanyId) {
+      this.snackBar.open('Company ID not found', 'Close', { duration: 3000 });
+      return;
+    }
+
+    if (!this.selectedCompanyId) {
+      this.snackBar.open('Please select a company', 'Close', { duration: 3000 });
+      return;
+    }
+
     this.loading = true;
 
-    // Get the current user's company ID (the accountant's company)
-    this.selectedCompanyId$.subscribe(myCompanyId => {
-      if (!myCompanyId) {
-        this.snackBar.open('Please select a company', 'Close', { duration: 3000 });
+    const request = {
+      clientId: this.selectedCompanyId, // The company we worked for (client)
+      workSessionIds: selectedIds,
+      hourlyRate: this.hourlyRate,
+      title: `Accounting Services - ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`,
+      notes: 'Thank you for your business'
+    };
+
+    // Use MY company ID (accountant's company) in the URL
+    this.http.post<any>(
+      `${environment.apiBaseUrl}/companies/${this.myCompanyId}/invoices/from-work-sessions`,
+      request
+    ).subscribe({
+      next: (invoice) => {
+        this.snackBar.open(`Invoice #${invoice.invoiceNumber} created successfully!`, 'View', {
+          duration: 7000
+        }).onAction().subscribe(() => {
+          // Navigate to invoice details
+          this.router.navigate(['/invoices', invoice.id]);
+        });
+
+        // Clear selections
+        selectedIds.forEach(id => this.selectedSessions.delete(id));
+
+        // Reload work sessions and invoices
+        this.loadWorkSessions();
+        this.loadInvoices();
+
+        // Switch to invoices tab
+        this.selectedTabIndex = 1;
+
         this.loading = false;
-        return;
+      },
+      error: (err) => {
+        console.error('Failed to create invoice', err);
+        this.snackBar.open(
+          err.error?.message || 'Failed to create invoice',
+          'Close',
+          { duration: 7000 }
+        );
+        this.loading = false;
       }
-
-      const request = {
-        clientId: stats.companyId, // The company we worked for
-        workSessionIds: selectedIds,
-        hourlyRate: this.hourlyRate,
-        title: `Accounting Services - ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`,
-        notes: 'Thank you for your business'
-      };
-
-      this.http.post<any>(
-        `${environment.apiBaseUrl}/companies/${myCompanyId}/invoices/from-work-sessions`,
-        request
-      ).subscribe({
-        next: (invoice) => {
-          this.snackBar.open(`Invoice #${invoice.invoiceNumber} created successfully!`, 'View', {
-            duration: 7000
-          }).onAction().subscribe(() => {
-            // Navigate to invoice details or sync to QuickBooks
-            this.router.navigate(['/invoices', invoice.id]);
-          });
-
-          // Clear selections for this company
-          selectedIds.forEach(id => this.selectedSessions.delete(id));
-
-          // Reload work sessions
-          this.loadWorkSessions();
-          this.loading = false;
-        },
-        error: (err) => {
-          console.error('Failed to create invoice', err);
-          this.snackBar.open(
-            err.error?.message || 'Failed to create invoice',
-            'Close',
-            { duration: 7000 }
-          );
-          this.loading = false;
-        }
-      });
-    }).unsubscribe();
+    });
   }
 
   formatDuration(minutes: number): string {
@@ -222,15 +335,7 @@ export class MyBillingComponent implements OnInit {
     });
   }
 
-  calculateSelectedHours(companyId: string): number {
-    const sessions = this.workStats.find(s => s.companyId === companyId)?.sessions || [];
-    const selectedMinutes = sessions
-      .filter(s => this.selectedSessions.has(s.id))
-      .reduce((sum, s) => sum + s.durationMinutes, 0);
-    return selectedMinutes / 60;
-  }
-
-  calculateSelectedAmount(companyId: string): number {
-    return this.calculateSelectedHours(companyId) * this.hourlyRate;
+  viewInvoice(invoiceId: string): void {
+    this.router.navigate(['/invoices', invoiceId]);
   }
 }
