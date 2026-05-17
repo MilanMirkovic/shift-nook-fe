@@ -352,6 +352,16 @@ export const routes: Routes = [
       },
     ],
   },
+  // ── My Billing: create invoices from work sessions ───────────────────────
+  {
+    path: 'my-billing',
+    canActivate: [authGuard, roleGuard(CompanyRole.ACCOUNTANT, CompanyRole.ACCOUNTING_MANAGER)],
+    data: { preload: true },
+    loadComponent: () =>
+      import('./components/my-billing/my-billing.component').then(
+        (m) => m.MyBillingComponent
+      ),
+  },
   // ── Platform Admin: user management ───────────────────────────────────────
   {
     path: 'admin/dashboard',

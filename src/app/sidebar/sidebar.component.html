@@ -85,6 +85,12 @@
           <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Work Time</span>
         </a>
       }
+      @if (canSeeMyBilling) {
+        <a mat-list-item routerLink="/my-billing" routerLinkActive="active" (click)="onLinkClicked()">
+          <mat-icon matListItemIcon>receipt_long</mat-icon>
+          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">My Billing</span>
+        </a>
+      }
       @if (canSeeSubcontractors) {
         <a mat-list-item routerLink="/subcontractors" routerLinkActive="active" (click)="onLinkClicked()">
           <mat-icon matListItemIcon>handshake</mat-icon>
