@@ -193,11 +193,11 @@
               <div class="invoice-header">
                 <div class="invoice-info">
                   <h3>Invoice #{{ invoice.invoiceNumber }}</h3>
-                  <p class="client-name">{{ invoice.clientName }}</p>
+                  <p class="client-name">{{ invoice.title }}</p>
                 </div>
                 <div class="invoice-amount">
                   <div class="amount-label">Total</div>
-                  <div class="amount-value">${{ invoice.total.toFixed(2) }}</div>
+                  <div class="amount-value">${{ invoice.totalAmount?.toFixed(2) || '0.00' }}</div>
                 </div>
               </div>
             </mat-card-header>

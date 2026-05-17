@@ -42,9 +42,9 @@ interface Invoice {
   id: string;
   invoiceNumber: string;
   clientId: string;
-  clientName: string;
+  clientName?: string;
   title: string;
-  total: number;
+  totalAmount: number;
   issuedAt: string;
   dueAt: string;
   status: string;
