@@ -19,8 +19,9 @@ import {
   QuickBooksCustomer,
   QuickBooksCustomerMapping
 } from '../../store/quickbooks-customer-mappings/qb-customer-mappings.models';
-import { selectSelectedCompanyId, selectCurrentCompany } from '../../store/user/user.selectors';
+import { selectSelectedCompanyId, selectCurrentCompany, selectUserCompanies } from '../../store/user/user.selectors';
 import { CompanyRole } from '../../shared/models/company-role';
+import { UserCompany } from '../../store/user/user.models';
 
 import { CreateMappingDialogComponent } from './create-mapping-dialog.component';
 
@@ -47,7 +48,7 @@ import { CreateMappingDialogComponent } from './create-mapping-dialog.component'
         <mat-card-header>
           <mat-card-title>QuickBooks Customer Mappings</mat-card-title>
           <mat-card-subtitle>
-            Map your ShiftNook clients to QuickBooks customers to sync invoices
+            Map ShiftNook companies to QuickBooks customers to sync invoices
           </mat-card-subtitle>
         </mat-card-header>
 
@@ -79,11 +80,11 @@ import { CreateMappingDialogComponent } from './create-mapping-dialog.component'
             </div>
 
             <table mat-table [dataSource]="(mappings$ | async) || []" class="mappings-table">
-              <!-- ShiftNook Client Column -->
+              <!-- ShiftNook Company Column -->
               <ng-container matColumnDef="clientId">
-                <th mat-header-cell *matHeaderCellDef>ShiftNook Client</th>
+                <th mat-header-cell *matHeaderCellDef>ShiftNook Company</th>
                 <td mat-cell *matCellDef="let mapping">
-                  {{ mapping.clientId }}
+                  {{ getCompanyName(mapping.clientId) || mapping.clientId }}
                 </td>
               </ng-container>
 
@@ -256,6 +257,8 @@ export class QBCustomerMappingsPage implements OnInit {
   error$: Observable<string | null>;
   canManageMappings = false;
 
+  private userCompanies: UserCompany[] = [];
+
   constructor() {
     this.companyId$ = this.store.select(selectSelectedCompanyId);
     this.mappings$ = this.store.select(QBCustomerMappingsSelectors.selectMappings);
@@ -263,6 +266,11 @@ export class QBCustomerMappingsPage implements OnInit {
     this.quickbooksCustomers$ = this.store.select(QBCustomerMappingsSelectors.selectQuickBooksCustomers);
     this.deletingMapping$ = this.store.select(QBCustomerMappingsSelectors.selectDeletingMapping);
     this.error$ = this.store.select(QBCustomerMappingsSelectors.selectError);
+
+    // Load user companies for display
+    this.store.select(selectUserCompanies).subscribe(companies => {
+      this.userCompanies = companies;
+    });
   }
 
   ngOnInit(): void {
@@ -319,5 +327,10 @@ export class QBCustomerMappingsPage implements OnInit {
         this.store.dispatch(QBCustomerMappingsActions.loadQuickBooksCustomers({ companyId }));
       }
     }).unsubscribe();
+  }
+
+  getCompanyName(companyId: string): string | null {
+    const company = this.userCompanies.find(c => c.companyId === companyId);
+    return company?.companyName || null;
   }
 }

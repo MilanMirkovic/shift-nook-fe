@@ -1,13 +1,14 @@
 export interface QuickBooksCustomer {
-  id: string;
-  displayName: string;
-  companyName?: string;
-  givenName?: string;
-  familyName?: string;
-  primaryEmailAddr?: {
-    address: string;
+  Id: string;
+  DisplayName: string;
+  CompanyName?: string;
+  GivenName?: string;
+  FamilyName?: string;
+  PrimaryEmailAddr?: {
+    Address: string;
   };
-  active: boolean;
+  Active: boolean;
+  readableName?: string; // Computed field from backend
 }
 
 export interface QuickBooksCustomerMapping {
