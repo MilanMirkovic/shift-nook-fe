@@ -97,8 +97,10 @@ export class SettingsQuickBooksComponent implements OnInit, OnDestroy {
       .select(selectCurrentCompany)
       .pipe(takeUntil(this.destroy$))
       .subscribe((company) => {
-        // Only OWNER and ACCOUNTING_MANAGER can connect/disconnect QuickBooks
-        this.canManageConnection = company?.role === CompanyRole.OWNER || company?.role === CompanyRole.ACCOUNTING_MANAGER;
+        // Only OWNER, ACCOUNTING_MANAGER, and ACCOUNTANT can connect/disconnect QuickBooks
+        this.canManageConnection = company?.role === CompanyRole.OWNER ||
+                                    company?.role === CompanyRole.ACCOUNTING_MANAGER ||
+                                    company?.role === CompanyRole.ACCOUNTANT;
       });
   }
 

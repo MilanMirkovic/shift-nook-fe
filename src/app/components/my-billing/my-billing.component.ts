@@ -402,8 +402,19 @@ export class MyBillingComponent implements OnInit {
           message = err.message;
         }
 
+        // Check if this is a customer mapping error
+        if (message.includes('needs to be mapped to a QuickBooks customer') ||
+            message.includes('Customer Mappings')) {
+          action = 'Go to Mappings';
+          duration = 15000;
+
+          const snackBarRef = this.snackBar.open(message, action, { duration });
+          snackBarRef.onAction().subscribe(() => {
+            this.router.navigate(['/settings/quickbooks-customer-mappings']);
+          });
+        }
         // Check if this is an authentication/authorization error
-        if (err.status === 401 || message.includes('401') ||
+        else if (err.status === 401 || message.includes('401') ||
             message.includes('Unauthorized') ||
             message.includes('refresh access token') ||
             message.includes('refresh token')) {

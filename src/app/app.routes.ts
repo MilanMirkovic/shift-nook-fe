@@ -23,6 +23,7 @@ import { adminDashboardReducer } from './store/admin-dashboard/admin-dashboard.r
 import { adminUsersReducer } from './store/admin-users/admin-users.reducer';
 import { adminCompaniesReducer } from './store/admin-companies/admin-companies.reducer';
 import { accountantTeamReducer } from './store/accountant-team/accountant-team.reducer';
+import { qbCustomerMappingsReducer } from './store/quickbooks-customer-mappings/qb-customer-mappings.reducer';
 
 // Import feature keys from selectors
 import { TIMESHEETS_FEATURE_KEY } from './store/timesheets/timesheets.selectors';
@@ -56,9 +57,11 @@ import { AdminDashboardEffects } from './store/admin-dashboard/admin-dashboard.e
 import { AdminUsersEffects } from './store/admin-users/admin-users.effects';
 import { AdminCompaniesEffects } from './store/admin-companies/admin-companies.effects';
 import { AccountantTeamEffects } from './store/accountant-team/accountant-team.effects';
+import { QBCustomerMappingsEffects } from './store/quickbooks-customer-mappings/qb-customer-mappings.effects';
 
 // Define COMPANY_WORK_SESSIONS_FEATURE_KEY if not exported from elsewhere
 export const COMPANY_WORK_SESSIONS_FEATURE_KEY = 'companyWorkSessions';
+export const QB_CUSTOMER_MAPPINGS_FEATURE_KEY = 'qbCustomerMappings';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -183,6 +186,8 @@ export const routes: Routes = [
         providers: [
           provideState(CLIENTS_FEATURE_KEY, clientsReducer),
           provideEffects(ClientsEffects),
+          provideState(QB_CUSTOMER_MAPPINGS_FEATURE_KEY, qbCustomerMappingsReducer),
+          provideEffects(QBCustomerMappingsEffects),
         ],
         loadComponent: () =>
           import('./pages/quickbooks-customer-mappings/qb-customer-mappings.page').then(
