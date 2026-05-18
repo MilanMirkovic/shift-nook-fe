@@ -385,6 +385,8 @@ export class MyBillingComponent implements OnInit {
 
         // Extract error message from various possible locations
         let message = 'Failed to sync to QuickBooks';
+        let action = 'Close';
+        let duration = 10000;
 
         if (err.error?.message) {
           // Spring Boot error response
@@ -400,7 +402,23 @@ export class MyBillingComponent implements OnInit {
           message = err.message;
         }
 
-        this.snackBar.open(message, 'Close', { duration: 10000 });
+        // Check if this is an authentication/authorization error
+        if (err.status === 401 || message.includes('401') ||
+            message.includes('Unauthorized') ||
+            message.includes('refresh access token') ||
+            message.includes('refresh token')) {
+          message = 'QuickBooks connection has expired. Please reconnect QuickBooks in Settings.';
+          action = 'Go to Settings';
+          duration = 15000;
+
+          const snackBarRef = this.snackBar.open(message, action, { duration });
+          snackBarRef.onAction().subscribe(() => {
+            this.router.navigate(['/settings/quickbooks']);
+          });
+        } else {
+          this.snackBar.open(message, action, { duration });
+        }
+
         this.syncingInvoices.delete(invoice.id);
       }
     });
