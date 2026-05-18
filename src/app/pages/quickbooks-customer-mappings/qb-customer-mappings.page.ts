@@ -21,7 +21,7 @@ import {
 } from '../../store/quickbooks-customer-mappings/qb-customer-mappings.models';
 import { selectSelectedCompanyId, selectCurrentCompany, selectUserCompanies } from '../../store/user/user.selectors';
 import { CompanyRole } from '../../shared/models/company-role';
-import { UserCompany } from '../../store/user/user.models';
+import { CompanyMembership } from '../../store/user/user.models';
 
 import { CreateMappingDialogComponent } from './create-mapping-dialog.component';
 
@@ -257,7 +257,7 @@ export class QBCustomerMappingsPage implements OnInit {
   error$: Observable<string | null>;
   canManageMappings = false;
 
-  private userCompanies: UserCompany[] = [];
+  private userCompanies: CompanyMembership[] = [];
 
   constructor() {
     this.companyId$ = this.store.select(selectSelectedCompanyId);

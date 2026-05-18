@@ -14,7 +14,7 @@ import * as QBCustomerMappingsActions from '../../store/quickbooks-customer-mapp
 import * as QBCustomerMappingsSelectors from '../../store/quickbooks-customer-mappings/qb-customer-mappings.selectors';
 import { QuickBooksCustomer } from '../../store/quickbooks-customer-mappings/qb-customer-mappings.models';
 import { selectUserCompanies } from '../../store/user/user.selectors';
-import { UserCompany } from '../../store/user/user.models';
+import { CompanyMembership } from '../../store/user/user.models';
 
 @Component({
   selector: 'app-create-mapping-dialog',
@@ -128,7 +128,7 @@ export class CreateMappingDialogComponent {
 
   form: FormGroup;
   quickbooksCustomers$: Observable<QuickBooksCustomer[]>;
-  companies$: Observable<UserCompany[]>;
+  companies$: Observable<CompanyMembership[]>;
   companyId$: Observable<string | null>;
   creatingMapping$: Observable<boolean>;
   error$: Observable<string | null>;
