@@ -43,7 +43,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         const currentUrl = router.url;
         const publicRoutes = ['/accept-invite', '/subcontractor-invite', '/auth/set-password', '/auth/reset-password', '/login', '/signup', '/forgot-password'];
         const isPublicRoute = publicRoutes.some(r => currentUrl.startsWith(r));
-        if (!isPublicRoute) {
+
+        // Don't logout on QuickBooks API errors - those are integration issues, not auth issues
+        const isQuickBooksError = req.url.includes('/quickbooks/') ||
+                                   err.error?.message?.includes('QuickBooks') ||
+                                   err.error?.message?.includes('refresh token');
+
+        if (!isPublicRoute && !isQuickBooksError) {
           // Token expired or invalid — force logout and redirect to login
           authService.signOut().finally(() => {
             userStore.logout();
