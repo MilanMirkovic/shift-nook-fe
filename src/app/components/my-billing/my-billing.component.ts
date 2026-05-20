@@ -123,11 +123,19 @@ export class MyBillingComponent implements OnInit {
       }
     });
 
-    // Find accountant's own firm (where they are ACCOUNTING_MANAGER)
+    // Find accountant's own firm (prioritize OWNER, then ACCOUNTING_MANAGER)
+    // This is the company that creates invoices and syncs to QuickBooks
     this.userCompanies$.pipe(take(1)).subscribe(companies => {
-      const accountingFirm = companies.find(c =>
-        c.role === CompanyRole.ACCOUNTING_MANAGER || c.role === CompanyRole.ACCOUNTANT
-      );
+      // First, look for a company where user is OWNER (their own firm)
+      let accountingFirm = companies.find(c => c.role === CompanyRole.OWNER);
+
+      // If no OWNER company, fall back to ACCOUNTING_MANAGER or ACCOUNTANT
+      // (for cases where accountant doesn't own their firm)
+      if (!accountingFirm) {
+        accountingFirm = companies.find(c =>
+          c.role === CompanyRole.ACCOUNTING_MANAGER || c.role === CompanyRole.ACCOUNTANT
+        );
+      }
 
       if (accountingFirm) {
         this.myAccountingFirmId = accountingFirm.companyId;
