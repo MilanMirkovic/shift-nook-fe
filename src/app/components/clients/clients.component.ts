@@ -16,6 +16,7 @@ import { Client } from '../../store/clients/clients.models';
 import { selectSelectedCompanyId, selectCurrentCompany } from '../../store/user/user.selectors';
 import { CompanyRole } from '../../shared/models/company-role';
 import { ClientDialogComponent } from '../../shared/components/client-dialog/client-dialog.component';
+import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { NotificationService } from '../../shared/services/notification.service';
 
 @Component({
@@ -142,7 +143,7 @@ export class ClientsComponent implements OnInit, OnDestroy {
   }
 
   private onDelete(client: Client): void {
-    if (!this.companyId) return;
+    if (!this.companyId || !client.id) return;
 
     // Show confirmation dialog
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
@@ -163,7 +164,7 @@ export class ClientsComponent implements OnInit, OnDestroy {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result === true && this.companyId) {
+      if (result === true && this.companyId && client.id) {
         // Dispatch delete action
         this._store.dispatch(
           deleteClient({
