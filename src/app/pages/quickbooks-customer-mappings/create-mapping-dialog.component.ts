@@ -13,8 +13,9 @@ import { Observable } from 'rxjs';
 import * as QBCustomerMappingsActions from '../../store/quickbooks-customer-mappings/qb-customer-mappings.actions';
 import * as QBCustomerMappingsSelectors from '../../store/quickbooks-customer-mappings/qb-customer-mappings.selectors';
 import { QuickBooksCustomer } from '../../store/quickbooks-customer-mappings/qb-customer-mappings.models';
-import { selectUserCompanies } from '../../store/user/user.selectors';
-import { CompanyMembership } from '../../store/user/user.models';
+import { selectClients } from '../../store/clients/clients.selectors';
+import { loadClients } from '../../store/clients/clients.actions';
+import { Client } from '../../store/clients/clients.models';
 
 @Component({
   selector: 'app-create-mapping-dialog',
@@ -35,15 +36,16 @@ import { CompanyMembership } from '../../store/user/user.models';
     <mat-dialog-content>
       <form [formGroup]="form">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>ShiftNook Company</mat-label>
+          <mat-label>Client</mat-label>
           <mat-select formControlName="clientId">
-            <mat-option *ngFor="let company of (companies$ | async)" [value]="company.companyId">
-              {{ company.companyName }}
+            <mat-option *ngFor="let client of (clients$ | async)" [value]="client.id">
+              {{ client.name }}
+              <span *ngIf="client.email" class="client-email"> ({{ client.email }})</span>
             </mat-option>
           </mat-select>
-          <mat-hint>Select the ShiftNook company you want to map to a QuickBooks customer</mat-hint>
+          <mat-hint>Select the client you want to map to a QuickBooks customer</mat-hint>
           <mat-error *ngIf="form.get('clientId')?.hasError('required')">
-            Company is required
+            Client is required
           </mat-error>
         </mat-form-field>
 
@@ -100,6 +102,12 @@ import { CompanyMembership } from '../../store/user/user.models';
       font-weight: 400;
     }
 
+    .client-email {
+      font-size: 0.875rem;
+      color: rgba(0, 0, 0, 0.54);
+      font-weight: 400;
+    }
+
     .loading-container {
       display: flex;
       flex-direction: column;
@@ -128,7 +136,7 @@ export class CreateMappingDialogComponent {
 
   form: FormGroup;
   quickbooksCustomers$: Observable<QuickBooksCustomer[]>;
-  companies$: Observable<CompanyMembership[]>;
+  clients$: Observable<Client[]>;
   companyId$: Observable<string | null>;
   creatingMapping$: Observable<boolean>;
   error$: Observable<string | null>;
@@ -144,9 +152,16 @@ export class CreateMappingDialogComponent {
   ) {
     this.quickbooksCustomers$ = data.quickbooksCustomers$;
     this.companyId$ = data.companyId$;
-    this.companies$ = this.store.select(selectUserCompanies);
+    this.clients$ = this.store.select(selectClients);
     this.creatingMapping$ = this.store.select(QBCustomerMappingsSelectors.selectCreatingMapping);
     this.error$ = this.store.select(QBCustomerMappingsSelectors.selectError);
+
+    // Load clients for the current company
+    this.companyId$.subscribe((companyId) => {
+      if (companyId) {
+        this.store.dispatch(loadClients({ companyId, page: 0, size: 1000 }));
+      }
+    }).unsubscribe();
 
     this.form = this.fb.group({
       clientId: ['', Validators.required],
