@@ -14,12 +14,26 @@
   <!-- Body: nav scrolls, footer pinned -->
   <div class="sidenav-content">
     <mat-nav-list class="nav-list">
-      <!-- Top-level Management Section -->
+      <!-- Top-level Accountant Section -->
       @if (canSeeMyAccountants) {
         <a mat-list-item routerLink="/my-accountants" routerLinkActive="active" (click)="onLinkClicked()">
           <mat-icon matListItemIcon>account_balance</mat-icon>
           <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">My Accountants</span>
         </a>
+      }
+      @if (canSeeMyBilling) {
+        <a mat-list-item routerLink="/my-billing" routerLinkActive="active" (click)="onLinkClicked()">
+          <mat-icon matListItemIcon>receipt_long</mat-icon>
+          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">My Billing</span>
+        </a>
+      }
+      @if (canSeeWorkTime) {
+        <a mat-list-item routerLink="/work-time" routerLinkActive="active" (click)="onLinkClicked()">
+          <mat-icon matListItemIcon>schedule</mat-icon>
+          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">My Time</span>
+        </a>
+      }
+      @if (canSeeMyAccountants || canSeeMyBilling || canSeeWorkTime) {
         <mat-divider></mat-divider>
       }
 
@@ -77,18 +91,6 @@
         <a mat-list-item routerLink="/financials" routerLinkActive="active" (click)="onLinkClicked()">
           <mat-icon matListItemIcon>account_balance_wallet</mat-icon>
           <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Financials</span>
-        </a>
-      }
-      @if (canSeeWorkTime) {
-        <a mat-list-item routerLink="/work-time" routerLinkActive="active" (click)="onLinkClicked()">
-          <mat-icon matListItemIcon>schedule</mat-icon>
-          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">Work Time</span>
-        </a>
-      }
-      @if (canSeeMyBilling) {
-        <a mat-list-item routerLink="/my-billing" routerLinkActive="active" (click)="onLinkClicked()">
-          <mat-icon matListItemIcon>receipt_long</mat-icon>
-          <span matListItemTitle [class.is-hidden]="!isHandset && isCollapsed">My Billing</span>
         </a>
       }
       @if (canSeeSubcontractors) {
