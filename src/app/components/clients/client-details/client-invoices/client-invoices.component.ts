@@ -3,6 +3,8 @@ import { Store } from '@ngrx/store';
 import { Observable, Subject, BehaviorSubject, combineLatest } from 'rxjs';
 import { take, takeUntil, map } from 'rxjs/operators';
 import { Actions, ofType } from '@ngrx/effects';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 import { AsyncPipe, CurrencyPipe, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,6 +15,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { environment } from '../../../../../environments/environment';
 
 import { Invoice, InvoiceStatus } from '../../../../store/invoices/invoices.models';
 import {
@@ -89,6 +93,9 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
   private readonly invoicesApi = inject(InvoicesApiService);
   private readonly actions$ = inject(Actions);
   private readonly navigationService = inject(ClientDetailsNavigationService);
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
   private readonly destroy$ = new Subject<void>();
 
   protected invoices$!: Observable<Invoice[]>;
@@ -99,6 +106,7 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
   private readonly searchQuery$ = new BehaviorSubject<string>('');
 
   protected pdfDownloading = new Set<string>();
+  protected syncingInvoices = new Set<string>();
   protected invoiceSummary$!: Observable<{
     totalValue: number;
     totalPaid: number;
@@ -550,5 +558,93 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
     // Invoice is received if it was issued BY the client (subcontractor) TO us (principal company)
     // Check recipientCompanyId which tracks the actual company being billed
     return invoice.companyId === this.clientId && invoice.recipientCompanyId === this.companyId;
+  }
+
+  protected syncToQuickBooks(invoice: Invoice): void {
+    if (this.syncingInvoices.has(invoice.id)) {
+      return;
+    }
+
+    this.syncingInvoices.add(invoice.id);
+
+    this.http.post<{ syncStatus: string; quickbooksDocNumber?: string; syncErrorMessage?: string; canRetry: boolean }>(
+      `${environment.apiBaseUrl}/companies/${this.companyId}/quickbooks/invoices/${invoice.id}/sync`,
+      {}
+    ).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (syncStatus) => {
+        this.notificationService.success(
+          `Invoice #${invoice.invoiceNumber} synced to QuickBooks successfully!`
+        );
+
+        // Reload invoices to get updated sync status
+        this.store.dispatch(loadInvoices({
+          companyId: this.companyId,
+          clientId: this.clientId,
+          page: 0,
+          size: 100,
+          includeReceived: true,
+        }));
+
+        this.syncingInvoices.delete(invoice.id);
+      },
+      error: (err) => {
+        console.error('Failed to sync invoice to QuickBooks', err);
+
+        // Extract error message from various possible locations
+        let message = 'Failed to sync to QuickBooks';
+        let action = 'Close';
+        let duration = 10000;
+
+        if (err.error?.message) {
+          // Spring Boot error response
+          message = err.error.message;
+
+          // Clean up "Failed to sync invoice to QuickBooks: " prefix if present
+          if (message.startsWith('Failed to sync invoice to QuickBooks: ')) {
+            message = message.substring('Failed to sync invoice to QuickBooks: '.length);
+          }
+        } else if (err.error?.syncErrorMessage) {
+          message = err.error.syncErrorMessage;
+        } else if (err.message) {
+          message = err.message;
+        }
+
+        // Check if this is a customer mapping error
+        if (message.includes('needs to be mapped to a QuickBooks customer') ||
+            message.includes('Customer Mappings')) {
+          action = 'Go to Mappings';
+          duration = 15000;
+
+          const snackBarRef = this.snackBar.open(message, action, { duration });
+          snackBarRef.onAction().subscribe(() => {
+            this.router.navigate(['/settings/quickbooks-customer-mappings']);
+          });
+        }
+        // Check if this is an authentication/authorization error
+        else if (err.status === 401 || message.includes('401') ||
+            message.includes('Unauthorized') ||
+            message.includes('refresh access token') ||
+            message.includes('refresh token')) {
+          message = 'QuickBooks connection has expired. Please reconnect QuickBooks in Settings.';
+          action = 'Go to Settings';
+          duration = 15000;
+
+          const snackBarRef = this.snackBar.open(message, action, { duration });
+          snackBarRef.onAction().subscribe(() => {
+            this.router.navigate(['/settings/quickbooks']);
+          });
+        } else {
+          this.snackBar.open(message, 'Close', { duration });
+        }
+
+        this.syncingInvoices.delete(invoice.id);
+      }
+    });
+  }
+
+  protected isSyncing(invoiceId: string): boolean {
+    return this.syncingInvoices.has(invoiceId);
   }
 }

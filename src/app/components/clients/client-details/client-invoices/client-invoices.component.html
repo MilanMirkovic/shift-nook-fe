@@ -249,6 +249,16 @@
                 </mat-icon>
                 <span>Download PDF</span>
               </button>
+              <button
+                mat-menu-item
+                [disabled]="isSyncing(invoice.id)"
+                (click)="syncToQuickBooks(invoice)">
+                <mat-icon>
+                  <mat-spinner *ngIf="isSyncing(invoice.id)" diameter="18"></mat-spinner>
+                  <span *ngIf="!isSyncing(invoice.id)">sync</span>
+                </mat-icon>
+                <span>Sync to QuickBooks</span>
+              </button>
               <mat-divider></mat-divider>
               <button mat-menu-item (click)="onDeleteInvoice(invoice)" class="delete-action">
                 <mat-icon>delete_outline</mat-icon>
