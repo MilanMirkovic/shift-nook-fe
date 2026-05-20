@@ -79,3 +79,18 @@ export const updateClientFailure = createAction(
   '[Clients] Update Failure',
   props<{ error: string }>()
 );
+
+export const deleteClient = createAction(
+  '[Clients] Delete',
+  props<{ companyId: string; clientId: string }>()
+);
+
+export const deleteClientSuccess = createAction(
+  '[Clients] Delete Success',
+  props<{ clientId: string }>()
+);
+
+export const deleteClientFailure = createAction(
+  '[Clients] Delete Failure',
+  props<{ error: string }>()
+);

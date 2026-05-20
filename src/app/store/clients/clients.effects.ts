@@ -15,6 +15,9 @@ import {
   updateClient,
   updateClientSuccess,
   updateClientFailure,
+  deleteClient,
+  deleteClientSuccess,
+  deleteClientFailure,
 } from './clients.actions';
 
 import { ClientsApiService } from './clients.api';
@@ -74,6 +77,20 @@ export class ClientsEffects {
           map((updated) => updateClientSuccess({ client: updated })),
           catchError((err) =>
             of(updateClientFailure({ error: this.toErrorMessage(err) }))
+          )
+        )
+      )
+    )
+  );
+
+  deleteClient$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(deleteClient),
+      switchMap(({ companyId, clientId }) =>
+        this.api.deleteClient(companyId, clientId).pipe(
+          map(() => deleteClientSuccess({ clientId })),
+          catchError((err) =>
+            of(deleteClientFailure({ error: this.toErrorMessage(err) }))
           )
         )
       )

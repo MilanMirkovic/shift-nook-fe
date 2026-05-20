@@ -59,4 +59,10 @@ export class ClientsApiService {
       client
     );
   }
+
+  deleteClient(companyId: string, clientId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/companies/${companyId}/clients/${clientId}`
+    );
+  }
 }

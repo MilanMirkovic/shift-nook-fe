@@ -13,6 +13,9 @@ import {
   updateClient,
   updateClientSuccess,
   updateClientFailure,
+  deleteClient,
+  deleteClientSuccess,
+  deleteClientFailure,
 } from './clients.actions';
 
 import { ClientsState } from './clients.models';
@@ -116,6 +119,25 @@ on(createClient, (state) => ({
   })),
 
   on(updateClientFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error,
+  })),
+
+  on(deleteClient, (state) => ({
+    ...state,
+    loading: true,
+    error: null,
+  })),
+
+  on(deleteClientSuccess, (state, { clientId }) => ({
+    ...state,
+    items: state.items.filter(c => c.id !== clientId),
+    total: state.total - 1,
+    loading: false,
+  })),
+
+  on(deleteClientFailure, (state, { error }) => ({
     ...state,
     loading: false,
     error,

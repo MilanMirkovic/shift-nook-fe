@@ -11,7 +11,7 @@ import {
   selectLoading,
   selectLoaded
 } from '../../store/clients/clients.selectors';
-import { loadClients, updatePage, createClient } from '../../store/clients/clients.actions';
+import { loadClients, updatePage, createClient, deleteClient } from '../../store/clients/clients.actions';
 import { Client } from '../../store/clients/clients.models';
 import { selectSelectedCompanyId, selectCurrentCompany } from '../../store/user/user.selectors';
 import { CompanyRole } from '../../shared/models/company-role';
@@ -142,8 +142,40 @@ export class ClientsComponent implements OnInit, OnDestroy {
   }
 
   private onDelete(client: Client): void {
-    console.log('Delete client:', client);
-    // TODO: Implement delete functionality (with confirmation dialog)
+    if (!this.companyId) return;
+
+    // Show confirmation dialog
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '440px',
+      maxWidth: '90vw',
+      data: {
+        title: 'Delete Client',
+        message: `Are you sure you want to delete "${client.name}"? This action cannot be undone.`,
+        confirmText: 'Yes, Delete',
+        cancelText: 'Cancel',
+        type: 'danger'
+      } as ConfirmationDialogData,
+      disableClose: false,
+      autoFocus: true,
+      panelClass: 'confirmation-dialog-panel',
+      hasBackdrop: true,
+      backdropClass: 'confirmation-dialog-backdrop'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true && this.companyId) {
+        // Dispatch delete action
+        this._store.dispatch(
+          deleteClient({
+            companyId: this.companyId,
+            clientId: client.id
+          })
+        );
+
+        // Show success notification
+        this.notificationService.success('Client deleted successfully');
+      }
+    });
   }
 
   onAddClient(): void {
