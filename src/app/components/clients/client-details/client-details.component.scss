@@ -331,6 +331,43 @@
       height: 18px;
     }
   }
+
+  .sn-btn-qb {
+    border-color: #4f46e5 !important;
+    color: #4f46e5 !important;
+    background: transparent !important;
+    transition: all 0.2s ease;
+
+    &:hover:not([disabled]) {
+      background: #eef2ff !important;
+      border-color: #4338ca !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+    }
+
+    &[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .sn-btn-success {
+    border-color: #10b981 !important;
+    color: #10b981 !important;
+    background: #d1fae5 !important;
+    cursor: default !important;
+
+    mat-icon {
+      color: #10b981;
+    }
+  }
+
+  .btn-spinner {
+    display: inline-block;
+    ::ng-deep circle {
+      stroke: currentColor !important;
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

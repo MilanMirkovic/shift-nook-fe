@@ -2,8 +2,9 @@ import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, Subject, combineLatest } from 'rxjs';
-import { filter, take, shareReplay, tap, map } from 'rxjs/operators';
+import { filter, take, shareReplay, tap, map, catchError } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { loadClientById } from '../../../store/clients/clients.actions';
 import { selectClientById } from '../../../store/clients/clients.selectors';
@@ -24,6 +25,10 @@ import { ClientDetailsNavigationService } from './client-details-navigation.serv
 import { takeUntil } from 'rxjs/operators';
 import { selectInvoicesByClientId } from '../../../store/invoices/invoices.selectors';
 import { loadInvoices } from '../../../store/invoices/invoices.actions';
+import { QBCustomerMappingsApiService } from '../../../store/quickbooks-customer-mappings/qb-customer-mappings.api';
+import { QuickBooksCustomer, QuickBooksCustomerMapping } from '../../../store/quickbooks-customer-mappings/qb-customer-mappings.models';
+import { QBSyncConfirmationDialogComponent, QBSyncConfirmationDialogData, QBSyncConfirmationDialogResult } from './qb-sync-confirmation-dialog/qb-sync-confirmation-dialog.component';
+import { of } from 'rxjs';
 
 interface ClientFinancialStats {
   outstandingBalance: number;
@@ -59,6 +64,8 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly navigationService = inject(ClientDetailsNavigationService);
+  private readonly qbMappingsApi = inject(QBCustomerMappingsApiService);
+  private readonly snackBar = inject(MatSnackBar);
   private readonly destroy$ = new Subject<void>();
 
   private readonly clientSubject$ = new BehaviorSubject<Client | null>(null);
@@ -68,6 +75,9 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
   protected currentCompanyId: string | null = null;
   protected selectedTabIndex = 0;
   protected financialStats$!: Observable<ClientFinancialStats>;
+  protected qbMapping: QuickBooksCustomerMapping | null = null;
+  protected qbMappingLoading = false;
+  protected qbSyncInProgress = false;
 
   ngOnInit(): void {
     const clientId = this.route.snapshot.paramMap.get('id');
@@ -91,6 +101,9 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
         this.currentCompanyId = companyId;
         this.store.dispatch(loadClientById({ companyId, clientId }));
         this.store.dispatch(loadInvoices({ companyId, clientId, page: 0, size: 1000 }));
+
+        // Check if client is already mapped to QuickBooks
+        this.loadQuickBooksMapping(companyId, clientId);
       });
 
     // Calculate financial statistics from invoices
@@ -160,5 +173,115 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
       data: { client, companyId: this.currentCompanyId } satisfies EditClientDialogData,
       panelClass: 'sn-dialog',
     });
+  }
+
+  private loadQuickBooksMapping(companyId: string, clientId: string): void {
+    this.qbMappingLoading = true;
+    this.qbMappingsApi.getMappingForClient(companyId, clientId)
+      .pipe(
+        catchError(() => {
+          // If no mapping exists, API returns 404 - this is expected
+          return of(null);
+        })
+      )
+      .subscribe(mapping => {
+        this.qbMapping = mapping;
+        this.qbMappingLoading = false;
+      });
+  }
+
+  protected onSyncToQuickBooks(client: Client): void {
+    if (!this.currentCompanyId || this.qbSyncInProgress) return;
+
+    this.qbSyncInProgress = true;
+
+    // Load all QuickBooks customers and search for matches by name
+    this.qbMappingsApi.listQuickBooksCustomers(this.currentCompanyId)
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError((error) => {
+          this.snackBar.open(
+            'Failed to load QuickBooks customers. Please ensure QuickBooks is connected.',
+            'Close',
+            { duration: 5000 }
+          );
+          this.qbSyncInProgress = false;
+          return of([]);
+        })
+      )
+      .subscribe((customers: QuickBooksCustomer[]) => {
+        // Search for customers matching the client name (case-insensitive)
+        const matches = customers.filter(customer => {
+          const clientName = client.name.toLowerCase().trim();
+          const displayName = customer.DisplayName?.toLowerCase().trim() || '';
+          const companyName = customer.CompanyName?.toLowerCase().trim() || '';
+
+          return displayName.includes(clientName) ||
+                 clientName.includes(displayName) ||
+                 companyName.includes(clientName) ||
+                 clientName.includes(companyName);
+        });
+
+        if (matches.length === 0) {
+          this.snackBar.open(
+            `No QuickBooks customer found matching "${client.name}". Please create the mapping manually in Settings.`,
+            'Go to Settings',
+            { duration: 8000 }
+          ).onAction().subscribe(() => {
+            window.location.href = '/settings/quickbooks-customer-mappings';
+          });
+          this.qbSyncInProgress = false;
+          return;
+        }
+
+        // Show confirmation dialog with matches
+        const dialogRef = this.dialog.open(QBSyncConfirmationDialogComponent, {
+          width: '600px',
+          maxWidth: '95vw',
+          panelClass: 'centered-dialog',
+          data: {
+            clientName: client.name,
+            matches: matches
+          } satisfies QBSyncConfirmationDialogData,
+        });
+
+        dialogRef.afterClosed().subscribe((result: QBSyncConfirmationDialogResult | undefined) => {
+          if (result?.confirmed && result.selectedCustomer && this.currentCompanyId && client.id) {
+            // Create the mapping
+            this.qbMappingsApi.createMapping(this.currentCompanyId, {
+              clientId: client.id,
+              quickbooksCustomerId: result.selectedCustomer.Id,
+              quickbooksCustomerName: result.selectedCustomer.DisplayName,
+              quickbooksDisplayName: result.selectedCustomer.DisplayName
+            }).pipe(
+              takeUntil(this.destroy$)
+            ).subscribe({
+              next: (mapping) => {
+                this.qbMapping = mapping;
+                this.snackBar.open(
+                  `Successfully linked ${client.name} to QuickBooks customer ${result.selectedCustomer!.DisplayName}`,
+                  'Close',
+                  { duration: 5000 }
+                );
+                this.qbSyncInProgress = false;
+              },
+              error: (error) => {
+                this.snackBar.open(
+                  `Failed to create mapping: ${error.error?.message || 'Unknown error'}`,
+                  'Close',
+                  { duration: 5000 }
+                );
+                this.qbSyncInProgress = false;
+              }
+            });
+          } else {
+            this.qbSyncInProgress = false;
+          }
+        });
+      });
+  }
+
+  protected get isQuickBooksSynced(): boolean {
+    return this.qbMapping !== null;
   }
 }

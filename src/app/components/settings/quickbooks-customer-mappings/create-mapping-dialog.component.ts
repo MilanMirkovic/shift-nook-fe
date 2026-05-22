@@ -10,12 +10,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import * as QBCustomerMappingsActions from '../../store/quickbooks-customer-mappings/qb-customer-mappings.actions';
-import * as QBCustomerMappingsSelectors from '../../store/quickbooks-customer-mappings/qb-customer-mappings.selectors';
-import { QuickBooksCustomer } from '../../store/quickbooks-customer-mappings/qb-customer-mappings.models';
-import { selectClients } from '../../store/clients/clients.selectors';
-import { loadClients } from '../../store/clients/clients.actions';
-import { Client } from '../../store/clients/clients.models';
+import * as QBCustomerMappingsActions from '../../../store/quickbooks-customer-mappings/qb-customer-mappings.actions';
+import * as QBCustomerMappingsSelectors from '../../../store/quickbooks-customer-mappings/qb-customer-mappings.selectors';
+import { QuickBooksCustomer } from '../../../store/quickbooks-customer-mappings/qb-customer-mappings.models';
+import { selectClients } from '../../../store/clients/clients.selectors';
+import { loadClients } from '../../../store/clients/clients.actions';
+import { Client } from '../../../store/clients/clients.models';
 
 @Component({
   selector: 'app-create-mapping-dialog',

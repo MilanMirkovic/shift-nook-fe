@@ -52,6 +52,31 @@
               <mat-icon>edit</mat-icon>
               <span>Edit Client</span>
             </button>
+
+            @if (isQuickBooksSynced) {
+              <button mat-stroked-button class="sn-btn-success" disabled>
+                <mat-icon>check_circle</mat-icon>
+                <span>Synced to QuickBooks</span>
+              </button>
+            } @else {
+              <button
+                mat-stroked-button
+                class="sn-btn-qb"
+                (click)="onSyncToQuickBooks(client)"
+                [disabled]="qbSyncInProgress || qbMappingLoading"
+              >
+                @if (qbSyncInProgress) {
+                  <mat-spinner diameter="16" class="btn-spinner"></mat-spinner>
+                  <span>Syncing...</span>
+                } @else if (qbMappingLoading) {
+                  <mat-spinner diameter="16" class="btn-spinner"></mat-spinner>
+                  <span>Checking...</span>
+                } @else {
+                  <mat-icon>sync</mat-icon>
+                  <span>Sync to QuickBooks</span>
+                }
+              </button>
+            }
           </div>
         </div>
 

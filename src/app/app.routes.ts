@@ -190,8 +190,8 @@ export const routes: Routes = [
           provideEffects(QBCustomerMappingsEffects),
         ],
         loadComponent: () =>
-          import('./pages/quickbooks-customer-mappings/qb-customer-mappings.page').then(
-            (m) => m.QBCustomerMappingsPage,
+          import('./components/settings/quickbooks-customer-mappings/quickbooks-customer-mappings.component').then(
+            (m) => m.QuickbooksCustomerMappingsComponent,
           ),
       },
     ],

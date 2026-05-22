@@ -13,20 +13,20 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import * as QBCustomerMappingsActions from '../../store/quickbooks-customer-mappings/qb-customer-mappings.actions';
-import * as QBCustomerMappingsSelectors from '../../store/quickbooks-customer-mappings/qb-customer-mappings.selectors';
+import * as QBCustomerMappingsActions from '../../../store/quickbooks-customer-mappings/qb-customer-mappings.actions';
+import * as QBCustomerMappingsSelectors from '../../../store/quickbooks-customer-mappings/qb-customer-mappings.selectors';
 import {
   QuickBooksCustomer,
   QuickBooksCustomerMapping
-} from '../../store/quickbooks-customer-mappings/qb-customer-mappings.models';
-import { selectSelectedCompanyId, selectCurrentCompany, selectUserCompanies } from '../../store/user/user.selectors';
-import { CompanyRole } from '../../shared/models/company-role';
-import { CompanyMembership } from '../../store/user/user.models';
+} from '../../../store/quickbooks-customer-mappings/qb-customer-mappings.models';
+import { selectSelectedCompanyId, selectCurrentCompany, selectUserCompanies } from '../../../store/user/user.selectors';
+import { CompanyRole } from '../../../shared/models/company-role';
+import { CompanyMembership } from '../../../store/user/user.models';
 
 import { CreateMappingDialogComponent } from './create-mapping-dialog.component';
 
 @Component({
-  selector: 'app-qb-customer-mappings',
+  selector: 'app-quickbooks-customer-mappings',
   standalone: true,
   imports: [
     CommonModule,
@@ -242,7 +242,7 @@ import { CreateMappingDialogComponent } from './create-mapping-dialog.component'
     }
   `]
 })
-export class QBCustomerMappingsPage implements OnInit {
+export class QuickbooksCustomerMappingsComponent implements OnInit {
   private readonly store = inject(Store);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
@@ -295,6 +295,7 @@ export class QBCustomerMappingsPage implements OnInit {
   openCreateMappingDialog(): void {
     const dialogRef = this.dialog.open(CreateMappingDialogComponent, {
       width: '500px',
+      panelClass: 'centered-dialog',
       data: {
         quickbooksCustomers$: this.quickbooksCustomers$,
         companyId$: this.companyId$
