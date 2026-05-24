@@ -179,19 +179,24 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
     this.qbMappingLoading = true;
     this.qbMappingsApi.getMappingForClient(companyId, clientId)
       .pipe(
-        catchError(() => {
+        catchError((error) => {
           // If no mapping exists, API returns 404 - this is expected
+          console.log('No QB mapping found for client:', clientId, error.status);
           return of(null);
         })
       )
       .subscribe(mapping => {
+        console.log('QB Mapping status:', mapping ? 'Mapped' : 'Not mapped');
         this.qbMapping = mapping;
         this.qbMappingLoading = false;
       });
   }
 
   protected onSyncToQuickBooks(client: Client): void {
-    if (!this.currentCompanyId || this.qbSyncInProgress) return;
+    if (!this.currentCompanyId || !client.id || this.qbSyncInProgress) return;
+
+    // First, reload the mapping status to make sure we have the latest
+    this.loadQuickBooksMapping(this.currentCompanyId, client.id);
 
     this.qbSyncInProgress = true;
 
@@ -210,38 +215,74 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe((customers: QuickBooksCustomer[]) => {
+        console.log('=== QB Customer Matching Debug ===');
         console.log('Loaded QB customers:', customers.length);
+        console.log('All customers:', customers.map(c => ({
+          id: c.Id,
+          display: c.DisplayName,
+          company: c.CompanyName
+        })));
 
         // Search for customers matching the client name (case-insensitive)
         const clientName = client.name.toLowerCase().trim();
-        console.log('Looking for client:', clientName);
+        console.log('Looking for client:', `"${clientName}"`);
 
         const matches = customers.filter(customer => {
           const displayName = customer.DisplayName?.toLowerCase().trim();
           const companyName = customer.CompanyName?.toLowerCase().trim();
 
+          console.log(`Checking: Display="${displayName}", Company="${companyName}"`);
+
           // Only match if strings are non-empty and actually contain each other
-          if (!displayName) return false;
+          if (!displayName) {
+            console.log('  -> Skipped (no display name)');
+            return false;
+          }
 
           // Exact match on display name (highest priority)
-          if (displayName === clientName) return true;
+          if (displayName === clientName) {
+            console.log('  -> MATCH (exact display name)');
+            return true;
+          }
 
           // Exact match on company name
-          if (companyName && companyName === clientName) return true;
+          if (companyName && companyName === clientName) {
+            console.log('  -> MATCH (exact company name)');
+            return true;
+          }
 
           // Partial matches (if search term is meaningful length)
           if (clientName.length > 3) {
-            if (displayName.includes(clientName)) return true;
-            if (companyName && companyName.includes(clientName)) return true;
+            if (displayName.includes(clientName)) {
+              console.log('  -> MATCH (display contains client)');
+              return true;
+            }
+            if (companyName && companyName.includes(clientName)) {
+              console.log('  -> MATCH (company contains client)');
+              return true;
+            }
           }
 
-          if (displayName.length > 3 && clientName.includes(displayName)) return true;
-          if (companyName && companyName.length > 3 && clientName.includes(companyName)) return true;
+          if (displayName.length > 3 && clientName.includes(displayName)) {
+            console.log('  -> MATCH (client contains display)');
+            return true;
+          }
+          if (companyName && companyName.length > 3 && clientName.includes(companyName)) {
+            console.log('  -> MATCH (client contains company)');
+            return true;
+          }
 
+          console.log('  -> No match');
           return false;
         });
 
-        console.log('Found matches:', matches.length, matches.map(m => m.DisplayName));
+        console.log('=== Matching Results ===');
+        console.log('Found matches:', matches.length);
+        console.log('Matched customers:', matches.map(m => ({
+          id: m.Id,
+          display: m.DisplayName,
+          company: m.CompanyName
+        })));
 
         if (matches.length === 0) {
           this.snackBar.open(
