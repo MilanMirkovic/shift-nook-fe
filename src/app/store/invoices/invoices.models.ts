@@ -79,6 +79,8 @@ export interface Invoice {
    *  backend; useful for received-invoice rows where {@link companyId} is the
    *  subcontractor's id. */
   senderCompanyName?: string | null;
+  /** QuickBooks sync status. Null if not synced, otherwise contains QB doc number. */
+  quickbooksDocNumber?: string | null;
 }
 
 export interface InvoiceItemInput {

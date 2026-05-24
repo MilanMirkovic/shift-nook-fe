@@ -619,6 +619,36 @@
   }
 }
 
+.status-badges {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.qb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: rgba(79, 70, 229, 0.1);
+  color: #4f46e5;
+  border: 1px solid rgba(79, 70, 229, 0.3);
+  cursor: help;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: #4f46e5;
+  }
+}
+
 // ─── Shared states ────────────────────────────────────────────────────────────
 .loading-state {
   display: flex;

@@ -204,9 +204,17 @@
             </div>
           </td>
           <td class="col-status">
-            <span class="invoice-status-badge" [ngClass]="getInvoiceStatusClass(invoice.status)">
-              {{ invoice.status }}
-            </span>
+            <div class="status-badges">
+              <span class="invoice-status-badge" [ngClass]="getInvoiceStatusClass(invoice.status)">
+                {{ invoice.status }}
+              </span>
+              @if (invoice.quickbooksDocNumber) {
+                <span class="qb-badge" matTooltip="Synced to QuickBooks (QB #{{ invoice.quickbooksDocNumber }})">
+                  <mat-icon>check_circle</mat-icon>
+                  QB
+                </span>
+              }
+            </div>
           </td>
           <td class="col-actions">
             <button mat-icon-button [matMenuTriggerFor]="actionsMenu" matTooltip="Actions">

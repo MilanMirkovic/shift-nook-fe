@@ -211,15 +211,30 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
       )
       .subscribe((customers: QuickBooksCustomer[]) => {
         // Search for customers matching the client name (case-insensitive)
-        const matches = customers.filter(customer => {
-          const clientName = client.name.toLowerCase().trim();
-          const displayName = customer.DisplayName?.toLowerCase().trim() || '';
-          const companyName = customer.CompanyName?.toLowerCase().trim() || '';
+        const clientName = client.name.toLowerCase().trim();
 
-          return displayName.includes(clientName) ||
-                 clientName.includes(displayName) ||
-                 companyName.includes(clientName) ||
-                 clientName.includes(companyName);
+        const matches = customers.filter(customer => {
+          const displayName = customer.DisplayName?.toLowerCase().trim();
+          const companyName = customer.CompanyName?.toLowerCase().trim();
+
+          // Only match if strings are non-empty and actually contain each other
+          if (!displayName) return false;
+
+          // Exact match on display name
+          if (displayName === clientName) return true;
+
+          // Check if display name contains the full client name (or vice versa)
+          if (displayName.includes(clientName) && clientName.length > 3) return true;
+          if (clientName.includes(displayName) && displayName.length > 3) return true;
+
+          // Check company name if it exists and is not empty
+          if (companyName && companyName.length > 0) {
+            if (companyName === clientName) return true;
+            if (companyName.includes(clientName) && clientName.length > 3) return true;
+            if (clientName.includes(companyName) && companyName.length > 3) return true;
+          }
+
+          return false;
         });
 
         if (matches.length === 0) {

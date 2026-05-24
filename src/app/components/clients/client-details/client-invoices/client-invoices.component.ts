@@ -560,22 +560,49 @@ export class ClientInvoicesComponent implements OnInit, OnDestroy {
     return invoice.companyId === this.clientId && invoice.recipientCompanyId === this.companyId;
   }
 
-  protected syncToQuickBooks(invoice: Invoice): void {
+  protected syncToQuickBooks(invoice: Invoice, force: boolean = false): void {
     if (this.syncingInvoices.has(invoice.id)) {
       return;
     }
 
     this.syncingInvoices.add(invoice.id);
 
+    const url = `${environment.apiBaseUrl}/companies/${this.companyId}/quickbooks/invoices/${invoice.id}/sync${force ? '?force=true' : ''}`;
+
     this.http.post<{ syncStatus: string; quickbooksDocNumber?: string; syncErrorMessage?: string; canRetry: boolean }>(
-      `${environment.apiBaseUrl}/companies/${this.companyId}/quickbooks/invoices/${invoice.id}/sync`,
+      url,
       {}
     ).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
-      next: (syncStatus) => {
+      next: (syncResponse) => {
+        // Check if invoice was already synced and this wasn't a forced re-sync
+        if (syncResponse.syncStatus === 'SYNCED' && syncResponse.quickbooksDocNumber && !force) {
+          // Invoice was already synced - ask if they want to re-sync
+          this.syncingInvoices.delete(invoice.id);
+
+          const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+            width: '480px',
+            data: {
+              title: 'Invoice Already Synced',
+              message: `Invoice #${invoice.invoiceNumber} is already synced to QuickBooks (QB #${syncResponse.quickbooksDocNumber}).\n\nWould you like to re-sync it? This will create a new invoice in QuickBooks.`,
+              confirmText: 'Re-sync',
+              cancelText: 'Cancel',
+              type: 'warning',
+            },
+          });
+
+          dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(confirmed => {
+            if (confirmed) {
+              // Re-sync with force=true
+              this.syncToQuickBooks(invoice, true);
+            }
+          });
+          return;
+        }
+
         this.notificationService.success(
-          `Invoice #${invoice.invoiceNumber} synced to QuickBooks successfully!`
+          `Invoice #${invoice.invoiceNumber} ${force ? 're-' : ''}synced to QuickBooks successfully!`
         );
 
         // Reload invoices to get updated sync status
