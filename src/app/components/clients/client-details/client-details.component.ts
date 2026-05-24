@@ -210,8 +210,11 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe((customers: QuickBooksCustomer[]) => {
+        console.log('Loaded QB customers:', customers.length);
+
         // Search for customers matching the client name (case-insensitive)
         const clientName = client.name.toLowerCase().trim();
+        console.log('Looking for client:', clientName);
 
         const matches = customers.filter(customer => {
           const displayName = customer.DisplayName?.toLowerCase().trim();
@@ -220,22 +223,25 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
           // Only match if strings are non-empty and actually contain each other
           if (!displayName) return false;
 
-          // Exact match on display name
+          // Exact match on display name (highest priority)
           if (displayName === clientName) return true;
 
-          // Check if display name contains the full client name (or vice versa)
-          if (displayName.includes(clientName) && clientName.length > 3) return true;
-          if (clientName.includes(displayName) && displayName.length > 3) return true;
+          // Exact match on company name
+          if (companyName && companyName === clientName) return true;
 
-          // Check company name if it exists and is not empty
-          if (companyName && companyName.length > 0) {
-            if (companyName === clientName) return true;
-            if (companyName.includes(clientName) && clientName.length > 3) return true;
-            if (clientName.includes(companyName) && companyName.length > 3) return true;
+          // Partial matches (if search term is meaningful length)
+          if (clientName.length > 3) {
+            if (displayName.includes(clientName)) return true;
+            if (companyName && companyName.includes(clientName)) return true;
           }
+
+          if (displayName.length > 3 && clientName.includes(displayName)) return true;
+          if (companyName && companyName.length > 3 && clientName.includes(companyName)) return true;
 
           return false;
         });
+
+        console.log('Found matches:', matches.length, matches.map(m => m.DisplayName));
 
         if (matches.length === 0) {
           this.snackBar.open(
